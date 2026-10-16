@@ -1,0 +1,1212 @@
+<title>Protótipo SustentAgro 2.0</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: barra do protótipo fixa no topo; abaixo, o site (largura total ou moldura de celular de 360 px),
+   que se adapta por container query para o modo celular funcionar sem mudar a janela. */
+:root {
+  /* Paleta "Campo suave" (D-32) — tema claro */
+  --fundo: #f6f8f3;
+  --superficie: #ffffff;
+  --superficie-2: #eef2ea;
+  --texto: #1f241c;
+  --suave: #5c6657;
+  --borda: #dde4d6;
+  --verde: #3d7a16;
+  --verde-forte: #2f6110;
+  --sobre-verde: #ffffff;
+  --limao: #a6e36b;
+  --sobre-limao: #1d1f1c;
+  --apoio: #eaf7dc;
+  --sobre-apoio: #2f5e10;
+  --link: #3d7a16;
+  --numero: #3d7a16;
+  --perigo: #b42318;
+  --perigo-apoio: #fdecea;
+  --aviso: #8a5a00;
+  --aviso-apoio: #fff4d6;
+  --sombra: 0 1px 2px rgb(31 36 28 / .06), 0 2px 8px rgb(31 36 28 / .04);
+  /* barra do protótipo: igual nos dois temas, para não se confundir com o site */
+  --proto-fundo: #1d1f1c;
+  --proto-texto: #e6eae2;
+  --proto-borda: #3a4036;
+  --fonte-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --fonte-texto: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --fonte-mono: "JetBrains Mono", Consolas, monospace;
+  --raio: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fundo: #1a1d19; --superficie: #232822; --superficie-2: #2a3028; --texto: #e6eae2; --suave: #a0a89a;
+    --borda: #343a31; --verde: #4a8a1f; --verde-forte: #5a9c2c; --sobre-verde: #f3f7ee; --limao: #a6e36b;
+    --sobre-limao: #1a1d19; --apoio: #2c3a24; --sobre-apoio: #c5ee9c; --link: #a6e36b; --numero: #b9ea88;
+    --perigo: #ff8a80; --perigo-apoio: #3a1f1d; --aviso: #f2c14e; --aviso-apoio: #3a3020;
+    --sombra: 0 1px 2px rgb(0 0 0 / .3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fundo: #1a1d19; --superficie: #232822; --superficie-2: #2a3028; --texto: #e6eae2; --suave: #a0a89a;
+  --borda: #343a31; --verde: #4a8a1f; --verde-forte: #5a9c2c; --sobre-verde: #f3f7ee; --limao: #a6e36b;
+  --sobre-limao: #1a1d19; --apoio: #2c3a24; --sobre-apoio: #c5ee9c; --link: #a6e36b; --numero: #b9ea88;
+  --perigo: #ff8a80; --perigo-apoio: #3a1f1d; --aviso: #f2c14e; --aviso-apoio: #3a3020;
+  --sombra: 0 1px 2px rgb(0 0 0 / .3);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--fundo); color: var(--texto); font-family: var(--fonte-texto); font-size: 15px; line-height: 1.5; }
+h1, h2, h3 { font-family: var(--fonte-display); line-height: 1.15; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+a { color: var(--link); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+
+/* ---------- Barra do protótipo ---------- */
+.proto {
+  position: sticky; top: 0; z-index: 20; background: var(--proto-fundo); color: var(--proto-texto);
+  padding-top: env(safe-area-inset-top, 0px); border-bottom: 1px solid var(--proto-borda);
+}
+.proto .dentro {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding-block: 8px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.proto .tag { font-family: var(--fonte-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #a6e36b; }
+.proto label { font-size: 12px; display: flex; align-items: center; gap: 6px; color: #b9c0b3; }
+.proto select, .proto .pbtn {
+  background: #2a2e27; color: var(--proto-texto); border: 1px solid var(--proto-borda); border-radius: 6px;
+  padding: 5px 8px; font-size: 13px; color-scheme: dark;
+}
+.proto .pbtn { cursor: pointer; }
+.proto .pbtn[aria-pressed="true"] { background: #a6e36b; color: #1d1f1c; border-color: #a6e36b; font-weight: 600; }
+.proto .direita { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- Palco e site ---------- */
+.palco { padding-block: 0 48px; }
+.palco.celular { padding-block: 24px 48px; padding-left: 16px; padding-right: 16px; }
+.site { container: site / inline-size; background: var(--fundo); min-height: 70vh; }
+.palco.celular .site {
+  max-width: 360px; margin: 0 auto; border: 1px solid var(--borda); border-radius: 22px; overflow: hidden;
+  box-shadow: 0 10px 30px rgb(0 0 0 / .18); min-height: 640px;
+}
+.largura { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.palco.celular .largura { padding-left: 16px; padding-right: 16px; }
+
+/* Menu do site */
+.menu { background: var(--superficie); border-bottom: 1px solid var(--borda); }
+.menu .largura { display: flex; align-items: center; gap: 22px; padding-block: 12px; flex-wrap: wrap; }
+.marca { display: flex; align-items: center; gap: 8px; font-family: var(--fonte-display); font-weight: 800; font-size: 20px; color: var(--texto); text-decoration: none; letter-spacing: -.01em; }
+.marca svg { width: 26px; height: 26px; }
+.menu nav { display: flex; gap: 18px; align-items: center; }
+.menu nav a, .menu .acoes a { color: var(--texto); text-decoration: none; font-weight: 500; font-size: 14.5px; padding-block: 4px; }
+.menu nav a.ativo { box-shadow: inset 0 -2px 0 var(--verde); font-weight: 700; }
+.menu .acoes { margin-left: auto; display: flex; gap: 14px; align-items: center; }
+.menu .quem { font-size: 13px; color: var(--suave); }
+.menu .acoes a.btn-primario { color: var(--sobre-verde); padding: 6px 14px; }
+.btn-menu { display: none; margin-left: auto; background: none; border: 1px solid var(--borda); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+@container site (max-width: 700px) {
+  .btn-menu { display: inline-block; }
+  .menu nav, .menu .acoes { display: none; width: 100%; flex-direction: column; align-items: flex-start; gap: 6px; margin-left: 0; }
+  .menu.aberto nav, .menu.aberto .acoes { display: flex; }
+}
+
+/* Botões e campos (equivalentes: .btn .btn-primary / .btn-outline-* / .form-control do Bootstrap) */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 6px; padding: 8px 16px; font-weight: 700; font-size: 14px; cursor: pointer; border: 1px solid transparent; text-decoration: none; }
+.btn-primario { background: var(--verde); color: var(--sobre-verde); }
+.btn-primario:hover { background: var(--verde-forte); }
+.btn-contorno { background: transparent; color: var(--texto); border-color: var(--borda); }
+.btn-contorno:hover { background: var(--superficie-2); }
+.btn-perigo { background: transparent; color: var(--perigo); border-color: var(--perigo); }
+.btn-pequeno { padding: 5px 12px; font-size: 13px; }
+.campo { display: grid; gap: 5px; }
+.campo > label, .campo > .rotulo-campo { font-size: 13.5px; font-weight: 600; }
+.campo .ajuda { font-size: 12.5px; color: var(--suave); }
+.campo .erro { font-size: 12.5px; color: var(--perigo); font-weight: 600; }
+.entrada { width: 100%; padding: 8px 10px; border: 1px solid var(--borda); border-radius: 6px; background: var(--superficie); }
+textarea.entrada { min-height: 90px; resize: vertical; }
+.grade-form { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grade-form .inteira { grid-column: 1 / -1; }
+@container site (max-width: 640px) { .grade-form { grid-template-columns: 1fr; } }
+.opcoes { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.opcoes label { display: flex; gap: 6px; align-items: center; font-size: 14px; font-weight: 500; }
+
+/* Peças comuns */
+.secao { padding-block: 36px; display: grid; gap: 20px; }
+.cabeca-secao { display: grid; gap: 6px; }
+.cabeca-secao h2 { font-size: 26px; }
+.cabeca-secao p { color: var(--suave); max-width: 64ch; }
+.cartao { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); }
+.selo { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+.selo-apoio { background: var(--apoio); color: var(--sobre-apoio); }
+.selo-limao { background: var(--limao); color: var(--sobre-limao); }
+.selo-neutro { background: var(--superficie-2); color: var(--suave); }
+.selo-aviso { background: var(--aviso-apoio); color: var(--aviso); }
+.selo-perigo { background: var(--perigo-apoio); color: var(--perigo); }
+.ods { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--texto); }
+.ods i { width: 20px; height: 20px; border-radius: 4px; display: inline-grid; place-items: center; font-style: normal; color: #fff; font-size: 11px; font-weight: 800; }
+.barra { height: 10px; border-radius: 99px; background: var(--superficie-2); overflow: hidden; }
+.barra > span { display: block; height: 100%; background: var(--verde); border-radius: 99px; }
+.barra.cheia > span { background: var(--limao); }
+.num { font-variant-numeric: tabular-nums; }
+.aviso-caixa { border-radius: var(--raio); padding: 14px 16px; display: grid; gap: 4px; }
+.aviso-caixa.info { background: var(--apoio); color: var(--sobre-apoio); }
+.aviso-caixa.alerta { background: var(--aviso-apoio); color: var(--aviso); }
+.aviso-caixa.erro { background: var(--perigo-apoio); color: var(--perigo); }
+.vazio { text-align: center; padding: 40px 16px; color: var(--suave); display: grid; gap: 10px; justify-items: center; }
+
+/* Rótulo de rastreabilidade (parte do protótipo, não do site) */
+.rastreio {
+  font-family: var(--fonte-mono); font-size: 11.5px; color: var(--suave); border: 1px dashed var(--borda);
+  border-radius: 6px; padding: 6px 10px; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin-top: 16px;
+}
+.rastreio b { color: var(--texto); }
+.rastreio .camada { background: var(--superficie-2); padding: 1px 6px; border-radius: 4px; }
+body.sem-rotulos .rastreio { display: none; }
+
+/* Capa de ONG: sulcos de plantio desenhados em CSS, na cor da ONG */
+.capa { position: relative; background-color: var(--cor-capa); background-image: repeating-linear-gradient(-28deg, rgb(255 255 255 / .10) 0 10px, transparent 10px 26px), linear-gradient(160deg, rgb(255 255 255 / .12), rgb(0 0 0 / .18)); }
+.logo-ong { width: 56px; height: 56px; border-radius: 12px; background: var(--superficie); color: var(--cor-capa); display: grid; place-items: center; font-family: var(--fonte-display); font-weight: 800; font-size: 20px; border: 3px solid var(--superficie); box-shadow: var(--sombra); }
+
+/* ---------- Tela 1: Início ---------- */
+.heroi { background: var(--superficie); border-bottom: 1px solid var(--borda); }
+.heroi .largura { padding-block: 44px 40px; display: grid; gap: 18px; }
+.heroi h1 { font-size: clamp(30px, 5cqi, 46px); max-width: 18ch; letter-spacing: -.02em; }
+.heroi h1 em { font-style: normal; background: linear-gradient(transparent 62%, var(--limao) 62% 92%, transparent 92%); padding-inline: 2px; }
+.heroi p { color: var(--suave); max-width: 58ch; font-size: 16.5px; }
+.busca { display: flex; gap: 8px; max-width: 620px; flex-wrap: wrap; }
+.busca .entrada { flex: 1 1 260px; padding: 11px 14px; font-size: 15.5px; }
+.grade-ods { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@container site (max-width: 760px) { .grade-ods { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container site (max-width: 420px) { .grade-ods { grid-template-columns: 1fr; } }
+.cartao-ods { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: center; padding: 14px; text-align: left; cursor: pointer; color: var(--texto); }
+.cartao-ods:hover { border-color: var(--verde); }
+.cartao-ods .quad { grid-row: span 2; width: 52px; height: 52px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-family: var(--fonte-display); font-weight: 800; font-size: 24px; }
+.cartao-ods strong { font-size: 14.5px; line-height: 1.3; }
+.cartao-ods span { font-size: 13px; color: var(--suave); }
+.carrossel { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: 14px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
+.carrossel > * { scroll-snap-align: start; }
+.carrossel { scroll-behavior: smooth; scrollbar-width: none; }
+.carrossel::-webkit-scrollbar { display: none; }
+.cabeca-carrossel { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.setas { display: flex; gap: 8px; }
+.seta { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--borda); background: var(--superficie); color: var(--texto); display: grid; place-items: center; cursor: pointer; box-shadow: var(--sombra); }
+.seta:hover:not(:disabled) { border-color: var(--verde); color: var(--verde); }
+.seta:disabled { opacity: .35; cursor: default; box-shadow: none; }
+.seta svg { width: 18px; height: 18px; }
+.sobre { display: grid; grid-template-columns: 1.3fr 1fr; gap: 28px; }
+@container site (max-width: 760px) { .sobre { grid-template-columns: 1fr; } }
+.sobre p { color: var(--suave); max-width: 62ch; }
+.equipe { columns: 2; gap: 20px; padding-left: 18px; margin: 0; font-size: 14px; }
+.equipe li { break-inside: avoid; margin-bottom: 4px; }
+.rodape { border-top: 1px solid var(--borda); background: var(--superficie); }
+.rodape .largura { padding-block: 22px; display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; font-size: 13px; color: var(--suave); }
+
+/* ---------- Tela 2: Lista ---------- */
+.lista-layout { display: grid; grid-template-columns: 250px 1fr; gap: 24px; align-items: start; }
+@container site (max-width: 760px) { .lista-layout { grid-template-columns: 1fr; } }
+.filtros { padding: 16px; display: grid; gap: 14px; }
+.filtros h3 { font-size: 16px; }
+.cartoes-ong { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@container site (max-width: 900px) { .cartoes-ong { grid-template-columns: 1fr; } }
+.cartao-ong { overflow: hidden; display: grid; grid-template-rows: auto 1fr; cursor: pointer; text-align: left; padding: 0; color: var(--texto); }
+.cartao-ong:hover { border-color: var(--verde); }
+.cartao-ong .capa { height: 86px; }
+.cartao-ong .logo-ong { position: absolute; left: 14px; bottom: -22px; width: 48px; height: 48px; font-size: 17px; }
+.cartao-ong .corpo { padding: 30px 14px 14px; display: grid; gap: 8px; align-content: start; }
+.cartao-ong h3 { font-size: 17px; }
+.cartao-ong .resumo { font-size: 13.5px; color: var(--suave); }
+.linha-ods { display: flex; flex-wrap: wrap; gap: 6px 10px; }
+.precisa { background: var(--superficie-2); border-radius: 6px; padding: 8px 10px; font-size: 13px; display: grid; gap: 6px; }
+.precisa .barra { background: var(--borda); }
+.precisa b { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--numero); }
+.cidade { font-size: 12.5px; color: var(--suave); display: inline-flex; gap: 4px; align-items: center; }
+.contagem { font-size: 14px; color: var(--suave); }
+
+/* ---------- Tela 3: Página da ONG ---------- */
+.ong-capa { height: 180px; }
+.ong-capa .largura { position: relative; height: 100%; }
+.ong-capa .logo-ong { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); bottom: -36px; width: 84px; height: 84px; font-size: 28px; border-radius: 16px; }
+.ong-cabeca { padding-block: 48px 8px; display: grid; gap: 10px; }
+.ong-cabeca h1 { font-size: clamp(26px, 4cqi, 36px); }
+.ong-cabeca .slogan { color: var(--suave); font-size: 16.5px; }
+.ong-layout { display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: start; padding-block: 20px 36px; }
+@container site (max-width: 860px) { .ong-layout { grid-template-columns: 1fr; } }
+.necessidade { padding: 16px; display: grid; gap: 10px; }
+.necessidade .topo { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.necessidade h3 { font-size: 17px; }
+.necessidade .quanto { font-size: 14px; }
+.necessidade .quanto strong { color: var(--numero); font-size: 16px; }
+.lateral { padding: 18px; display: grid; gap: 14px; }
+.lateral h3 { font-size: 17px; }
+.lateral dl { margin: 0; display: grid; gap: 8px; font-size: 14px; }
+.lateral dt { font-size: 12px; color: var(--suave); text-transform: uppercase; letter-spacing: .06em; }
+.lateral dd { margin: 0; }
+.acoes-ong { display: grid; gap: 8px; }
+
+/* ---------- Tela 4/5: formulários de conta ---------- */
+.estreito { max-width: 760px; }
+.perfis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@container site (max-width: 760px) { .perfis { grid-template-columns: 1fr; } }
+.cartao-perfil { padding: 18px; display: grid; gap: 8px; text-align: left; cursor: pointer; color: var(--texto); align-content: start; }
+.cartao-perfil[aria-pressed="true"] { border-color: var(--verde); box-shadow: 0 0 0 2px var(--verde); }
+.cartao-perfil h3 { font-size: 17px; }
+.cartao-perfil p { font-size: 13.5px; color: var(--suave); }
+.cartao-perfil .icone { width: 40px; height: 40px; border-radius: 10px; background: var(--apoio); color: var(--sobre-apoio); display: grid; place-items: center; }
+.formulario { padding: 22px; display: grid; gap: 18px; }
+.formulario h2 { font-size: 21px; }
+.login { max-width: 420px; margin: 0 auto; }
+
+/* ---------- Tela 7: Ofertas ---------- */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.chip { border: 1px solid var(--borda); background: var(--superficie); padding: 5px 14px; border-radius: 99px; font-size: 13.5px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--verde); color: var(--sobre-verde); border-color: var(--verde); font-weight: 600; }
+.ofertas { display: grid; gap: 12px; }
+.oferta { padding: 16px; display: grid; grid-template-columns: 1fr auto; gap: 8px 18px; align-items: start; }
+.oferta.direcionada { border-color: var(--verde); }
+.oferta .nome { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.oferta .nome h3 { font-size: 17px; }
+.oferta .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--suave); }
+.oferta .meta .dist { color: var(--link); font-weight: 700; }
+.oferta .saldo { font-size: 14px; }
+.oferta .saldo strong { color: var(--numero); font-size: 16px; }
+.oferta .reservar { grid-column: 2; grid-row: 1 / span 4; display: grid; gap: 8px; justify-items: end; align-self: center; min-width: 170px; }
+.oferta .reservar .qtd { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--suave); }
+.oferta .reservar input { width: 80px; text-align: right; }
+.oferta .retorno { grid-column: 1 / -1; }
+@container site (max-width: 640px) {
+  .oferta { grid-template-columns: 1fr; }
+  .oferta .reservar { grid-column: 1; grid-row: auto; justify-items: start; }
+}
+
+/* ---------- Tela 8: Painel ---------- */
+.indicadores { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@container site (max-width: 860px) { .indicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.indicador { padding: 16px; display: grid; gap: 4px; }
+.indicador .valor { font-family: var(--fonte-display); font-size: clamp(24px, 3.4cqi, 32px); font-weight: 800; color: var(--numero); font-variant-numeric: tabular-nums; }
+.indicador .nome { font-size: 13.5px; color: var(--suave); }
+.graficos { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; }
+@container site (max-width: 860px) { .graficos { grid-template-columns: 1fr; } }
+.grafico { padding: 18px; display: grid; gap: 12px; }
+.grafico h3 { font-size: 17px; }
+.grafico svg { width: 100%; height: auto; display: block; }
+.grafico svg text { fill: var(--suave); font-size: 12px; font-family: var(--fonte-texto); }
+.grafico svg .valor-barra { fill: var(--texto); font-weight: 700; }
+.grafico svg .grade { stroke: var(--borda); stroke-width: 1; }
+.grafico svg .barra-kg { fill: var(--verde); }
+.grafico svg .barra-kg.ultima { fill: var(--limao); }
+.fatias { display: grid; gap: 10px; }
+.fatia { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-size: 13.5px; }
+.fatia .barra { grid-column: 1 / -1; height: 8px; }
+
+/* ---------- Área logada ---------- */
+.conta-cabeca { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.abas { display: flex; gap: 4px; border-bottom: 1px solid var(--borda); overflow-x: auto; }
+.abas a { padding: 10px 14px; text-decoration: none; color: var(--suave); font-weight: 600; font-size: 14px; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.abas a[aria-current="page"] { color: var(--texto); border-bottom-color: var(--verde); }
+.abas .contador { background: var(--limao); color: var(--sobre-limao); border-radius: 99px; padding: 0 7px; font-size: 12px; margin-left: 4px; }
+.linha-item { padding: 16px; display: grid; gap: 10px; }
+.linha-item .topo { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.linha-item h3 { font-size: 16.5px; }
+.linha-item .meta { font-size: 13px; color: var(--suave); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.linha-item .acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+.contato { background: var(--superficie-2); border-radius: 6px; padding: 10px 12px; font-size: 13.5px; display: grid; gap: 2px; }
+.contato b { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--suave); }
+.lista-itens { display: grid; gap: 12px; }
+.subtitulo { font-size: 18px; margin-top: 8px; }
+.pix { border: 2px dashed var(--verde); border-radius: var(--raio); padding: 16px; display: grid; gap: 8px; background: var(--apoio); color: var(--sobre-apoio); }
+.pix code { font-family: var(--fonte-mono); font-size: 15px; word-break: break-all; }
+.tabela-rolagem { overflow-x: auto; }
+
+/* Toast */
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--texto); color: var(--fundo); padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 8px 24px rgb(0 0 0 / .2); z-index: 30; max-width: calc(100% - 32px); }
+</style>
+
+<div class="proto" role="region" aria-label="Controles do protótipo">
+  <div class="dentro">
+    <span class="tag">Protótipo · não é o site final</span>
+    <label for="sel-perfil">Ver como
+      <select id="sel-perfil">
+        <option value="visitante">Visitante (sem conta)</option>
+        <option value="pessoa">Mariana · doadora</option>
+        <option value="agricultor">Antônio · agricultor</option>
+        <option value="ong">Cozinha Sol Nascente · ONG ativa</option>
+        <option value="ong-pendente">Horta Vila Planalto · ONG pendente</option>
+        <option value="ong-reprovada">Instituto Raízes · ONG reprovada</option>
+      </select>
+    </label>
+    <label for="sel-tela">Tela
+      <select id="sel-tela"></select>
+    </label>
+    <div class="direita">
+      <button class="pbtn" id="btn-celular" type="button" aria-pressed="false">Celular 360 px</button>
+      <button class="pbtn" id="btn-tema" type="button">Alternar tema</button>
+      <button class="pbtn" id="btn-rotulos" type="button" aria-pressed="true">Rótulos</button>
+    </div>
+  </div>
+</div>
+
+<div class="palco" id="palco">
+  <div class="site" id="site">
+    <header class="menu" id="menu">
+      <div class="largura">
+        <a class="marca" href="#inicio" data-ir="inicio" aria-label="SustentAgro, página inicial">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="var(--apoio)"/><path d="M16 25V14" stroke="var(--verde)" stroke-width="2.4" stroke-linecap="round"/><path d="M16 16c0-5 3.5-8 9-8 0 5.2-3.6 8.4-9 8Z" fill="var(--verde)"/><path d="M16 19c0-4-2.8-6.6-7.4-6.6 0 4.2 2.9 6.8 7.4 6.6Z" fill="var(--limao)"/></svg>
+          SustentAgro
+        </a>
+        <button class="btn-menu" id="btn-menu" type="button" aria-expanded="false" aria-controls="menu-links">Menu</button>
+        <nav id="menu-links" aria-label="Principal"></nav>
+        <div class="acoes" id="menu-acoes"></div>
+      </div>
+    </header>
+    <main id="conteudo"></main>
+    <footer class="rodape">
+      <div class="largura">
+        <span>SustentAgro · Itinerário 5 · Cultura e Desenvolvimento Social</span>
+        <span>ODS 2 · 8 · 10 em foco</span>
+      </div>
+    </footer>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+/* ===================== Dados de exemplo (nomes de campo do modelo de dados, Fase 4a) ===================== */
+const ODS = [
+  { numero: 1, nome: 'Erradicação da pobreza', cor: '#E5243B' },
+  { numero: 2, nome: 'Fome zero e agricultura sustentável', cor: '#DDA63A' },
+  { numero: 4, nome: 'Educação de qualidade', cor: '#C5192D' },
+  { numero: 5, nome: 'Igualdade de gênero', cor: '#FF3A21' },
+  { numero: 8, nome: 'Trabalho decente e crescimento econômico', cor: '#A21942' },
+  { numero: 10, nome: 'Redução das desigualdades', cor: '#DD1367' },
+];
+const LOCALIDADES = ['Brazlândia', 'Ceilândia', 'Gama', 'Planaltina', 'Samambaia', 'Sobradinho', 'Taguatinga', 'Águas Lindas de Goiás (GO)', 'Valparaíso de Goiás (GO)'];
+
+const ONGS = [
+  { id: 1, nome: 'Cozinha Solidária Sol Nascente', nome_curto: 'Sol Nascente', cor: '#3d7a16', localidade: 'Ceilândia',
+    slogan: 'Comida de verdade no prato de quem mais precisa.', ods: [1, 2], aceita_itens: true, aceita_dinheiro: true, aceita_voluntariado: true,
+    familias_por_mes: 180, telefone: '(61) 3371-0045', email_contato: 'contato@solnascente.org.br', chave_pix: 'pix@solnascente.org.br',
+    descricao: 'Servimos almoço de segunda a sábado para famílias do Sol Nascente, a maior favela do DF. Usamos hortaliças doadas por agricultores da região e mantemos uma horta escola com as mães atendidas.',
+    necessidades: [
+      { id: 11, titulo: 'Cestas básicas', tipo: 'itens', unidade: 'cestas', meta: 60, confirmado: 42, situacao: 'aberta' },
+      { id: 12, titulo: 'Voluntários para a cozinha aos sábados', tipo: 'voluntariado', unidade: 'voluntários', meta: 8, confirmado: 5, situacao: 'aberta' },
+      { id: 13, titulo: 'Gás de cozinha para o trimestre', tipo: 'dinheiro', unidade: 'R$', meta: 1200, confirmado: 380, situacao: 'aberta' },
+      { id: 14, titulo: 'Arroz (pacotes de 5 kg)', tipo: 'itens', unidade: 'pacotes', meta: 30, confirmado: 30, situacao: 'atendida' },
+    ] },
+  { id: 2, nome: 'Instituto Semear Saberes', nome_curto: 'Semear Saberes', cor: '#2c6e7a', localidade: 'Planaltina',
+    slogan: 'Reforço escolar e leitura para crianças da zona rural.', ods: [4, 10], aceita_itens: true, aceita_dinheiro: false, aceita_voluntariado: true,
+    familias_por_mes: 95, telefone: '(61) 3388-2210', email_contato: 'ola@semearsaberes.org', chave_pix: '',
+    descricao: 'Atendemos crianças de 6 a 14 anos dos núcleos rurais de Planaltina no contraturno escolar.',
+    necessidades: [
+      { id: 21, titulo: 'Kits de material escolar', tipo: 'itens', unidade: 'kits', meta: 150, confirmado: 70, situacao: 'aberta' },
+      { id: 22, titulo: 'Professores voluntários de reforço', tipo: 'voluntariado', unidade: 'voluntários', meta: 6, confirmado: 3, situacao: 'aberta' },
+    ] },
+  { id: 3, nome: 'Rede Mulheres do Cerrado', nome_curto: 'Mulheres do Cerrado', cor: '#7a3d5c', localidade: 'Brazlândia',
+    slogan: 'Renda e autonomia para agricultoras e costureiras.', ods: [5, 8], aceita_itens: false, aceita_dinheiro: true, aceita_voluntariado: true,
+    familias_por_mes: 60, telefone: '(61) 3391-7788', email_contato: 'rede@mulheresdocerrado.org', chave_pix: '12.345.678/0001-95',
+    descricao: 'Grupo de produção de mulheres agricultoras que transforma excedente em conservas e mantém uma oficina de costura.',
+    necessidades: [
+      { id: 31, titulo: 'Máquinas de costura para a oficina', tipo: 'dinheiro', unidade: 'R$', meta: 4000, confirmado: 2150, situacao: 'aberta' },
+    ] },
+  { id: 4, nome: 'Associação Prato Cheio Gama', nome_curto: 'Prato Cheio', cor: '#8a5a16', localidade: 'Gama',
+    slogan: 'Sopa comunitária três vezes por semana.', ods: [2, 10], aceita_itens: true, aceita_dinheiro: false, aceita_voluntariado: false,
+    familias_por_mes: 210, telefone: '(61) 3556-1020', email_contato: 'pratocheio@gmail.com', chave_pix: '',
+    descricao: 'Preparamos sopa com hortaliças da Colheita Solidária para famílias do Gama e de Santa Maria.',
+    necessidades: [
+      { id: 41, titulo: 'Hortaliças para a sopa comunitária', tipo: 'itens', unidade: 'kg', meta: 300, confirmado: 120, situacao: 'aberta' },
+    ] },
+  { id: 5, nome: 'Casa Esperança Águas Lindas', nome_curto: 'Casa Esperança', cor: '#3d5a8a', localidade: 'Águas Lindas de Goiás (GO)',
+    slogan: 'Acolhimento para mães e bebês do Entorno.', ods: [1, 4], aceita_itens: true, aceita_dinheiro: true, aceita_voluntariado: false,
+    familias_por_mes: 140, telefone: '(61) 3613-4400', email_contato: 'casaesperanca@org.br', chave_pix: 'casaesperanca@org.br',
+    descricao: 'Apoio a gestantes e mães com bebês de até 2 anos em Águas Lindas de Goiás.',
+    necessidades: [
+      { id: 51, titulo: 'Fraldas infantis', tipo: 'itens', unidade: 'pacotes', meta: 400, confirmado: 210, situacao: 'aberta' },
+    ] },
+  { id: 6, nome: 'Projeto Juventude que Trabalha', nome_curto: 'Juventude que Trabalha', cor: '#5a6b1f', localidade: 'Samambaia',
+    slogan: 'Primeiro emprego com mentoria de quem já chegou lá.', ods: [8, 10], aceita_itens: false, aceita_dinheiro: false, aceita_voluntariado: true,
+    familias_por_mes: 75, telefone: '(61) 3359-0900', email_contato: 'jqt@projetojqt.org', chave_pix: '',
+    descricao: 'Oficinas de currículo, entrevistas simuladas e mentoria para jovens de 16 a 24 anos.',
+    necessidades: [
+      { id: 61, titulo: 'Mentores de primeiro emprego', tipo: 'voluntariado', unidade: 'voluntários', meta: 10, confirmado: 4, situacao: 'aberta' },
+    ] },
+];
+
+// Ofertas vistas a partir de Ceilândia (localidade da Cozinha Sol Nascente)
+let OFERTAS = [
+  { id: 101, produto: 'Alface crespa', categoria: 'hortaliças', quantidade: 40, saldo: 25, unidade: 'un', localidade: 'Brazlândia', distancia_km: 21,
+    colher_ate: '18/10', estado: 'excedente', destino: 'doar', preco_unitario: null, transporte: 'ONG busca', urgente: true, direcionada: false,
+    agricultor: 'Antônio Ribeiro', telefone: '(61) 98123-4567', local_retirada: 'Chácara 12, Núcleo Rural Alexandre Gusmão' },
+  { id: 102, produto: 'Mandioca', categoria: 'raízes e tubérculos', quantidade: 200, saldo: 200, unidade: 'kg', localidade: 'Ceilândia', distancia_km: 0,
+    colher_ate: '30/10', estado: 'excedente', destino: 'doar', preco_unitario: null, transporte: 'ONG busca', urgente: false, direcionada: false,
+    agricultor: 'Lúcia Ferreira', telefone: '(61) 99654-2210', local_retirada: 'Sítio Boa Vista, Setor de Chácaras do Sol Nascente' },
+  { id: 103, produto: 'Abóbora cabotiá', categoria: 'hortaliças', quantidade: 150, saldo: 60, unidade: 'kg', localidade: 'Gama', distancia_km: 26,
+    colher_ate: '25/10', estado: 'fora do padrão', destino: 'vender', preco_unitario: 1.8, transporte: 'agricultor leva', urgente: false, direcionada: false,
+    agricultor: 'José Almeida', telefone: '(61) 98877-1122', local_retirada: 'Núcleo Rural Ponte Alta, lote 8' },
+  { id: 104, produto: 'Banana-prata', categoria: 'frutas', quantidade: 80, saldo: 80, unidade: 'kg', localidade: 'Sobradinho', distancia_km: 38,
+    colher_ate: '21/10', estado: 'fora do padrão', destino: 'doar', preco_unitario: null, transporte: 'agricultor leva', urgente: false, direcionada: false,
+    agricultor: 'Rosa Nunes', telefone: '(61) 99210-3344', local_retirada: 'Chácara Recanto, DF-150 km 4' },
+  { id: 105, produto: 'Tomate', categoria: 'hortaliças', quantidade: 120, saldo: 85.5, unidade: 'kg', localidade: 'Planaltina', distancia_km: 52,
+    colher_ate: '22/10', estado: 'fora do padrão', destino: 'vender', preco_unitario: 2.5, transporte: 'agricultor leva', urgente: false, direcionada: false,
+    agricultor: 'Carlos Menezes', telefone: '(61) 98400-5566', local_retirada: 'Núcleo Rural Taquara, chácara 31' },
+  { id: 106, produto: 'Couve-manteiga', categoria: 'hortaliças', quantidade: 30, saldo: 30, unidade: 'un', localidade: 'Brazlândia', distancia_km: 21,
+    colher_ate: '24/10', estado: 'excedente', destino: 'doar', preco_unitario: null, transporte: 'ONG busca', urgente: false, direcionada: true, abre_em: '31 h',
+    agricultor: 'Antônio Ribeiro', telefone: '(61) 98123-4567', local_retirada: 'Chácara 12, Núcleo Rural Alexandre Gusmão' },
+];
+
+const PAINEL = {
+  kg: [['mai', 320], ['jun', 540], ['jul', 610], ['ago', 880], ['set', 1130], ['out', 900]],
+  ods: [[2, 34], [1, 22], [10, 18], [4, 12], [8, 9], [5, 5]],
+  renda: 3912.5, ongs_ativas: 6,
+};
+
+const EQUIPE = ['Brayan Aragão Pletsch', 'Caio Vinício Nunes Vilarouca', 'Gabriel Ribeiro de Carvalho', 'Guilherme de Melo Lucas',
+  'Jimmie Haskell Gonçalves da Silva', 'João Matheus Bezerra', 'João Vitor de Freitas Silva', 'Júlia Sernagiotto Barbosa',
+  'Pedro Freire de Farias', 'Vinicius Pereira Souza', 'Vitor Gomes Araújo'];
+
+const PERFIS = {
+  visitante: { nome: null },
+  pessoa: { nome: 'Mariana Costa' },
+  agricultor: { nome: 'Antônio Ribeiro' },
+  ong: { nome: 'Cozinha Solidária Sol Nascente' },
+  'ong-pendente': { nome: 'Horta Comunitária Vila Planalto' },
+  'ong-reprovada': { nome: 'Instituto Raízes do Planalto' },
+};
+
+/* ===================== Telas e rastreabilidade ===================== */
+const TELAS = [
+  ['inicio', 'Início', 'UC-01 · RF-01, RF-02, RF-03, RF-34 · BL-14, BL-23, BL-30', 'Camada 1 (carrossel e Sobre: desejáveis)', null],
+  ['lista', 'Lista de ONGs', 'UC-01 · RF-04, RF-05 · BL-15, BL-30', 'Camada 1', null],
+  ['ong', 'Página da ONG', 'UC-01 · RF-06 · RN-21 · BL-06, BL-30', 'Camada 1 (botões levam à camada 2)', null],
+  ['cadastro', 'Cadastro por perfil', 'UC-02, UC-03 · RF-07, RF-10, RF-33 · BL-11, BL-28, BL-29', 'Camada 1', 'visitante'],
+  ['login', 'Login', 'RF-09 · BL-12, BL-28', 'Camada 1', 'visitante'],
+  ['publicar', 'Publicar oferta', 'UC-08 · RF-18, RF-21 · RN-13, RN-16 · BL-17, BL-32', 'Camada 1 (ONG de destino: camada 3)', 'agricultor'],
+  ['ofertas', 'Ofertas da Colheita', 'UC-09, UC-14 · RF-19, RF-20, RF-21, RF-22, RF-27, RF-28 · RN-15, RN-22 · BL-18, BL-33, BL-34', 'Camada 1 (direcionada e urgente: camada 3)', null],
+  ['painel', 'Painel de impacto', 'UC-13 · RF-29, RF-30, RF-31 · RN-07 a RN-11, RN-23 · BL-20, BL-37', 'Camada 1', null],
+  ['ong-conta', 'ONG · Situação e perfil', 'UC-03 · RF-11, RF-12 · RN-20 · BL-16, BL-29, BL-31', 'Camada 1', 'ong'],
+  ['ong-necessidades', 'ONG · Necessidades', 'UC-04 · RF-13 · RN-21 · BL-16, BL-41', 'Camada 2 (mock se faltar tempo)', 'ong'],
+  ['ong-reservas', 'ONG · Minhas reservas', 'UC-10 · RF-23, RF-24, RF-27 · RN-17 · BL-19, BL-35, BL-47', 'Camada 1 (cancelar: camada 3)', 'ong'],
+  ['ong-doacoes', 'ONG · Doações a confirmar', 'UC-05, UC-06, UC-07 · RF-16 · RN-02 · BL-22, BL-44', 'Camada 2 (mock se faltar tempo)', 'ong'],
+  ['agricultor-ofertas', 'Agricultor · Minhas ofertas', 'UC-11 · RF-25, RF-24, RF-27 · BL-21, BL-36, BL-47', 'Camada 1 (cancelar: camada 3)', 'agricultor'],
+  ['pessoa-contribuicoes', 'Pessoa · Minhas contribuições', 'UC-12 · RF-26, RF-08 · BL-13, BL-45, BL-48', 'Camada 2 (ativar perfil: camada 3)', 'pessoa'],
+  ['contribuir', 'Contribuir (itens, voluntariado, dinheiro)', 'UC-05, UC-06, UC-07 · RF-14, RF-15, RF-17 · BL-22, BL-42, BL-43', 'Camada 2 (mock se faltar tempo)', 'pessoa'],
+];
+
+/* ===================== Estado ===================== */
+const estado = { perfil: 'visitante', tela: 'inicio', ongId: 1, contribTipo: 'itens', filtros: { q: '', ods: '', tipo: '', cidade: '' },
+  dist: 'todas', perfilCadastro: 'pessoa', painelVazio: false, loginMotivo: '', agricultorTambemDoador: false };
+function ler(chave, padrao) { try { const v = localStorage.getItem('proto-sa-' + chave); return v === null ? padrao : v; } catch (e) { return padrao; } }
+function gravar(chave, valor) { try { localStorage.setItem('proto-sa-' + chave, valor); } catch (e) { /* armazenamento indisponível */ } }
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = (n, casas = 0) => Number(n).toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
+const fmtQtd = (n, unidade) => unidade === 'R$' ? 'R$ ' + fmt(n, 2) : fmt(n, Number.isInteger(n) ? 0 : 1) + ' ' + unidade;
+const reais = n => 'R$ ' + fmt(n, 2);
+const odsDe = n => ODS.find(o => o.numero === n);
+const ongDe = id => ONGS.find(o => o.id === id);
+const ehOng = () => estado.perfil.startsWith('ong');
+
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.timer); toast.timer = setTimeout(() => { t.hidden = true; }, 3200);
+}
+
+/* ===================== Componentes ===================== */
+function seloOds(n, comNome = true) {
+  const o = odsDe(n);
+  return `<span class="ods" title="ODS ${o.numero} · ${esc(o.nome)}"><i style="background:${o.cor}">${o.numero}</i>${comNome ? esc(o.nome) : ''}</span>`;
+}
+function barra(confirmado, meta) {
+  const pct = Math.min(100, Math.round(confirmado / meta * 100));
+  return `<div class="barra${pct >= 100 ? ' cheia' : ''}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="${pct}% da meta"><span style="width:${pct}%"></span></div>`;
+}
+function iniciais(nome) { return nome.split(' ').filter(p => p.length > 2).slice(0, 2).map(p => p[0]).join(''); }
+function precisaAgora(ong) { return ong.necessidades.filter(n => n.situacao === 'aberta')[0]; }
+function tiposAjuda(ong) {
+  return [ong.aceita_itens && 'Itens', ong.aceita_dinheiro && 'Dinheiro', ong.aceita_voluntariado && 'Voluntariado'].filter(Boolean);
+}
+function rastreio(id, extra = '') {
+  const t = TELAS.find(x => x[0] === id);
+  const n = TELAS.indexOf(t) + 1;
+  return `<div class="rastreio" aria-label="Rastreabilidade da tela"><b>Tela ${n} · ${esc(t[1])}</b><span>${esc(t[2])}</span><span class="camada">${esc(t[3])}</span>${extra}</div>`;
+}
+function cartaoOng(ong) {
+  const p = precisaAgora(ong);
+  return `<button class="cartao cartao-ong" type="button" data-ong="${ong.id}">
+    <div class="capa" style="--cor-capa:${ong.cor}"><div class="logo-ong" style="--cor-capa:${ong.cor}">${iniciais(ong.nome)}</div></div>
+    <div class="corpo">
+      <h3>${esc(ong.nome)}</h3>
+      <span class="cidade">${esc(ong.localidade)}</span>
+      <p class="resumo">${esc(ong.slogan)}</p>
+      <div class="linha-ods">${ong.ods.map(n => seloOds(n, false)).join('')}<span class="selo selo-neutro">${tiposAjuda(ong).join(' · ')}</span></div>
+      ${p ? `<div class="precisa"><b>Precisa agora</b><span>${esc(p.titulo)} · <span class="num">${fmtQtd(p.confirmado, p.unidade)} de ${fmtQtd(p.meta, p.unidade)}</span></span>${barra(p.confirmado, p.meta)}</div>` : ''}
+    </div>
+  </button>`;
+}
+
+/* ===================== Menu ===================== */
+function destinoColheita() {
+  if (estado.perfil === 'agricultor') return 'publicar';  // D-26, RN-25
+  return 'ofertas';
+}
+function destinoConta() {
+  return { pessoa: 'pessoa-contribuicoes', agricultor: 'agricultor-ofertas', ong: 'ong-conta', 'ong-pendente': 'ong-conta', 'ong-reprovada': 'ong-conta' }[estado.perfil];
+}
+function renderMenu() {
+  const t = estado.tela;
+  const grupo = { inicio: 'inicio', lista: 'lista', ong: 'lista', contribuir: 'lista', ofertas: 'colheita', publicar: 'colheita', painel: 'painel' }[t];
+  $('#menu-links').innerHTML = `
+    <a href="#lista" data-ir="lista" class="${grupo === 'lista' ? 'ativo' : ''}">ONGs</a>
+    <a href="#${destinoColheita()}" data-ir="${destinoColheita()}" class="${grupo === 'colheita' ? 'ativo' : ''}">Colheita Solidária</a>
+    <a href="#painel" data-ir="painel" class="${grupo === 'painel' ? 'ativo' : ''}">Impacto</a>`;
+  const nome = PERFIS[estado.perfil].nome;
+  $('#menu-acoes').innerHTML = nome
+    ? `<span class="quem">${esc(nome)}</span><a href="#${destinoConta()}" data-ir="${destinoConta()}">Minha conta</a><a href="#inicio" data-sair>Sair</a>`
+    : `<a href="#login" data-ir="login">Entrar</a><a class="btn btn-primario btn-pequeno" href="#cadastro" data-ir="cadastro">Cadastrar</a>`;
+}
+
+/* ===================== Telas ===================== */
+const R = {};
+
+R.inicio = () => `
+  <section class="heroi"><div class="largura">
+    <h1>O que sobra no campo vira <em>comida no prato</em> de quem precisa</h1>
+    <p>Encontre ONGs do DF e do Entorno pela causa, pelo tipo de ajuda ou pela cidade, e veja do que cada uma precisa agora.</p>
+    <form class="busca" id="form-busca" role="search">
+      <label for="busca-inicio" class="visualmente-oculto" hidden>Buscar ONGs</label>
+      <input class="entrada" id="busca-inicio" type="search" placeholder="Nome da ONG, causa ou cidade" aria-label="Buscar ONGs por nome, causa ou cidade">
+      <button class="btn btn-primario" type="submit">Buscar</button>
+    </form>
+    ${rastreio('inicio')}
+  </div></section>
+  <div class="largura">
+    <section class="secao">
+      <div class="cabeca-secao"><h2>Encontre por causa</h2><p>Os seis Objetivos de Desenvolvimento Sustentável em que as ONGs da rede atuam.</p></div>
+      <div class="grade-ods">${ODS.map(o => {
+        const qtd = ONGS.filter(g => g.ods.includes(o.numero)).length;
+        return `<button class="cartao cartao-ods" type="button" data-filtro-ods="${o.numero}"><span class="quad" style="background:${o.cor}">${o.numero}</span><strong>${esc(o.nome)}</strong><span class="num">${qtd} ${qtd === 1 ? 'ONG' : 'ONGs'}</span></button>`;
+      }).join('')}</div>
+    </section>
+    <section class="secao">
+      <div class="cabeca-carrossel">
+        <div class="cabeca-secao"><h2>ONGs da rede</h2><p class="num">${ONGS.length} ONGs ativas. Use as setas ou arraste para o lado.</p></div>
+        <div class="setas">
+          <button class="seta" type="button" data-carrossel="-1" aria-label="ONGs anteriores" aria-controls="carrossel-ongs"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="seta" type="button" data-carrossel="1" aria-label="Próximas ONGs" aria-controls="carrossel-ongs"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+      <div class="carrossel" id="carrossel-ongs" tabindex="0" aria-label="ONGs da rede">${ONGS.map(cartaoOng).join('')}</div>
+    </section>
+    <section class="secao" id="sobre">
+      <div class="sobre">
+        <div class="cabeca-secao"><h2>Sobre o SustentAgro</h2>
+          <p>Alimento bom para consumo se perde no campo por ser excedente ou por estar fora do padrão estético, enquanto ONGs e cozinhas comunitárias têm demanda que não conseguem atender. O SustentAgro liga agricultores familiares, ONGs e quem quer ajudar, e mostra o impacto dessa rede em números públicos.</p>
+          <p>Projeto do Itinerário 5, Trilha Cultura e Desenvolvimento Social, com foco nos ODS 2, 8 e 10.</p>
+        </div>
+        <div class="cartao" style="padding:18px; display:grid; gap:10px;"><h3 style="font-size:17px">Equipe do projeto</h3><ul class="equipe">${EQUIPE.map(n => `<li>${esc(n)}</li>`).join('')}</ul></div>
+      </div>
+    </section>
+  </div>`;
+
+function ongsFiltradas() {
+  const f = estado.filtros;
+  const q = f.q.trim().toLowerCase();
+  return ONGS.filter(o => {
+    if (f.ods && !o.ods.includes(Number(f.ods))) return false;
+    if (f.tipo && !o['aceita_' + f.tipo]) return false;
+    if (f.cidade && o.localidade !== f.cidade) return false;
+    if (q) {
+      const texto = [o.nome, o.localidade, ...o.ods.map(n => odsDe(n).nome)].join(' ').toLowerCase();
+      if (!texto.includes(q)) return false;
+    }
+    return true;
+  });
+}
+R.lista = () => {
+  const f = estado.filtros, lista = ongsFiltradas();
+  const opt = (v, t, sel) => `<option value="${esc(v)}"${String(sel) === String(v) ? ' selected' : ''}>${esc(t)}</option>`;
+  return `<div class="largura"><section class="secao">
+    <div class="cabeca-secao"><h2>ONGs da rede</h2><p>Combine os filtros para achar uma ONG pela causa, pelo tipo de ajuda que ela aceita e pela cidade.</p></div>
+    ${rastreio('lista')}
+    <div class="lista-layout">
+      <form class="cartao filtros" id="form-filtros">
+        <h3>Filtrar</h3>
+        <div class="campo"><label for="f-q">Busca</label><input class="entrada" id="f-q" type="search" value="${esc(f.q)}" placeholder="Nome, causa ou cidade"></div>
+        <div class="campo"><label for="f-ods">Causa (ODS)</label><select class="entrada" id="f-ods">${opt('', 'Todas', f.ods)}${ODS.map(o => opt(o.numero, `${o.numero} · ${o.nome}`, f.ods)).join('')}</select></div>
+        <div class="campo"><label for="f-tipo">Tipo de ajuda</label><select class="entrada" id="f-tipo">${opt('', 'Todos', f.tipo)}${opt('itens', 'Itens', f.tipo)}${opt('dinheiro', 'Dinheiro', f.tipo)}${opt('voluntariado', 'Voluntariado', f.tipo)}</select></div>
+        <div class="campo"><label for="f-cidade">Cidade</label><select class="entrada" id="f-cidade">${opt('', 'Todas', f.cidade)}${LOCALIDADES.map(l => opt(l, l, f.cidade)).join('')}</select></div>
+        <button class="btn btn-contorno" type="button" data-limpar>Limpar filtros</button>
+      </form>
+      <div style="display:grid; gap:12px;">
+        <p class="contagem num" aria-live="polite">${lista.length} ${lista.length === 1 ? 'ONG encontrada' : 'ONGs encontradas'}</p>
+        ${lista.length ? `<div class="cartoes-ong">${lista.map(cartaoOng).join('')}</div>` :
+          `<div class="cartao vazio"><strong>Nenhuma ONG encontrada</strong><span>Nenhuma ONG atende a todos os filtros ao mesmo tempo. Tente tirar um deles.</span><button class="btn btn-contorno" type="button" data-limpar>Limpar filtros</button></div>`}
+      </div>
+    </div>
+  </section></div>`;
+};
+
+R.ong = () => {
+  const o = ongDe(estado.ongId);
+  const abertas = o.necessidades.filter(n => n.situacao !== 'encerrada');
+  return `<div class="capa ong-capa" style="--cor-capa:${o.cor}"><div class="largura"><div class="logo-ong" style="--cor-capa:${o.cor}">${iniciais(o.nome)}</div></div></div>
+  <div class="largura">
+    <div class="ong-cabeca">
+      <h1>${esc(o.nome)}</h1>
+      <p class="slogan">${esc(o.slogan)}</p>
+      <div class="linha-ods">${o.ods.map(n => seloOds(n)).join('')}</div>
+      ${rastreio('ong')}
+    </div>
+    <div class="ong-layout">
+      <div style="display:grid; gap:14px;">
+        <p style="max-width:66ch">${esc(o.descricao)}</p>
+        <h2 class="subtitulo">Do que precisamos agora</h2>
+        ${abertas.map(n => `<article class="cartao necessidade">
+          <div class="topo"><h3>${esc(n.titulo)}</h3>${n.situacao === 'atendida' ? '<span class="selo selo-limao">Meta atingida</span>' : `<span class="selo selo-apoio">${{ itens: 'Itens', dinheiro: 'Dinheiro', voluntariado: 'Voluntariado' }[n.tipo]}</span>`}</div>
+          <p class="quanto num"><strong>${fmtQtd(n.confirmado, n.unidade)}</strong> de ${fmtQtd(n.meta, n.unidade)}</p>
+          ${barra(n.confirmado, n.meta)}
+        </article>`).join('')}
+      </div>
+      <aside class="cartao lateral">
+        <h3>Como ajudar</h3>
+        <div class="acoes-ong">
+          ${o.aceita_itens ? `<button class="btn btn-primario" type="button" data-contribuir="itens">Quero doar itens</button>` : ''}
+          ${o.aceita_voluntariado ? `<button class="btn ${o.aceita_itens ? 'btn-contorno' : 'btn-primario'}" type="button" data-contribuir="voluntariado">Quero ser voluntário(a)</button>` : ''}
+          ${o.aceita_dinheiro ? `<button class="btn btn-contorno" type="button" data-contribuir="dinheiro">Doar dinheiro por Pix</button>` : ''}
+        </div>
+        <dl>
+          <div><dt>Cidade</dt><dd>${esc(o.localidade)}</dd></div>
+          <div><dt>Famílias atendidas por mês</dt><dd class="num">${fmt(o.familias_por_mes)}</dd></div>
+          <div><dt>Contato</dt><dd>${esc(o.telefone)}<br>${esc(o.email_contato)}</dd></div>
+        </dl>
+      </aside>
+    </div>
+  </div>`;
+};
+
+R.contribuir = () => {
+  const o = ongDe(estado.ongId), tipo = estado.contribTipo;
+  const nec = o.necessidades.filter(n => n.situacao === 'aberta' && n.tipo === tipo);
+  const abas = [['itens', 'Doar itens', o.aceita_itens], ['voluntariado', 'Ser voluntário(a)', o.aceita_voluntariado], ['dinheiro', 'Doar dinheiro', o.aceita_dinheiro]].filter(a => a[2]);
+  let corpo = '';
+  if (tipo === 'itens') corpo = `
+    <div class="campo"><label for="c-nec">Necessidade</label><select class="entrada" id="c-nec">${nec.map(n => `<option value="${n.id}">${esc(n.titulo)} · faltam ${fmtQtd(n.meta - n.confirmado, n.unidade)}</option>`).join('')}</select></div>
+    <div class="campo"><label for="c-qtd">Quantidade que você vai entregar</label><input class="entrada num" id="c-qtd" type="number" min="1" value="5"><span class="ajuda">A barra só avança quando a ONG confirmar que recebeu.</span></div>
+    <button class="btn btn-primario" type="submit">Registrar promessa de doação</button>`;
+  if (tipo === 'voluntariado') corpo = `
+    <div class="campo"><label for="c-nec">Vaga de voluntariado</label><select class="entrada" id="c-nec">${nec.map(n => `<option value="${n.id}">${esc(n.titulo)} · ${fmt(n.meta - n.confirmado)} vagas</option>`).join('')}</select></div>
+    <p class="ajuda" style="font-size:13px; color:var(--suave)">A ONG vê seu nome e telefone e entra em contato para combinar. Sua inscrição fica pendente até ela confirmar.</p>
+    <button class="btn btn-primario" type="submit">Quero me inscrever</button>`;
+  if (tipo === 'dinheiro') corpo = `
+    <fieldset class="campo" style="border:0; padding:0; margin:0"><legend class="rotulo-campo" style="font-weight:600; font-size:13.5px; margin-bottom:6px">Para onde vai o dinheiro</legend>
+      <div class="opcoes">
+        <label><input type="radio" name="c-destino" id="c-dest-nec" value="nec" checked> Para uma necessidade</label>
+        <label><input type="radio" name="c-destino" id="c-dest-livre" value="livre"> Doação livre à ONG</label>
+      </div></fieldset>
+    <div class="campo" id="c-nec-campo"><label for="c-nec">Necessidade</label><select class="entrada" id="c-nec">${nec.map(n => `<option value="${n.id}">${esc(n.titulo)} · faltam ${reais(n.meta - n.confirmado)}</option>`).join('')}</select></div>
+    <div class="campo"><label for="c-valor">Valor (R$)</label><input class="entrada num" id="c-valor" type="number" min="1" step="0.01" value="50.00"></div>
+    <div class="pix"><strong>Chave Pix da ONG</strong><code id="c-chave">${esc(o.chave_pix)}</code>
+      <span style="font-size:13px">Faça o Pix pelo aplicativo do seu banco. O SustentAgro não recebe nem movimenta dinheiro: só registra a sua doação para a ONG confirmar.</span>
+      <div><button class="btn btn-contorno btn-pequeno" type="button" data-copiar-pix>Copiar chave</button></div></div>
+    <button class="btn btn-primario" type="submit">Registrar doação</button>`;
+  return `<div class="largura estreito"><section class="secao">
+    <div class="cabeca-secao"><h2>Contribuir com ${esc(o.nome)}</h2><p>Escolha como você quer ajudar.</p></div>
+    ${rastreio('contribuir')}
+    <nav class="abas" aria-label="Formas de contribuir">${abas.map(a => `<a href="#contribuir" data-tipo="${a[0]}" ${a[0] === tipo ? 'aria-current="page"' : ''}>${a[1]}</a>`).join('')}</nav>
+    <form class="cartao formulario" id="form-contribuir">${corpo}</form>
+    <p><a href="#ong" data-ir="ong">Voltar para a página da ONG</a></p>
+  </section></div>`;
+};
+
+R.cadastro = () => {
+  const p = estado.perfilCadastro;
+  const perfil = (id, titulo, texto, icone) => `<button class="cartao cartao-perfil" type="button" data-perfil-cad="${id}" aria-pressed="${p === id}"><span class="icone" aria-hidden="true">${icone}</span><h3>${titulo}</h3><p>${texto}</p></button>`;
+  const loc = (obrig) => `<div class="campo"><label for="cad-local">Localidade${obrig ? '' : ' (opcional)'}</label><select class="entrada" id="cad-local">${obrig ? '' : '<option value="">Prefiro não informar</option>'}${LOCALIDADES.map(l => `<option>${esc(l)}</option>`).join('')}</select><span class="ajuda">${obrig ? 'Usada para calcular a distância até as ofertas.' : ''}</span></div>`;
+  const conta = `<div class="campo"><label for="cad-user">Nome de usuário</label><input class="entrada" id="cad-user" autocomplete="username" value="${p === 'ong' ? 'solnascente' : p === 'agricultor' ? 'antonio.ribeiro' : 'mariana.costa'}"></div>
+    <div class="campo"><label for="cad-senha">Senha</label><input class="entrada" id="cad-senha" type="password" autocomplete="new-password" value="exemplo123"><span class="ajuda">Pelo menos 8 caracteres, sem ser só números.</span></div>`;
+  let form = '';
+  if (p === 'pessoa') form = `<h2>Doador(a) ou voluntário(a)</h2><div class="grade-form">
+    <div class="campo inteira"><label for="cad-nome">Nome completo</label><input class="entrada" id="cad-nome" value="Mariana Costa"></div>
+    <div class="campo"><label for="cad-email">E-mail</label><input class="entrada" id="cad-email" type="email" value="mariana.costa@email.com"></div>
+    <div class="campo"><label for="cad-tel">Telefone</label><input class="entrada" id="cad-tel" value="(61) 99812-4433"><span class="ajuda">A ONG usa para combinar a entrega ou o voluntariado.</span></div>
+    ${loc(false)}<div></div>${conta}</div>`;
+  if (p === 'agricultor') form = `<h2>Agricultor(a) familiar</h2><div class="grade-form">
+    <div class="campo inteira"><label for="cad-nome">Nome completo</label><input class="entrada" id="cad-nome" value="Antônio Ribeiro"></div>
+    <div class="campo"><label for="cad-email">E-mail</label><input class="entrada" id="cad-email" type="email" value="antonio.ribeiro@email.com"></div>
+    <div class="campo"><label for="cad-tel">Telefone (WhatsApp)</label><input class="entrada" id="cad-tel" value="(61) 98123-4567"><span class="ajuda">Só aparece para a ONG que reservar sua oferta.</span></div>
+    ${loc(true)}<div></div>${conta}</div>`;
+  if (p === 'ong') form = `<h2>ONG ou cozinha comunitária</h2>
+    <div class="aviso-caixa info"><strong>Seu cadastro passa por análise</strong><span>A equipe do SustentAgro confere o CNPJ antes de publicar a ONG. Enquanto isso, você acessa só a sua conta.</span></div>
+    <div class="grade-form">
+    <div class="campo inteira"><label for="cad-nome">Nome da ONG</label><input class="entrada" id="cad-nome" value="Cozinha Solidária Sol Nascente"></div>
+    <div class="campo"><label for="cad-curto">Nome curto</label><input class="entrada" id="cad-curto" value="Sol Nascente"></div>
+    <div class="campo"><label for="cad-cnpj">CNPJ</label><input class="entrada num" id="cad-cnpj" inputmode="numeric" value="11.222.333/0001-81"><span class="ajuda" id="cad-cnpj-msg">Confira os 14 dígitos. Teste um número errado para ver o aviso.</span></div>
+    <div class="campo"><label for="cad-email">E-mail de contato</label><input class="entrada" id="cad-email" type="email" value="contato@solnascente.org.br"></div>
+    <div class="campo"><label for="cad-tel">Telefone</label><input class="entrada" id="cad-tel" value="(61) 3371-0045"></div>
+    ${loc(true)}<div></div>
+    <fieldset class="campo inteira" style="border:0;padding:0;margin:0"><legend class="rotulo-campo" style="font-weight:600;font-size:13.5px;margin-bottom:6px">Causas (ODS)</legend><div class="opcoes">${ODS.map(o => `<label><input type="checkbox" id="cad-ods-${o.numero}" ${[1, 2].includes(o.numero) ? 'checked' : ''}> ${o.numero} · ${esc(o.nome)}</label>`).join('')}</div></fieldset>
+    <fieldset class="campo inteira" style="border:0;padding:0;margin:0"><legend class="rotulo-campo" style="font-weight:600;font-size:13.5px;margin-bottom:6px">Tipos de ajuda que vocês aceitam</legend><div class="opcoes"><label><input type="checkbox" id="cad-aj-itens" checked> Itens</label><label><input type="checkbox" id="cad-aj-dinheiro" checked> Dinheiro</label><label><input type="checkbox" id="cad-aj-vol" checked> Voluntariado</label></div></fieldset>
+    ${conta}</div>`;
+  return `<div class="largura"><section class="secao">
+    <div class="cabeca-secao"><h2>Criar conta</h2><p>Escolha como você vai usar o SustentAgro. Quem doa também pode virar agricultor(a) depois, em Minha conta.</p></div>
+    ${rastreio('cadastro')}
+    <div class="perfis">
+      ${perfil('pessoa', 'Quero doar ou ser voluntário(a)', 'Prometa itens, doe por Pix ou se inscreva para ajudar uma ONG.', '♥')}
+      ${perfil('agricultor', 'Sou agricultor(a) familiar', 'Publique o excedente ou o que saiu do padrão para doar ou vender a preço justo.', '✿')}
+      ${perfil('ong', 'Represento uma ONG', 'Mostre do que vocês precisam e reserve alimento do campo perto de vocês.', '⌂')}
+    </div>
+    <form class="cartao formulario estreito" id="form-cadastro">${form}<div><button class="btn btn-primario" type="submit">Criar conta</button></div></form>
+  </section></div>`;
+};
+
+R.login = () => `<div class="largura"><section class="secao login">
+  <div class="cabeca-secao"><h2>Entrar</h2>${estado.loginMotivo ? `<p>${esc(estado.loginMotivo)}</p>` : '<p>Use o nome de usuário e a senha do seu cadastro.</p>'}</div>
+  ${rastreio('login', '<span>No protótipo, "Entrar" usa a conta da Mariana.</span>')}
+  <form class="cartao formulario" id="form-login">
+    <div class="campo"><label for="login-user">Nome de usuário</label><input class="entrada" id="login-user" autocomplete="username" value="mariana.costa"></div>
+    <div class="campo"><label for="login-senha">Senha</label><input class="entrada" id="login-senha" type="password" autocomplete="current-password" value="exemplo123"></div>
+    <button class="btn btn-primario" type="submit">Entrar</button>
+    <p style="font-size:13px; color:var(--suave)">Esqueceu a senha? Peça para a equipe do SustentAgro redefinir.</p>
+  </form>
+  <p>Ainda não tem conta? <a href="#cadastro" data-ir="cadastro">Cadastre-se</a></p>
+</section></div>`;
+
+R.publicar = () => `<div class="largura estreito"><section class="secao">
+  <div class="cabeca-secao"><h2>Publicar oferta</h2><p>Conte o que sobrou ou saiu do padrão. As ONGs perto de você veem a oferta e reservam o quanto conseguem receber.</p></div>
+  ${rastreio('publicar')}
+  <form class="cartao formulario" id="form-publicar"><div class="grade-form">
+    <div class="campo"><label for="pub-cat">Categoria</label><select class="entrada" id="pub-cat"><option>hortaliças</option><option>frutas</option><option>raízes e tubérculos</option><option>grãos</option><option>outros</option></select></div>
+    <div class="campo"><label for="pub-prod">Produto</label><input class="entrada" id="pub-prod" value="Alface crespa"></div>
+    <div class="campo"><label for="pub-qtd">Quantidade</label><input class="entrada num" id="pub-qtd" type="number" min="0.1" step="0.1" value="40"><span class="ajuda">Em kg aceita uma casa decimal; em unidades, só números inteiros.</span></div>
+    <div class="campo"><label for="pub-un">Unidade</label><select class="entrada" id="pub-un"><option value="un">unidades</option><option value="kg">kg</option></select></div>
+    <div class="campo"><label for="pub-data">Colher até</label><input class="entrada" id="pub-data" type="date" value="2026-10-18"></div>
+    <div class="campo"><label for="pub-local">Localidade</label><select class="entrada" id="pub-local">${LOCALIDADES.map(l => `<option ${l === 'Brazlândia' ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select><span class="ajuda">Já vem com a do seu cadastro.</span></div>
+    <fieldset class="campo" style="border:0;padding:0;margin:0"><legend class="rotulo-campo" style="font-weight:600;font-size:13.5px;margin-bottom:6px">Estado</legend><div class="opcoes"><label><input type="radio" name="pub-estado" id="pub-est-exc" checked> Excedente</label><label><input type="radio" name="pub-estado" id="pub-est-fora"> Fora do padrão</label></div></fieldset>
+    <fieldset class="campo" style="border:0;padding:0;margin:0"><legend class="rotulo-campo" style="font-weight:600;font-size:13.5px;margin-bottom:6px">Destino</legend><div class="opcoes"><label><input type="radio" name="pub-destino" id="pub-doar" value="doar" checked> Doar</label><label><input type="radio" name="pub-destino" id="pub-vender" value="vender"> Vender a preço justo</label></div></fieldset>
+    <div class="campo" id="pub-preco-campo" hidden><label for="pub-preco">Preço por unidade (R$)</label><input class="entrada num" id="pub-preco" type="number" min="0.01" step="0.01" placeholder="2,50"><span class="ajuda">O pagamento é combinado direto com a ONG, fora do site.</span></div>
+    <div class="campo inteira"><label for="pub-retirada">Local de retirada</label><input class="entrada" id="pub-retirada" value="Chácara 12, Núcleo Rural Alexandre Gusmão"><span class="ajuda">Só a ONG que reservar vê este endereço.</span></div>
+    <fieldset class="campo" style="border:0;padding:0;margin:0"><legend class="rotulo-campo" style="font-weight:600;font-size:13.5px;margin-bottom:6px">Transporte</legend><div class="opcoes"><label><input type="radio" name="pub-transp" id="pub-ong-busca" checked> A ONG busca</label><label><input type="radio" name="pub-transp" id="pub-eu-levo"> Eu levo</label></div></fieldset>
+    <div class="campo"><label for="pub-destino-ong">ONG de destino (opcional)</label><select class="entrada" id="pub-destino-ong"><option value="">Aberta a todas as ONGs</option>${ONGS.map(o => `<option>${esc(o.nome)}</option>`).join('')}</select><span class="ajuda">Se escolher uma, só ela vê a oferta nas primeiras 48 horas.</span></div>
+  </div><div><button class="btn btn-primario" type="submit">Publicar oferta</button></div></form>
+</section></div>`;
+
+function ofertasVisiveis() {
+  const lim = { '30': 30, '60': 60, todas: Infinity }[estado.dist];
+  return OFERTAS.filter(o => o.saldo > 0 && o.distancia_km <= lim)
+    .sort((a, b) => (b.direcionada - a.direcionada) || (b.urgente - a.urgente) || (a.distancia_km - b.distancia_km));
+}
+R.ofertas = () => {
+  if (estado.perfil === 'ong-pendente' || estado.perfil === 'ong-reprovada') {
+    return `<div class="largura"><section class="secao">${rastreio('ofertas')}<div class="aviso-caixa alerta"><strong>As ofertas aparecem depois da aprovação</strong><span>Sua ONG ainda não foi aprovada. Acompanhe a situação do cadastro em Minha conta.</span></div><p><a href="#ong-conta" data-ir="ong-conta">Ir para Minha conta</a></p></section></div>`;
+  }
+  const ehOngAtiva = estado.perfil === 'ong';
+  if (!ehOngAtiva) {
+    const lista = OFERTAS.filter(o => o.saldo > 0 && !o.direcionada);
+    return `<div class="largura"><section class="secao">
+      <div class="cabeca-secao"><h2>Colheita Solidária</h2><p>Alimento bom que sobrou no campo ou saiu do padrão de venda. As ONGs cadastradas reservam e combinam a retirada com quem plantou.</p></div>
+      ${rastreio('ofertas', '<span>Versão para visitante e doador. Troque o perfil para "ONG ativa" para ver a outra.</span>')}
+      <div class="aviso-caixa info"><strong>Você representa uma ONG?</strong><span>Cadastre a sua para ver a distância de cada oferta e reservar. Agricultor(a)? Cadastre-se para publicar o seu excedente.</span><div style="margin-top:6px"><a class="btn btn-primario btn-pequeno" href="#cadastro" data-ir="cadastro">Cadastrar</a></div></div>
+      <div class="ofertas">${lista.map(o => `<article class="cartao oferta">
+        <div class="nome"><h3>${esc(o.produto)}</h3><span class="selo selo-apoio">${o.destino === 'doar' ? 'Doação' : 'Venda · ' + reais(o.preco_unitario) + '/' + o.unidade}</span></div>
+        <div class="meta"><span>${esc(o.localidade)}</span><span>Colher até ${o.colher_ate}</span><span>${o.estado === 'excedente' ? 'Excedente' : 'Fora do padrão'}</span></div>
+        <div class="saldo num">Disponível <strong>${fmtQtd(o.saldo, o.unidade)}</strong></div>
+      </article>`).join('')}</div>
+    </section></div>`;
+  }
+  const lista = ofertasVisiveis();
+  const chip = (v, t) => `<button class="chip" type="button" data-dist="${v}" aria-pressed="${estado.dist === v}">${t}</button>`;
+  return `<div class="largura"><section class="secao">
+    <div class="cabeca-secao"><h2>Ofertas perto de você</h2><p>Distâncias calculadas a partir de Ceilândia, a localidade da sua ONG.</p></div>
+    ${rastreio('ofertas', '<span>Versão para ONG ativa.</span>')}
+    <div class="chips" role="group" aria-label="Distância máxima"><span style="font-size:13px; color:var(--suave)">Distância</span>${chip('30', 'até 30 km')}${chip('60', 'até 60 km')}${chip('todas', 'todas')}</div>
+    <div class="ofertas">${lista.length ? lista.map(o => `<article class="cartao oferta${o.direcionada ? ' direcionada' : ''}" id="oferta-${o.id}">
+      <div class="nome"><h3>${esc(o.produto)}</h3>
+        ${o.direcionada ? `<span class="selo selo-limao">Para a sua ONG · abre a todas em ${o.abre_em}</span>` : ''}
+        ${o.urgente ? '<span class="selo selo-limao">Urgente</span>' : ''}
+        <span class="selo selo-apoio">${o.destino === 'doar' ? 'Doação' : 'Venda · ' + reais(o.preco_unitario) + '/' + o.unidade}</span></div>
+      <div class="meta"><span>${esc(o.localidade)}</span><span class="dist num">${o.distancia_km} km</span><span>Colher até ${o.colher_ate}</span><span>${o.transporte === 'ONG busca' ? 'A ONG busca' : 'O agricultor leva'}</span></div>
+      <div class="meta"><span>Retirada: ${esc(o.local_retirada)}</span></div>
+      <div class="saldo num">Saldo <strong>${fmtQtd(o.saldo, o.unidade)}</strong> de ${fmtQtd(o.quantidade, o.unidade)}</div>
+      <div class="reservar"><label class="qtd" for="res-${o.id}">Quantidade (${o.unidade})</label><input class="entrada num" id="res-${o.id}" type="number" min="${o.unidade === 'kg' ? 0.1 : 1}" step="${o.unidade === 'kg' ? 0.1 : 1}" max="${o.saldo}" value="${Math.min(o.saldo, o.unidade === 'kg' ? 20 : 10)}"><button class="btn btn-primario" type="button" data-reservar="${o.id}">Reservar</button></div>
+      <div class="retorno" id="ret-${o.id}"></div>
+    </article>`).join('') : `<div class="cartao vazio"><strong>Nenhuma oferta nesta distância</strong><span>Amplie a distância para ver ofertas mais longe.</span></div>`}</div>
+  </section></div>`;
+};
+
+R.painel = () => {
+  const vazio = estado.painelVazio;
+  const kgTotal = PAINEL.kg.reduce((s, m) => s + m[1], 0);
+  const familias = ONGS.reduce((s, o) => s + o.familias_por_mes, 0);
+  const extra = `<button class="btn btn-contorno btn-pequeno" type="button" data-painel-vazio>${vazio ? 'Ver com dados' : 'Ver sem dados'}</button>`;
+  const ind = (valor, nome) => `<div class="cartao indicador"><span class="valor">${valor}</span><span class="nome">${nome}</span></div>`;
+  return `<div class="largura"><section class="secao">
+    <div class="cabeca-secao"><h2>Impacto da rede</h2><p>Números calculados a partir das ações confirmadas pelas ONGs: colheitas recebidas, doações e voluntariado.</p></div>
+    ${rastreio('painel', extra)}
+    <div class="indicadores">
+      ${ind(vazio ? '0 kg' : fmt(kgTotal) + ' kg', 'de alimento salvo do desperdício')}
+      ${ind(vazio ? '0' : fmt(familias), 'famílias atendidas por mês')}
+      ${ind(vazio ? 'R$ 0,00' : reais(PAINEL.renda), 'de renda gerada para agricultores')}
+      ${ind(vazio ? '0' : PAINEL.ongs_ativas, 'ONGs ativas na rede')}
+    </div>
+    <div class="graficos">
+      <div class="cartao grafico"><h3>Quilos recebidos por mês</h3>${vazio ? '<div class="vazio">Ainda não há colheitas recebidas. O gráfico aparece quando uma ONG confirmar o primeiro recebimento.</div>' : graficoKg()}</div>
+      <div class="cartao grafico"><h3>Ações confirmadas por ODS</h3>${vazio ? '<div class="vazio">Sem ações confirmadas ainda.</div>' : `<div class="fatias">${PAINEL.ods.map(([n, pct]) => {
+        const o = odsDe(n);
+        return `<div class="fatia"><span>${seloOds(n)}</span><span class="num"><strong>${pct}%</strong></span><div class="barra"><span style="width:${pct}%; background:${o.cor}"></span></div></div>`;
+      }).join('')}</div>`}</div>
+    </div>
+  </section></div>`;
+};
+function graficoKg() {
+  const W = 520, H = 240, m = { t: 24, r: 8, b: 28, l: 44 }, max = 1200;
+  const iw = W - m.l - m.r, ih = H - m.t - m.b, bw = iw / PAINEL.kg.length;
+  const y = v => m.t + ih - v / max * ih;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Quilos recebidos por mês, de maio a outubro de 2026">`;
+  [0, 300, 600, 900, 1200].forEach(v => { s += `<line class="grade" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end">${fmt(v)}</text>`; });
+  PAINEL.kg.forEach(([mes, v], i) => {
+    const x = m.l + i * bw + bw * .18, w = bw * .64, ultima = i === PAINEL.kg.length - 1;
+    s += `<rect class="barra-kg${ultima ? ' ultima' : ''}" x="${x}" y="${y(v)}" width="${w}" height="${m.t + ih - y(v)}" rx="3"/>`;
+    s += `<text class="valor-barra" x="${x + w / 2}" y="${y(v) - 6}" text-anchor="middle">${fmt(v)}</text>`;
+    s += `<text x="${x + w / 2}" y="${H - 8}" text-anchor="middle">${mes}</text>`;
+  });
+  return s + '</svg><p style="font-size:12.5px; color:var(--suave)">Mês da confirmação do recebimento. Outubro ainda em andamento.</p>';
+}
+
+/* ---------- Área logada: ONG ---------- */
+function abasOng(atual) {
+  const pend = estado.perfil !== 'ong';
+  const a = (id, t, cont) => `<a href="#${id}" data-ir="${id}" ${atual === id ? 'aria-current="page"' : ''}>${t}${cont ? `<span class="contador num">${cont}</span>` : ''}</a>`;
+  return `<nav class="abas" aria-label="Minha conta">${a('ong-conta', 'Situação e perfil')}${pend ? '' : a('ong-necessidades', 'Necessidades') + a('ong-reservas', 'Minhas reservas', 1) + a('ong-doacoes', 'Doações a confirmar', 3)}</nav>`;
+}
+function cabecaConta(titulo, sub) {
+  return `<div class="conta-cabeca"><div class="cabeca-secao"><h2>${titulo}</h2><p>${sub}</p></div></div>`;
+}
+R['ong-conta'] = () => {
+  const p = estado.perfil;
+  const situacao = {
+    ong: `<div class="aviso-caixa info"><strong>ONG ativa</strong><span>Aprovada em 02/10/2026. Sua página está pública e vocês já podem reservar ofertas.</span></div>`,
+    'ong-pendente': `<div class="aviso-caixa alerta"><strong>Cadastro em análise desde 16/10/2026</strong><span>A equipe do SustentAgro está conferindo o CNPJ. Enquanto isso, a ONG não aparece no site e não vê as ofertas. Vocês já podem completar o perfil.</span></div>`,
+    'ong-reprovada': `<div class="aviso-caixa erro"><strong>Cadastro não aprovado</strong><span>Motivo: o CNPJ informado pertence a uma empresa com fins lucrativos, não a uma organização da sociedade civil. Corrija os dados abaixo e fale com a equipe do SustentAgro para uma nova análise.</span></div>`,
+  }[p];
+  const o = p === 'ong' ? ongDe(1) : { nome: PERFIS[p].nome, nome_curto: p === 'ong-pendente' ? 'Horta Vila Planalto' : 'Raízes do Planalto', slogan: '', descricao: '', localidade: 'Planaltina', telefone: '(61) 3301-2200', email_contato: 'contato@exemplo.org', chave_pix: '', familias_por_mes: 40, ods: [2], aceita_itens: true, aceita_dinheiro: false, aceita_voluntariado: true };
+  return `<div class="largura"><section class="secao">
+    ${cabecaConta('Minha conta', esc(o.nome))}
+    ${rastreio('ong-conta', '<span>Troque o perfil para ver a ONG pendente e a reprovada.</span>')}
+    ${abasOng('ong-conta')}
+    ${situacao}
+    <form class="cartao formulario" id="form-perfil-ong"><h2>Perfil público</h2><div class="grade-form">
+      <div class="campo"><label for="po-nome">Nome</label><input class="entrada" id="po-nome" value="${esc(o.nome)}"></div>
+      <div class="campo"><label for="po-curto">Nome curto</label><input class="entrada" id="po-curto" value="${esc(o.nome_curto)}"></div>
+      <div class="campo inteira"><label for="po-slogan">Frase de apresentação</label><input class="entrada" id="po-slogan" value="${esc(o.slogan)}"></div>
+      <div class="campo inteira"><label for="po-desc">Descrição</label><textarea class="entrada" id="po-desc">${esc(o.descricao)}</textarea></div>
+      <div class="campo"><label for="po-logo">Logo</label><input class="entrada" id="po-logo" type="file" accept=".jpeg,.jpg,.png,.webp"><span class="ajuda">JPEG, PNG ou WebP, até 10 MB.</span></div>
+      <div class="campo"><label for="po-capa">Imagem de capa</label><input class="entrada" id="po-capa" type="file" accept=".jpeg,.jpg,.png,.webp"><span class="ajuda">JPEG, PNG ou WebP, até 10 MB.</span></div>
+      <fieldset class="campo inteira" style="border:0;padding:0;margin:0"><legend class="rotulo-campo" style="font-weight:600;font-size:13.5px;margin-bottom:6px">Causas (ODS)</legend><div class="opcoes">${ODS.map(x => `<label><input type="checkbox" id="po-ods-${x.numero}" ${o.ods.includes(x.numero) ? 'checked' : ''}> ${x.numero} · ${esc(x.nome)}</label>`).join('')}</div></fieldset>
+      <fieldset class="campo inteira" style="border:0;padding:0;margin:0"><legend class="rotulo-campo" style="font-weight:600;font-size:13.5px;margin-bottom:6px">Tipos de ajuda aceitos</legend><div class="opcoes"><label><input type="checkbox" id="po-itens" ${o.aceita_itens ? 'checked' : ''}> Itens</label><label><input type="checkbox" id="po-dinheiro" ${o.aceita_dinheiro ? 'checked' : ''}> Dinheiro</label><label><input type="checkbox" id="po-vol" ${o.aceita_voluntariado ? 'checked' : ''}> Voluntariado</label></div></fieldset>
+      <div class="campo"><label for="po-local">Localidade</label><select class="entrada" id="po-local">${LOCALIDADES.map(l => `<option ${l === o.localidade ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>
+      <div class="campo"><label for="po-familias">Famílias atendidas por mês</label><input class="entrada num" id="po-familias" type="number" min="0" value="${o.familias_por_mes}"><span class="ajuda">Entra no total do painel de impacto.</span></div>
+      <div class="campo"><label for="po-tel">Telefone</label><input class="entrada" id="po-tel" value="${esc(o.telefone)}"></div>
+      <div class="campo"><label for="po-email">E-mail de contato</label><input class="entrada" id="po-email" value="${esc(o.email_contato)}"></div>
+      <div class="campo"><label for="po-site">Site (opcional)</label><input class="entrada" id="po-site" placeholder="https://"></div>
+      <div class="campo"><label for="po-pix">Chave Pix (opcional)</label><input class="entrada" id="po-pix" value="${esc(o.chave_pix)}"><span class="ajuda">Aparece para quem escolher doar dinheiro.</span></div>
+    </div><div><button class="btn btn-primario" type="submit">Salvar perfil</button></div></form>
+  </section></div>`;
+};
+R['ong-necessidades'] = () => {
+  const o = ongDe(1);
+  return `<div class="largura"><section class="secao">
+    ${cabecaConta('Minha conta', esc(o.nome))}
+    ${rastreio('ong-necessidades')}
+    ${abasOng('ong-necessidades')}
+    <div class="lista-itens">${o.necessidades.map(n => `<article class="cartao linha-item">
+      <div class="topo"><h3>${esc(n.titulo)}</h3>${n.situacao === 'atendida' ? '<span class="selo selo-limao">Meta atingida</span>' : '<span class="selo selo-apoio">Aberta</span>'}</div>
+      <div class="meta"><span>${{ itens: 'Itens', dinheiro: 'Dinheiro', voluntariado: 'Voluntariado' }[n.tipo]}</span><span class="num">${fmtQtd(n.confirmado, n.unidade)} de ${fmtQtd(n.meta, n.unidade)} confirmados</span></div>
+      ${barra(n.confirmado, n.meta)}
+      <div class="acoes"><button class="btn btn-contorno btn-pequeno" type="button" data-toast="Abre o formulário de edição com os dados desta necessidade.">Editar</button><button class="btn btn-contorno btn-pequeno" type="button" data-toast="Necessidade encerrada. Ela sai da página da ONG.">Encerrar</button></div>
+      ${n.situacao === 'atendida' ? '<p style="font-size:13px; color:var(--suave)">Não aceita novas promessas. Para reabrir, aumente a meta.</p>' : ''}
+    </article>`).join('')}</div>
+    <form class="cartao formulario" id="form-necessidade"><h2>Nova necessidade</h2><div class="grade-form">
+      <div class="campo inteira"><label for="nn-titulo">Título</label><input class="entrada" id="nn-titulo" value="Leite em pó"></div>
+      <div class="campo"><label for="nn-tipo">Tipo</label><select class="entrada" id="nn-tipo"><option value="itens">Itens</option><option value="dinheiro">Dinheiro</option><option value="voluntariado">Voluntariado</option></select></div>
+      <div class="campo"><label for="nn-unidade">Unidade</label><input class="entrada" id="nn-unidade" value="latas"><span class="ajuda">Por exemplo: cestas, kg, kits, voluntários. Em dinheiro, a unidade é R$.</span></div>
+      <div class="campo"><label for="nn-meta">Meta</label><input class="entrada num" id="nn-meta" type="number" min="1" value="80"></div>
+      <div class="campo inteira"><label for="nn-desc">Descrição (opcional)</label><textarea class="entrada" id="nn-desc">Latas de 400 g para as crianças atendidas.</textarea></div>
+    </div><div><button class="btn btn-primario" type="submit">Publicar necessidade</button></div></form>
+  </section></div>`;
+};
+R['ong-reservas'] = () => `<div class="largura"><section class="secao">
+  ${cabecaConta('Minha conta', 'Cozinha Solidária Sol Nascente')}
+  ${rastreio('ong-reservas')}
+  ${abasOng('ong-reservas')}
+  <h2 class="subtitulo">Aguardando retirada</h2>
+  <article class="cartao linha-item">
+    <div class="topo"><h3>Alface crespa · <span class="num">15 un</span></h3><span class="selo selo-aviso">Reservada em 15/10</span></div>
+    <div class="meta"><span>Brazlândia · 21 km</span><span>Colher até 18/10</span><span>Doação</span><span>A ONG busca</span></div>
+    <div class="contato"><b>Contato do agricultor</b><span>Antônio Ribeiro · (61) 98123-4567</span><span>Retirada: Chácara 12, Núcleo Rural Alexandre Gusmão</span></div>
+    <form class="acoes" id="form-receber">
+      <div class="campo"><label for="rec-qtd">Quantidade recebida (un)</label><input class="entrada num" id="rec-qtd" type="number" min="0" max="15" step="1" value="15" style="max-width:140px"><span class="ajuda">De 0 a 15. Informe 0 se a colheita não chegou.</span></div>
+      <button class="btn btn-primario" type="submit">Confirmar recebimento</button>
+      <button class="btn btn-perigo" type="button" data-toast="Reserva cancelada. As 15 un voltaram ao saldo da oferta.">Cancelar reserva</button>
+    </form>
+    <div id="rec-msg"></div>
+  </article>
+  <h2 class="subtitulo">Recebidas</h2>
+  <article class="cartao linha-item">
+    <div class="topo"><h3>Mandioca · <span class="num">48 kg de 50 kg</span></h3><span class="selo selo-apoio">Recebida em 10/10</span></div>
+    <div class="meta"><span>Lúcia Ferreira · Ceilândia</span><span>Contou 48 kg no painel de impacto</span></div>
+  </article>
+</section></div>`;
+R['ong-doacoes'] = () => {
+  const item = (id, quem, oque, tipo, campo) => `<article class="cartao linha-item" id="doa-${id}">
+    <div class="topo"><h3>${oque}</h3><span class="selo selo-aviso">${tipo === 'voluntariado' ? 'Inscrição pendente' : 'Promessa pendente'}</span></div>
+    <div class="meta"><span>${quem}</span></div>
+    <div class="acoes">${campo}<button class="btn btn-primario btn-pequeno" type="button" data-confirmar-doacao="${id}">Confirmar</button><button class="btn btn-contorno btn-pequeno" type="button" data-recusar-doacao="${id}">Recusar</button></div>
+  </article>`;
+  return `<div class="largura"><section class="secao">
+    ${cabecaConta('Minha conta', 'Cozinha Solidária Sol Nascente')}
+    ${rastreio('ong-doacoes')}
+    ${abasOng('ong-doacoes')}
+    <p style="color:var(--suave)">Confirme só o que chegou de fato. A barra da necessidade avança com a quantidade ou o valor confirmado.</p>
+    <div class="lista-itens">
+      ${item(1, 'Mariana Costa · (61) 99812-4433', 'Cestas básicas · <span class="num">10 cestas</span>', 'itens', '<div class="campo"><label for="doa-q1">Recebidas</label><input class="entrada num" id="doa-q1" type="number" min="1" value="10" style="max-width:110px"></div>')}
+      ${item(2, 'João Pedro Lima · (61) 98444-1290', 'Voluntários para a cozinha aos sábados', 'voluntariado', '')}
+      ${item(3, 'Carlos Souza · Pix para a chave pix@solnascente.org.br', 'Gás de cozinha para o trimestre · <span class="num">R$ 50,00</span>', 'dinheiro', '<div class="campo"><label for="doa-q3">Valor recebido (R$)</label><input class="entrada num" id="doa-q3" type="number" min="0.01" step="0.01" value="50.00" style="max-width:130px"></div>')}
+    </div>
+  </section></div>`;
+};
+
+/* ---------- Área logada: agricultor ---------- */
+R['agricultor-ofertas'] = () => `<div class="largura"><section class="secao">
+  <div class="conta-cabeca"><div class="cabeca-secao"><h2>Minhas ofertas</h2><p>Antônio Ribeiro · Brazlândia</p></div><a class="btn btn-primario" href="#publicar" data-ir="publicar">Publicar oferta</a></div>
+  ${rastreio('agricultor-ofertas')}
+  <div class="lista-itens">
+    <article class="cartao linha-item">
+      <div class="topo"><h3>Alface crespa</h3><span class="selo selo-apoio">Aberta · urgente</span></div>
+      <div class="meta"><span class="num">Saldo 25 un de 40 un</span><span>Colher até 18/10</span><span>Doação</span></div>
+      ${barra(15, 40)}
+      <div class="contato"><b>Reserva ativa · 15 un</b><span>Cozinha Solidária Sol Nascente · (61) 3371-0045 · contato@solnascente.org.br</span></div>
+      <div class="acoes"><button class="btn btn-contorno btn-pequeno" type="button" data-toast="Reserva cancelada. As 15 un voltaram ao saldo.">Cancelar a reserva</button><button class="btn btn-contorno btn-pequeno" type="button" disabled title="Só é possível cancelar ofertas sem reservas ativas">Cancelar oferta</button></div>
+    </article>
+    <article class="cartao linha-item">
+      <div class="topo"><h3>Couve-manteiga</h3><span class="selo selo-limao">Só para Cozinha Sol Nascente · abre a todas em 31 h</span></div>
+      <div class="meta"><span class="num">Saldo 30 un de 30 un</span><span>Colher até 24/10</span><span>Doação</span></div>
+      <div class="acoes"><button class="btn btn-perigo btn-pequeno" type="button" data-toast="Oferta cancelada. Ela sai da lista das ONGs.">Cancelar oferta</button></div>
+    </article>
+    <article class="cartao linha-item">
+      <div class="topo"><h3>Milho verde</h3><span class="selo selo-neutro">Vencida em 10/10</span></div>
+      <div class="meta"><span class="num">300 un publicadas · 260 un recebidas por 2 ONGs</span><span>Venda · R$ 0,80/un</span><span class="num">Renda gerada R$ 208,00</span></div>
+    </article>
+  </div>
+</section></div>`;
+
+/* ---------- Área logada: pessoa ---------- */
+R['pessoa-contribuicoes'] = () => {
+  const linha = (titulo, ong, situacao, cls, data, cancelar) => `<article class="cartao linha-item">
+    <div class="topo"><h3>${titulo}</h3><span class="selo ${cls}">${situacao}</span></div>
+    <div class="meta"><span>${ong}</span><span>${data}</span></div>
+    ${cancelar ? `<div class="acoes"><button class="btn btn-contorno btn-pequeno" type="button" data-toast="Contribuição cancelada. A ONG deixa de esperar por ela.">Cancelar</button></div>` : ''}
+  </article>`;
+  return `<div class="largura"><section class="secao">
+    ${cabecaConta('Minhas contribuições', 'Mariana Costa')}
+    ${rastreio('pessoa-contribuicoes')}
+    <div class="lista-itens">
+      ${linha('10 cestas básicas', 'Cozinha Solidária Sol Nascente', 'Aguardando a ONG', 'selo-aviso', 'Prometida em 14/10', true)}
+      ${linha('R$ 30,00 · doação livre', 'Casa Esperança Águas Lindas', 'Aguardando a ONG', 'selo-aviso', 'Registrada em 15/10', true)}
+      ${linha('Voluntariado · cozinha aos sábados', 'Cozinha Solidária Sol Nascente', 'Confirmada', 'selo-apoio', 'Confirmada em 08/10', false)}
+      ${linha('R$ 50,00 · máquinas de costura', 'Rede Mulheres do Cerrado', 'Confirmada', 'selo-apoio', 'Confirmada em 30/09', false)}
+      ${linha('5 kits de material escolar', 'Instituto Semear Saberes', 'Recusada pela ONG', 'selo-perigo', 'Recusada em 25/09', false)}
+    </div>
+    <div class="cartao linha-item">
+      <h3>Você também planta?</h3>
+      <p style="color:var(--suave); font-size:14px">Ative o perfil de agricultor(a) para publicar excedente na Colheita Solidária, sem criar outra conta.</p>
+      <div class="acoes">${estado.agricultorTambemDoador ? '<span class="selo selo-apoio">Perfil de agricultor(a) ativo</span>' : '<button class="btn btn-contorno btn-pequeno" type="button" data-ativar-agricultor>Ativar perfil de agricultor(a)</button>'}</div>
+    </div>
+  </section></div>`;
+};
+
+/* ===================== Navegação ===================== */
+const PERFIL_DA_TELA = Object.fromEntries(TELAS.map(t => [t[0], t[4]]));
+function exigeLogin(tela) {
+  const req = PERFIL_DA_TELA[tela];
+  if (!req || req === 'visitante') return false;
+  if (req === 'ong') return !ehOng();
+  return estado.perfil !== req;
+}
+function ir(tela, { daBarra = false } = {}) {
+  if (!R[tela]) tela = 'inicio';
+  if (daBarra) {
+    const req = PERFIL_DA_TELA[tela];
+    if (req === 'visitante') definirPerfil('visitante');
+    else if (req && exigeLogin(tela)) definirPerfil(req);
+  } else if (exigeLogin(tela)) {
+    estado.loginMotivo = tela === 'contribuir' ? `Entre para contribuir com ${ongDe(estado.ongId).nome}.` : 'Entre para continuar.';
+    tela = 'login';
+  }
+  if (['ong-necessidades', 'ong-reservas', 'ong-doacoes'].includes(tela) && estado.perfil !== 'ong') tela = 'ong-conta';
+  estado.tela = tela;
+  if (location.hash !== '#' + tela) history.replaceState(null, '', '#' + tela);
+  render();
+  window.scrollTo({ top: 0 });
+}
+function definirPerfil(p) {
+  estado.perfil = p; $('#sel-perfil').value = p; gravar('perfil', p);
+}
+function atualizarSetas() {
+  const c = $('#carrossel-ongs'); if (!c) return;
+  const [ant, prox] = document.querySelectorAll('[data-carrossel]');
+  ant.disabled = c.scrollLeft <= 2;
+  prox.disabled = c.scrollLeft + c.clientWidth >= c.scrollWidth - 2;
+}
+document.addEventListener('scroll', e => { if (e.target.id === 'carrossel-ongs') atualizarSetas(); }, true);
+window.addEventListener('resize', atualizarSetas);
+function render() {
+  renderMenu();
+  $('#conteudo').innerHTML = R[estado.tela]();
+  atualizarSetas();
+  $('#sel-tela').value = estado.tela;
+  $('#menu').classList.remove('aberto'); $('#btn-menu').setAttribute('aria-expanded', 'false');
+  document.title = 'Protótipo SustentAgro 2.0';
+}
+
+/* ===================== Regras demonstradas ===================== */
+function cnpjValido(v) {
+  const c = String(v).replace(/\D/g, '');
+  if (c.length !== 14 || /^(\d)\1+$/.test(c)) return false;
+  const dv = n => { const pesos = n === 12 ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    const s = pesos.reduce((acc, p, i) => acc + p * Number(c[i]), 0) % 11; return s < 2 ? 0 : 11 - s; };
+  return dv(12) === Number(c[12]) && dv(13) === Number(c[13]);
+}
+function reservar(id) {
+  const o = OFERTAS.find(x => x.id === id), inp = $('#res-' + id), ret = $('#ret-' + id);
+  const q = Number(inp.value);
+  if (!(q > 0)) { ret.innerHTML = `<div class="aviso-caixa erro"><span>Informe uma quantidade maior que zero.</span></div>`; return; }
+  if (o.unidade === 'un' && !Number.isInteger(q)) { ret.innerHTML = `<div class="aviso-caixa erro"><span>Esta oferta é em unidades: use um número inteiro.</span></div>`; return; }
+  if (q > o.saldo) { ret.innerHTML = `<div class="aviso-caixa erro"><span>Só restam ${fmtQtd(o.saldo, o.unidade)} desta oferta. Diminua a quantidade.</span></div>`; return; }
+  o.saldo = Math.round((o.saldo - q) * 10) / 10;
+  render();
+  const novo = $('#ret-' + id);
+  const msg = `<div class="aviso-caixa info"><strong>Reserva feita: ${fmtQtd(q, o.unidade)} de ${esc(o.produto)}</strong><span>Combine a retirada com ${esc(o.agricultor)} · ${esc(o.telefone)}. A reserva está em <a href="#ong-reservas" data-ir="ong-reservas">Minhas reservas</a>.</span></div>`;
+  if (novo) novo.innerHTML = msg; else toast(`Reserva feita: ${fmtQtd(q, o.unidade)} de ${o.produto}. A oferta saiu da lista porque o saldo acabou.`);
+}
+
+/* ===================== Eventos ===================== */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-ir],[data-sair],[data-ong],[data-filtro-ods],[data-limpar],[data-contribuir],[data-tipo],[data-perfil-cad],[data-dist],[data-reservar],[data-painel-vazio],[data-toast],[data-copiar-pix],[data-confirmar-doacao],[data-recusar-doacao],[data-ativar-agricultor],[data-carrossel]');
+  if (!t) return;
+  if (t.matches('a')) e.preventDefault();
+  const d = t.dataset;
+  if (d.ir) ir(d.ir);
+  else if ('sair' in d) { definirPerfil('visitante'); ir('inicio'); toast('Você saiu da sua conta.'); }
+  else if (d.ong) { estado.ongId = Number(d.ong); ir('ong'); }
+  else if (d.filtroOds) { estado.filtros = { q: '', ods: d.filtroOds, tipo: '', cidade: '' }; ir('lista'); }
+  else if ('limpar' in d) { estado.filtros = { q: '', ods: '', tipo: '', cidade: '' }; render(); }
+  else if (d.contribuir) { estado.contribTipo = d.contribuir; ir('contribuir'); }
+  else if (d.tipo) { estado.contribTipo = d.tipo; render(); }
+  else if (d.perfilCad) { estado.perfilCadastro = d.perfilCad; render(); }
+  else if (d.dist) { estado.dist = d.dist; render(); }
+  else if (d.carrossel) {
+    const c = $('#carrossel-ongs'), cartao = c.firstElementChild;
+    const passo = cartao ? cartao.getBoundingClientRect().width + 14 : c.clientWidth;
+    c.scrollBy({ left: Number(d.carrossel) * passo });
+  }
+  else if (d.reservar) reservar(Number(d.reservar));
+  else if ('painelVazio' in d) { estado.painelVazio = !estado.painelVazio; render(); }
+  else if (d.toast) toast(d.toast);
+  else if ('copiarPix' in d) {
+    const chave = $('#c-chave').textContent;
+    Promise.resolve().then(() => navigator.clipboard.writeText(chave)).then(() => toast('Chave Pix copiada.'), () => toast('Selecione a chave e copie: ' + chave));
+  }
+  else if (d.confirmarDoacao) { $('#doa-' + d.confirmarDoacao).remove(); toast('Confirmado. A barra da necessidade avançou e a ação conta no painel.'); }
+  else if (d.recusarDoacao) { $('#doa-' + d.recusarDoacao).remove(); toast('Recusado. A barra não muda e a pessoa vê a recusa em Minhas contribuições.'); }
+  else if ('ativarAgricultor' in d) { estado.agricultorTambemDoador = true; render(); toast('Perfil de agricultor(a) ativado. "Colheita Solidária" agora leva a publicar oferta.'); }
+});
+
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target;
+  if (f.id === 'form-busca') { estado.filtros = { q: $('#busca-inicio').value, ods: '', tipo: '', cidade: '' }; ir('lista'); }
+  else if (f.id === 'form-filtros') render();
+  else if (f.id === 'form-login') { definirPerfil('pessoa'); const volta = estado.loginMotivo.startsWith('Entre para contribuir') ? 'contribuir' : 'pessoa-contribuicoes'; estado.loginMotivo = ''; ir(volta); toast('Você entrou como Mariana Costa.'); }
+  else if (f.id === 'form-cadastro') {
+    if (estado.perfilCadastro === 'ong') {
+      const msg = $('#cad-cnpj-msg');
+      if (!cnpjValido($('#cad-cnpj').value)) { msg.className = 'erro'; msg.textContent = 'CNPJ inválido: os dígitos verificadores não conferem. Confira o número no cartão do CNPJ.'; $('#cad-cnpj').focus(); return; }
+      definirPerfil('ong-pendente'); ir('ong-conta'); toast('Cadastro enviado. A ONG fica em análise até a aprovação.');
+    } else if (estado.perfilCadastro === 'agricultor') { definirPerfil('agricultor'); ir('agricultor-ofertas'); toast('Conta criada. Você já pode publicar ofertas.'); }
+    else { definirPerfil('pessoa'); ir('pessoa-contribuicoes'); toast('Conta criada. Bem-vinda, Mariana.'); }
+  }
+  else if (f.id === 'form-publicar') {
+    const vender = $('#pub-vender').checked, preco = $('#pub-preco').value;
+    if (vender && !(Number(preco) > 0)) { toast('Informe o preço para uma oferta de venda.'); $('#pub-preco').focus(); return; }
+    if ($('#pub-data').value < '2026-10-16') { toast('A data "colher até" não pode estar no passado.'); return; }
+    ir('agricultor-ofertas'); toast('Oferta publicada. As ONGs próximas já podem reservar.');
+  }
+  else if (f.id === 'form-contribuir') {
+    const t = estado.contribTipo;
+    toast(t === 'itens' ? 'Promessa registrada. Ela fica pendente até a ONG confirmar o recebimento.' : t === 'voluntariado' ? 'Inscrição enviada. A ONG entra em contato para combinar.' : 'Doação registrada. Faça o Pix; a ONG confirma quando o valor cair.');
+    ir('pessoa-contribuicoes');
+  }
+  else if (f.id === 'form-receber') {
+    const q = Number($('#rec-qtd').value);
+    if (q < 0 || q > 15 || !Number.isInteger(q)) { $('#rec-msg').innerHTML = '<div class="aviso-caixa erro"><span>A quantidade recebida vai de 0 a 15 un.</span></div>'; return; }
+    $('#rec-msg').innerHTML = q === 0
+      ? '<div class="aviso-caixa alerta"><span>Registrado como não recebida. As 15 un voltaram ao saldo da oferta e nada conta no painel.</span></div>'
+      : `<div class="aviso-caixa info"><span>Recebimento confirmado: ${q} un. A colheita conta no painel de impacto.</span></div>`;
+  }
+  else if (f.id === 'form-necessidade') toast('Necessidade publicada na página da ONG.');
+  else if (f.id === 'form-perfil-ong') toast('Perfil salvo.');
+});
+
+document.addEventListener('change', e => {
+  const id = e.target.id;
+  if (['f-q', 'f-ods', 'f-tipo', 'f-cidade'].includes(id)) {
+    estado.filtros = { q: $('#f-q').value, ods: $('#f-ods').value, tipo: $('#f-tipo').value, cidade: $('#f-cidade').value };
+    render(); const el = document.getElementById(id); if (el) el.focus();
+  }
+  if (e.target.name === 'pub-destino') $('#pub-preco-campo').hidden = !$('#pub-vender').checked;
+  if (e.target.name === 'c-destino') $('#c-nec-campo').hidden = $('#c-dest-livre').checked;
+});
+
+/* Controles do protótipo */
+$('#sel-tela').innerHTML = TELAS.map((t, i) => `<option value="${t[0]}">${i + 1}. ${t[1]}</option>`).join('');
+$('#sel-tela').addEventListener('change', e => ir(e.target.value, { daBarra: true }));
+$('#sel-perfil').addEventListener('change', e => { definirPerfil(e.target.value); ir(estado.tela); });
+$('#btn-menu').addEventListener('click', () => { const m = $('#menu'); const ab = m.classList.toggle('aberto'); $('#btn-menu').setAttribute('aria-expanded', String(ab)); });
+$('#btn-celular').addEventListener('click', e => {
+  const on = $('#palco').classList.toggle('celular'); e.currentTarget.setAttribute('aria-pressed', String(on)); gravar('celular', on ? '1' : ''); atualizarSetas();
+});
+$('#btn-rotulos').addEventListener('click', e => {
+  const sem = document.body.classList.toggle('sem-rotulos'); e.currentTarget.setAttribute('aria-pressed', String(!sem));
+});
+function temaAtual() {
+  const t = document.documentElement.dataset.theme;
+  if (t) return t;
+  return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+$('#btn-tema').addEventListener('click', () => {
+  const novo = temaAtual() === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = novo; gravar('tema', novo);
+  $('#btn-tema').textContent = novo === 'dark' ? 'Tema claro' : 'Tema escuro';
+});
+window.addEventListener('hashchange', () => { const t = location.hash.slice(1); if (t && t !== estado.tela) ir(t); });
+
+/* Início */
+(function iniciar() {
+  const temaSalvo = ler('tema', ''); if (temaSalvo) document.documentElement.dataset.theme = temaSalvo;
+  $('#btn-tema').textContent = temaAtual() === 'dark' ? 'Tema claro' : 'Tema escuro';
+  if (ler('celular', '')) { $('#palco').classList.add('celular'); $('#btn-celular').setAttribute('aria-pressed', 'true'); }
+  definirPerfil(ler('perfil', 'visitante'));
+  // Parâmetros para capturas de tela: ?perfil=ong&tema=dark&celular=1&limpo=1&tipo=dinheiro
+  const qp = new URLSearchParams(location.search);
+  if (qp.get('perfil')) { estado.perfil = qp.get('perfil'); $('#sel-perfil').value = estado.perfil; }
+  if (qp.get('tema')) document.documentElement.dataset.theme = qp.get('tema');
+  if (qp.get('celular') === '1') { $('#palco').classList.add('celular'); $('#btn-celular').setAttribute('aria-pressed', 'true'); }
+  if (qp.get('limpo') === '1') { document.body.classList.add('sem-rotulos'); $('.proto').hidden = true; }
+  if (qp.get('tipo')) estado.contribTipo = qp.get('tipo');
+  const inicial = location.hash.slice(1);
+  ir(R[inicial] ? inicial : 'inicio', { daBarra: true });
+})();
+</script>

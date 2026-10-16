@@ -1,0 +1,972 @@
+{
+  "titulo": "SustentAgro 2.0 — Modelo de dados",
+  "subtitulo": "Fase 4a do pré-projeto · 16/10/2026 · nomes de campo iguais aos dos models e dos mocks (ADR-004) · o Django cria um id em cada entidade",
+  "fontes": "Fontes: requirements.md (RF, RN, glossário), analysis-report.md (A-01 a A-05, E-01 a E-12), architecture.md e ADR-002 a ADR-004",
+  "largura_caixa": 300,
+  "apps": {
+    "contas": [
+      "#2b6cb0",
+      "#ebf4ff"
+    ],
+    "ongs": [
+      "#2f855a",
+      "#f0fff4"
+    ],
+    "colheita": [
+      "#c05621",
+      "#fffaf0"
+    ],
+    "doacoes": [
+      "#6b46c1",
+      "#faf5ff"
+    ]
+  },
+  "legenda": {
+    "x": 1220,
+    "y": 480,
+    "titulo_areas": "Áreas (apps Django)"
+  },
+  "entidades": [
+    {
+      "chave": "loc",
+      "titulo": "Localidade",
+      "app": "contas",
+      "x": 30,
+      "y": 110,
+      "atributos": [
+        [
+          "nome",
+          "texto, único"
+        ],
+        [
+          "uf",
+          "lista"
+        ],
+        [
+          "latitude",
+          "decimal 9,6"
+        ],
+        [
+          "longitude",
+          "decimal 9,6"
+        ]
+      ]
+    },
+    {
+      "chave": "perfil",
+      "titulo": "Perfil de pessoa",
+      "app": "contas",
+      "x": 430,
+      "y": 110,
+      "atributos": [
+        [
+          "nome_completo",
+          "texto"
+        ],
+        [
+          "telefone",
+          "texto"
+        ],
+        [
+          "eh_doador",
+          "sim/não"
+        ],
+        [
+          "eh_agricultor",
+          "sim/não"
+        ]
+      ]
+    },
+    {
+      "chave": "usuario",
+      "titulo": "Usuário",
+      "app": "contas",
+      "x": 820,
+      "y": 110,
+      "atributos": [
+        [
+          "username",
+          "texto, único"
+        ],
+        [
+          "email",
+          "texto"
+        ],
+        [
+          "password",
+          "senha protegida"
+        ],
+        [
+          "tipo_conta",
+          "lista"
+        ],
+        [
+          "is_staff",
+          "sim/não"
+        ],
+        [
+          "date_joined",
+          "data e hora"
+        ]
+      ]
+    },
+    {
+      "chave": "oferta",
+      "titulo": "Oferta",
+      "app": "colheita",
+      "x": 30,
+      "y": 310,
+      "atributos": [
+        [
+          "categoria",
+          "lista"
+        ],
+        [
+          "produto",
+          "texto"
+        ],
+        [
+          "quantidade",
+          "decimal 10,1"
+        ],
+        [
+          "unidade",
+          "lista"
+        ],
+        [
+          "colher_ate",
+          "data"
+        ],
+        [
+          "estado",
+          "lista"
+        ],
+        [
+          "destino",
+          "lista"
+        ],
+        [
+          "preco_unitario",
+          "decimal 10,2, opcional"
+        ],
+        [
+          "local_retirada",
+          "texto"
+        ],
+        [
+          "transporte",
+          "lista"
+        ],
+        [
+          "situacao",
+          "lista"
+        ],
+        [
+          "criada_em",
+          "data e hora"
+        ],
+        [
+          "aberta_a_todas_em",
+          "data e hora"
+        ],
+        [
+          "saldo · distancia_km · urgente · vencida",
+          "calculados",
+          true
+        ]
+      ]
+    },
+    {
+      "chave": "contrib",
+      "titulo": "Contribuição",
+      "app": "doacoes",
+      "x": 430,
+      "y": 310,
+      "atributos": [
+        [
+          "tipo",
+          "lista"
+        ],
+        [
+          "quantidade",
+          "decimal 10,2"
+        ],
+        [
+          "quantidade_confirmada",
+          "decimal 10,2, opcional"
+        ],
+        [
+          "situacao",
+          "lista"
+        ],
+        [
+          "criada_em",
+          "data e hora"
+        ],
+        [
+          "confirmada_em",
+          "data e hora, opcional"
+        ]
+      ]
+    },
+    {
+      "chave": "ong",
+      "titulo": "ONG",
+      "app": "ongs",
+      "x": 820,
+      "y": 310,
+      "atributos": [
+        [
+          "nome",
+          "texto, único"
+        ],
+        [
+          "nome_curto",
+          "texto, único"
+        ],
+        [
+          "cnpj",
+          "texto 14 dígitos, único"
+        ],
+        [
+          "slogan",
+          "texto"
+        ],
+        [
+          "descricao",
+          "texto longo"
+        ],
+        [
+          "logo",
+          "imagem"
+        ],
+        [
+          "capa",
+          "imagem"
+        ],
+        [
+          "telefone",
+          "texto"
+        ],
+        [
+          "email_contato",
+          "texto"
+        ],
+        [
+          "site",
+          "URL, opcional"
+        ],
+        [
+          "chave_pix",
+          "texto, opcional"
+        ],
+        [
+          "familias_por_mes",
+          "inteiro"
+        ],
+        [
+          "aceita_itens",
+          "sim/não"
+        ],
+        [
+          "aceita_dinheiro",
+          "sim/não"
+        ],
+        [
+          "aceita_voluntariado",
+          "sim/não"
+        ],
+        [
+          "situacao",
+          "lista"
+        ],
+        [
+          "motivo_reprovacao",
+          "texto, opcional"
+        ],
+        [
+          "verificacao_cnpj",
+          "lista"
+        ],
+        [
+          "criada_em",
+          "data e hora"
+        ],
+        [
+          "aprovada_em",
+          "data e hora, opcional"
+        ]
+      ]
+    },
+    {
+      "chave": "ods",
+      "titulo": "ODS",
+      "app": "ongs",
+      "x": 1220,
+      "y": 330,
+      "atributos": [
+        [
+          "numero",
+          "inteiro, único"
+        ],
+        [
+          "nome",
+          "texto"
+        ],
+        [
+          "cor",
+          "texto (hexadecimal)"
+        ]
+      ]
+    },
+    {
+      "chave": "nec",
+      "titulo": "Necessidade",
+      "app": "ongs",
+      "x": 430,
+      "y": 530,
+      "atributos": [
+        [
+          "titulo",
+          "texto"
+        ],
+        [
+          "descricao",
+          "texto, opcional"
+        ],
+        [
+          "tipo",
+          "lista"
+        ],
+        [
+          "unidade",
+          "texto"
+        ],
+        [
+          "meta",
+          "decimal 10,2"
+        ],
+        [
+          "situacao",
+          "lista"
+        ],
+        [
+          "criada_em",
+          "data e hora"
+        ],
+        [
+          "confirmado · percentual",
+          "calculados",
+          true
+        ]
+      ]
+    },
+    {
+      "chave": "reserva",
+      "titulo": "Reserva",
+      "app": "colheita",
+      "x": 820,
+      "y": 790,
+      "atributos": [
+        [
+          "quantidade",
+          "decimal 10,1"
+        ],
+        [
+          "situacao",
+          "lista"
+        ],
+        [
+          "quantidade_recebida",
+          "decimal 10,1, opcional"
+        ],
+        [
+          "recebida_em",
+          "data e hora, opcional"
+        ],
+        [
+          "cancelada_por",
+          "lista, opcional"
+        ],
+        [
+          "criada_em",
+          "data e hora"
+        ]
+      ]
+    }
+  ],
+  "ligacoes": [
+    {
+      "pontos": [
+        [
+          730,
+          170
+        ],
+        [
+          820,
+          170
+        ]
+      ],
+      "rotulos": [
+        [
+          "1..1",
+          812,
+          163,
+          "end"
+        ],
+        [
+          "0..1",
+          738,
+          163,
+          "start"
+        ],
+        [
+          "tem",
+          775,
+          186,
+          "middle"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          970,
+          270
+        ],
+        [
+          970,
+          310
+        ]
+      ],
+      "rotulos": [
+        [
+          "1..1",
+          976,
+          284,
+          "start"
+        ],
+        [
+          "0..1",
+          976,
+          304,
+          "start"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          330,
+          170
+        ],
+        [
+          430,
+          170
+        ]
+      ],
+      "rotulos": [
+        [
+          "0..N",
+          422,
+          163,
+          "end"
+        ],
+        [
+          "0..1",
+          338,
+          163,
+          "start"
+        ],
+        [
+          "mora em",
+          380,
+          186,
+          "middle"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          180,
+          234
+        ],
+        [
+          180,
+          310
+        ]
+      ],
+      "rotulos": [
+        [
+          "1..1",
+          186,
+          250,
+          "start"
+        ],
+        [
+          "0..N",
+          186,
+          302,
+          "start"
+        ],
+        [
+          "fica em",
+          120,
+          276,
+          "middle"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          470,
+          234
+        ],
+        [
+          470,
+          272
+        ],
+        [
+          280,
+          272
+        ],
+        [
+          280,
+          310
+        ]
+      ],
+      "rotulos": [
+        [
+          "1..1",
+          476,
+          250,
+          "start"
+        ],
+        [
+          "0..N",
+          286,
+          302,
+          "start"
+        ],
+        [
+          "publica (agricultor)",
+          375,
+          266,
+          "middle"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          600,
+          234
+        ],
+        [
+          600,
+          310
+        ]
+      ],
+      "rotulos": [
+        [
+          "1..1",
+          606,
+          250,
+          "start"
+        ],
+        [
+          "0..N",
+          606,
+          302,
+          "start"
+        ],
+        [
+          "faz (doador)",
+          612,
+          276,
+          "start"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          730,
+          390
+        ],
+        [
+          820,
+          390
+        ]
+      ],
+      "rotulos": [
+        [
+          "1..1",
+          812,
+          383,
+          "end"
+        ],
+        [
+          "0..N",
+          738,
+          383,
+          "start"
+        ],
+        [
+          "recebe",
+          775,
+          406,
+          "middle"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          580,
+          470
+        ],
+        [
+          580,
+          530
+        ]
+      ],
+      "rotulos": [
+        [
+          "0..N",
+          586,
+          486,
+          "start"
+        ],
+        [
+          "0..1",
+          586,
+          524,
+          "start"
+        ],
+        [
+          "ligada a",
+          574,
+          504,
+          "end"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          730,
+          640
+        ],
+        [
+          820,
+          640
+        ]
+      ],
+      "rotulos": [
+        [
+          "1..1",
+          812,
+          633,
+          "end"
+        ],
+        [
+          "0..N",
+          738,
+          633,
+          "start"
+        ],
+        [
+          "publica",
+          775,
+          656,
+          "middle"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          970,
+          722
+        ],
+        [
+          970,
+          790
+        ]
+      ],
+      "rotulos": [
+        [
+          "1..1",
+          976,
+          738,
+          "start"
+        ],
+        [
+          "0..N",
+          976,
+          784,
+          "start"
+        ],
+        [
+          "faz",
+          964,
+          760,
+          "end"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          180,
+          614
+        ],
+        [
+          180,
+          870
+        ],
+        [
+          820,
+          870
+        ]
+      ],
+      "rotulos": [
+        [
+          "1..1",
+          186,
+          630,
+          "start"
+        ],
+        [
+          "0..N",
+          812,
+          863,
+          "end"
+        ],
+        [
+          "tem",
+          500,
+          863,
+          "middle"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          300,
+          614
+        ],
+        [
+          300,
+          780
+        ],
+        [
+          775,
+          780
+        ],
+        [
+          775,
+          690
+        ],
+        [
+          820,
+          690
+        ]
+      ],
+      "rotulos": [
+        [
+          "0..N",
+          306,
+          630,
+          "start"
+        ],
+        [
+          "0..1",
+          812,
+          683,
+          "end"
+        ],
+        [
+          "direcionada a (opcional)",
+          540,
+          773,
+          "middle"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          180,
+          110
+        ],
+        [
+          180,
+          90
+        ],
+        [
+          1170,
+          90
+        ],
+        [
+          1170,
+          340
+        ],
+        [
+          1120,
+          340
+        ]
+      ],
+      "rotulos": [
+        [
+          "1..1",
+          186,
+          104,
+          "start"
+        ],
+        [
+          "0..N",
+          1128,
+          333,
+          "start"
+        ],
+        [
+          "fica em",
+          680,
+          84,
+          "middle"
+        ]
+      ]
+    },
+    {
+      "pontos": [
+        [
+          1120,
+          390
+        ],
+        [
+          1220,
+          390
+        ]
+      ],
+      "rotulos": [
+        [
+          "1..N",
+          1212,
+          383,
+          "end"
+        ],
+        [
+          "0..N",
+          1128,
+          383,
+          "start"
+        ],
+        [
+          "atua em",
+          1170,
+          406,
+          "middle"
+        ]
+      ]
+    }
+  ],
+  "relacoes_texto": [
+    "Um <b>Usuário</b> (1..1) tem um <b>Perfil de pessoa</b> (0..1); cada Perfil de pessoa pertence a um Usuário (1..1).",
+    "Um <b>Usuário</b> (1..1) tem uma <b>ONG</b> (0..1); cada ONG pertence a um Usuário (1..1).",
+    "Um <b>Perfil de pessoa</b> mora numa <b>Localidade</b> (0..1), pois o doador não precisa informar; uma Localidade tem Perfis (0..N).",
+    "Uma <b>ONG</b> fica numa <b>Localidade</b> (1..1); uma Localidade tem ONGs (0..N).",
+    "Uma <b>ONG</b> atua em <b>ODS</b> (1..N); um ODS tem ONGs (0..N).",
+    "Uma <b>ONG</b> (1..1) publica <b>Necessidades</b> (0..N); cada Necessidade é de uma ONG (1..1).",
+    "Um <b>Perfil de pessoa</b> agricultor (1..1) publica <b>Ofertas</b> (0..N); cada Oferta é de um agricultor (1..1).",
+    "Uma <b>Oferta</b> fica numa <b>Localidade</b> (1..1); uma Localidade tem Ofertas (0..N).",
+    "Uma <b>Oferta</b> pode ser direcionada a uma <b>ONG</b> (0..1); uma ONG recebe Ofertas direcionadas (0..N).",
+    "Uma <b>Oferta</b> (1..1) tem <b>Reservas</b> (0..N); cada Reserva é de uma Oferta (1..1).",
+    "Uma <b>ONG</b> (1..1) faz <b>Reservas</b> (0..N); cada Reserva é de uma ONG (1..1).",
+    "Um <b>Perfil de pessoa</b> doador (1..1) faz <b>Contribuições</b> (0..N); cada Contribuição é de uma pessoa (1..1).",
+    "Uma <b>ONG</b> (1..1) recebe <b>Contribuições</b> (0..N); cada Contribuição vai para uma ONG (1..1).",
+    "Uma <b>Contribuição</b> é ligada a uma <b>Necessidade</b> (0..1), pois a doação livre em dinheiro não tem necessidade; uma Necessidade tem Contribuições (0..N)."
+  ],
+  "regras": [
+    "<b>Saldo</b> da oferta = quantidade − soma das reservas ativas e recebidas; nunca negativo (RN-03, ADR-003).",
+    "<b>Distância</b> = haversine entre a localidade da ONG e a da oferta; mesma localidade = 0 km (RN-15).",
+    "<b>Urgente</b> = oferta aberta a todas há mais de 48 h e com saldo (RN-06, P-05). <b>Vencida</b> = colher_ate já passou (P-03, RN-18).",
+    "<b>aberta_a_todas_em</b> = criada_em, ou criada_em + 48 h se a oferta tiver ONG de destino (RN-04, RN-05).",
+    "<b>Confirmado</b> da necessidade = soma das quantidades confirmadas das contribuições; <b>percentual</b> = confirmado ÷ meta, até 100% (RN-02, RN-21).",
+    "Quantidades em kg com uma casa decimal; em unidades, só inteiros (RN-16). Valores em R$ com duas casas.",
+    "preco_unitario é obrigatório se destino = vender e vazio se destino = doar (RN-13).",
+    "quantidade_recebida vai de 0 até a quantidade reservada; 0 = \"não recebida\" (RN-17).",
+    "Contribuição sem necessidade só é permitida para tipo = dinheiro (doação livre, D-24).",
+    "Datas gravadas em UTC e exibidas no horário de Brasília; o gráfico de kg por mês usa recebida_em (RN-23)."
+  ],
+  "listas": [
+    [
+      "Usuário.tipo_conta",
+      "pessoa, ong"
+    ],
+    [
+      "Localidade.uf",
+      "DF, GO, MG"
+    ],
+    [
+      "ONG.situacao",
+      "pendente, ativa, reprovada, desativada"
+    ],
+    [
+      "ONG.verificacao_cnpj",
+      "não consultado, confirmado, não confirmado"
+    ],
+    [
+      "Necessidade.tipo",
+      "itens, dinheiro, voluntariado"
+    ],
+    [
+      "Necessidade.situacao",
+      "aberta, atendida, encerrada"
+    ],
+    [
+      "Oferta.categoria",
+      "hortaliças, frutas, raízes e tubérculos, grãos, outros"
+    ],
+    [
+      "Oferta.unidade",
+      "kg, un"
+    ],
+    [
+      "Oferta.estado",
+      "excedente, fora do padrão"
+    ],
+    [
+      "Oferta.destino",
+      "doar, vender"
+    ],
+    [
+      "Oferta.transporte",
+      "ONG busca, agricultor leva"
+    ],
+    [
+      "Oferta.situacao",
+      "aberta, cancelada"
+    ],
+    [
+      "Reserva.situacao",
+      "ativa, recebida, não recebida, cancelada"
+    ],
+    [
+      "Reserva.cancelada_por",
+      "ONG, agricultor, sistema"
+    ],
+    [
+      "Contribuição.tipo",
+      "itens, voluntariado, dinheiro"
+    ],
+    [
+      "Contribuição.situacao",
+      "pendente, confirmada, recusada, cancelada"
+    ]
+  ]
+}
