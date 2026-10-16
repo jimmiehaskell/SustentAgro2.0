@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block titulo %}Minhas ofertas{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <h1 class="h3">Minhas ofertas</h1>
+  {% include 'componentes/aviso_construcao.html' with item='BL-21' responsavel='Pedro' tela='13' %}
+  <ul class="list-group">
+    {% for o in ofertas %}<li class="list-group-item">{{ o.produto }} · saldo {{ o.saldo|floatformat:"-1" }} de {{ o.quantidade|floatformat:"-1" }} {{ o.unidade }}</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

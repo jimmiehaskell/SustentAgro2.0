@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block titulo %}ONGs{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <h1 class="h3">ONGs da rede</h1>
+  {% include 'componentes/aviso_construcao.html' with item='BL-15' responsavel='Júlia' tela='2' %}
+  <div class="row g-4">
+    <aside class="col-12 col-md-3">
+      {# RF-04: filtros combinados por E lógico (ODS, tipo de ajuda, cidade) e busca por texto #}
+      <form class="card card-body d-grid gap-3" method="get">
+        <div><label class="form-label" for="f-q">Busca</label><input class="form-control" id="f-q" name="q" value="{{ filtros.q }}"></div>
+        <div><label class="form-label" for="f-ods">Causa (ODS)</label>
+          <select class="form-select" id="f-ods" name="ods"><option value="">Todas</option>
+            {% for o in ods %}<option value="{{ o.numero }}" {% if filtros.ods == o.numero|stringformat:'s' %}selected{% endif %}>{{ o.numero }} · {{ o.nome }}</option>{% endfor %}
+          </select></div>
+        <div><label class="form-label" for="f-tipo">Tipo de ajuda</label>
+          <select class="form-select" id="f-tipo" name="tipo"><option value="">Todos</option><option value="itens">Itens</option><option value="dinheiro">Dinheiro</option><option value="voluntariado">Voluntariado</option></select></div>
+        <div><label class="form-label" for="f-cidade">Cidade</label>
+          <select class="form-select" id="f-cidade" name="cidade"><option value="">Todas</option>{% for l in localidades %}<option>{{ l.nome }}</option>{% endfor %}</select></div>
+        <button class="btn btn-primary" type="submit">Filtrar</button>
+        <a class="btn btn-outline-secondary" href="{% url 'ongs:lista' %}">Limpar filtros</a>
+      </form>
+    </aside>
+    <div class="col-12 col-md-9">
+      <p class="text-body-secondary tabular">{{ ongs|length }} ONG{{ ongs|length|pluralize:"s" }} encontrada{{ ongs|length|pluralize:"s" }}</p>
+      <div class="row g-3">
+        {% for ong, precisa in ongs %}
+          <div class="col-12 col-lg-6">{% include 'componentes/cartao_ong.html' with ong=ong precisa=precisa %}</div>
+        {% empty %}
+          <div class="col-12"><div class="card card-body text-center"><strong>Nenhuma ONG encontrada</strong><span class="text-body-secondary">Tente tirar um dos filtros.</span></div></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

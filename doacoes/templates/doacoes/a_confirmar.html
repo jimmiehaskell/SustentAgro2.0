@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block titulo %}Doações a confirmar{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <h1 class="h3">Doações a confirmar</h1>
+  {% include 'componentes/aviso_construcao.html' with item='BL-22' responsavel='Pedro' tela='12' %}
+  {% include 'componentes/abas_ong.html' with aba=aba %}
+  <ul class="list-group">{% for c in pendentes %}<li class="list-group-item">{{ c.pessoa.nome_completo }} · {{ c.tipo }} · {{ c.necessidade.titulo }} · {{ c.quantidade|floatformat:"-2" }}</li>{% endfor %}</ul>
+</div>
+{% endblock %}

@@ -1,0 +1,7 @@
+# O Git guarda tudo com LF; no Windows, o checkout converte para CRLF (.editorconfig)
+* text=auto
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.svg text

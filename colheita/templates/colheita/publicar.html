@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block titulo %}Publicar oferta{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <h1 class="h3">Publicar oferta</h1>
+  {% include 'componentes/aviso_construcao.html' with item='BL-17' responsavel='Gabriel' tela='6' %}
+  {# RF-18, RN-13 (preço só para venda), RN-16 (kg com 1 casa; un inteiro) #}
+  <p class="text-body-secondary">Categorias: {% for valor, rotulo in categorias %}{{ rotulo }}{% if not forloop.last %}, {% endif %}{% endfor %}.
+  Localidade sugerida: {{ localidade_do_agricultor }}. ONGs para destino opcional: {{ ongs|length }}.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block titulo %}Início{% endblock %}
+{% block conteudo %}
+<section class="border-bottom" style="background: var(--sa-superficie)">
+  <div class="container py-5 d-grid gap-3">
+    <h1 class="display-6 fw-bold" style="max-width: 18ch">O que sobra no campo vira comida no prato de quem precisa</h1>
+    <p class="lead text-body-secondary mb-0" style="max-width: 58ch">Encontre ONGs do DF e do Entorno pela causa, pelo tipo de ajuda ou pela cidade, e veja do que cada uma precisa agora.</p>
+    {# RF-01: a busca leva para a lista com ?q= #}
+    <form class="d-flex gap-2" style="max-width: 38rem" action="{% url 'ongs:lista' %}" role="search">
+      <input class="form-control form-control-lg" type="search" name="q" placeholder="Nome da ONG, causa ou cidade" aria-label="Buscar ONGs">
+      <button class="btn btn-primary" type="submit">Buscar</button>
+    </form>
+  </div>
+</section>
+
+<div class="container">
+  {% include 'componentes/aviso_construcao.html' with item='BL-14' responsavel='Júlia' tela='1' %}
+
+  <section class="py-4">
+    <h2 class="h4">Encontre por causa</h2>
+    {# RF-02: cartões dos 6 ODS com a contagem; clicar leva à lista filtrada #}
+    <div class="row g-3">
+      {% for ods, quantidade in ods_com_contagem %}
+        <div class="col-12 col-sm-6 col-lg-4">
+          <a class="card h-100 text-reset text-decoration-none" href="{% url 'ongs:lista' %}?ods={{ ods.numero }}">
+            <div class="card-body d-flex gap-3 align-items-center">
+              {% include 'componentes/selo_ods.html' with ods=ods com_nome=False %}
+              <div><strong class="small">{{ ods.nome }}</strong><br><span class="small text-body-secondary">{{ quantidade }} ONG{{ quantidade|pluralize:"s" }}</span></div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="py-4">
+    <h2 class="h4">ONGs da rede</h2>
+    {# RF-03 (desejável): carrossel com setas; no protótipo, botões de anterior e próximo #}
+    <div class="row g-3">
+      {% for ong in ongs %}<div class="col-12 col-md-6 col-lg-4">{% include 'componentes/cartao_ong.html' with ong=ong %}</div>{% endfor %}
+    </div>
+  </section>
+
+  <section class="py-4" id="sobre">
+    <h2 class="h4">Sobre o SustentAgro</h2>
+    {# RF-34 (desejável): texto do projeto e a equipe (P-09) #}
+    <ul class="small">{% for nome in equipe %}<li>{{ nome }}</li>{% endfor %}</ul>
+  </section>
+</div>
+{% endblock %}

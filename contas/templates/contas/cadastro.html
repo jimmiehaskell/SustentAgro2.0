@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block titulo %}Criar conta{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <h1 class="h3">Criar conta</h1>
+  {% include 'componentes/aviso_construcao.html' with item='BL-11' responsavel='Vinicius' tela='4' %}
+  {# RF-07: três perfis; cada um com o próprio formulário. tipo = pessoa | agricultor | ong #}
+  <ul class="nav nav-pills mb-3">
+    <li class="nav-item"><a class="nav-link {% if tipo == 'pessoa' %}active{% endif %}" href="{% url 'contas:cadastro_perfil' 'pessoa' %}">Quero doar ou ser voluntário(a)</a></li>
+    <li class="nav-item"><a class="nav-link {% if tipo == 'agricultor' %}active{% endif %}" href="{% url 'contas:cadastro_perfil' 'agricultor' %}">Sou agricultor(a) familiar</a></li>
+    <li class="nav-item"><a class="nav-link {% if tipo == 'ong' %}active{% endif %}" href="{% url 'contas:cadastro_perfil' 'ong' %}">Represento uma ONG</a></li>
+  </ul>
+  <p class="text-body-secondary">Formulário escolhido: <strong>{{ tipo }}</strong>. Localidades disponíveis: {{ localidades|length }}. ODS: {{ ods|length }}.</p>
+</div>
+{% endblock %}

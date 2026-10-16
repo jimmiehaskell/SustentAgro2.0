@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block titulo %}Colheita Solidária{% endblock %}
+{% block conteudo %}
+<div class="container py-4 d-grid gap-3">
+  {% if perfil == 'ong-pendente' or perfil == 'ong-reprovada' %}
+    {# E-06: ONG não aprovada não vê ofertas #}
+    <div class="alert alert-warning"><strong>As ofertas aparecem depois da aprovação.</strong> Acompanhe a situação em <a href="{% url 'ongs:minha_ong' %}">Minha conta</a>.</div>
+  {% elif versao_ong %}
+    <div><h1 class="h3 mb-1">Ofertas perto de você</h1><p class="text-body-secondary mb-0">Distâncias calculadas a partir da localidade da sua ONG.</p></div>
+    {% include 'componentes/aviso_construcao.html' with item='BL-18' responsavel='Gabriel' tela='7 (perfil ONG ativa)' %}
+    {# RF-19: filtros "até 30 km", "até 60 km" e "todas" #}
+    <nav class="d-flex gap-2 flex-wrap" aria-label="Distância máxima">
+      <a class="btn btn-sm {% if dist == '30' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?dist=30">até 30 km</a>
+      <a class="btn btn-sm {% if dist == '60' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?dist=60">até 60 km</a>
+      <a class="btn btn-sm {% if dist == 'todas' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?dist=todas">todas</a>
+    </nav>
+    {% for oferta in ofertas %}{% include 'componentes/cartao_oferta.html' with oferta=oferta versao_ong=True %}
+    {% empty %}<div class="card card-body text-center">Nenhuma oferta nesta distância.</div>{% endfor %}
+  {% else %}
+    <div><h1 class="h3 mb-1">Colheita Solidária</h1><p class="text-body-secondary mb-0">Alimento bom que sobrou no campo ou saiu do padrão de venda.</p></div>
+    {% include 'componentes/aviso_construcao.html' with item='BL-18' responsavel='Gabriel' tela='7 (perfil visitante)' %}
+    {# RF-28, D-26: sem distância, contato nem botão; convite para cadastro #}
+    <div class="alert alert-success mb-0"><strong>Você representa uma ONG?</strong> <a href="{% url 'contas:cadastro_perfil' 'ong' %}">Cadastre-se</a> para ver a distância e reservar.</div>
+    {% for oferta in ofertas %}{% include 'componentes/cartao_oferta.html' with oferta=oferta versao_ong=False %}{% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

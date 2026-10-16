@@ -1,0 +1,9 @@
+{# Abas da "Minha conta" da ONG. Uso: {% include 'componentes/abas_ong.html' with aba='perfil' %} #}
+<ul class="nav nav-underline mb-4">
+  <li class="nav-item"><a class="nav-link {% if aba == 'perfil' %}active{% endif %}" href="{% url 'ongs:minha_ong' %}">Situação e perfil</a></li>
+  {% if perfil == 'ong' %}
+    <li class="nav-item"><a class="nav-link {% if aba == 'necessidades' %}active{% endif %}" href="{% url 'ongs:necessidades' %}">Necessidades</a></li>
+    <li class="nav-item"><a class="nav-link {% if aba == 'reservas' %}active{% endif %}" href="{% url 'colheita:minhas_reservas' %}">Minhas reservas</a></li>
+    <li class="nav-item"><a class="nav-link {% if aba == 'doacoes' %}active{% endif %}" href="{% url 'doacoes:a_confirmar' %}">Doações a confirmar</a></li>
+  {% endif %}
+</ul>

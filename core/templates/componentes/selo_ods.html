@@ -1,0 +1,2 @@
+{# Uso: {% include 'componentes/selo_ods.html' with ods=ods com_nome=True %} #}
+<span class="selo-ods" title="ODS {{ ods.numero }} · {{ ods.nome }}"><i style="background: {{ ods.cor }}">{{ ods.numero }}</i>{% if com_nome %}{{ ods.nome }}{% endif %}</span>

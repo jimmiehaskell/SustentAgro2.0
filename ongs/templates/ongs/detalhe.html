@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% comment %}
+  TELA-EXEMPLO (BL-06). Use este arquivo como modelo para as outras telas:
+  - estende base.html e preenche os blocos titulo e conteudo;
+  - usa os componentes de core/templates/componentes com {% include %};
+  - lê só os campos do modelo de dados (ong.nome, ong.ods.all, necessidade.percentual...);
+  - usa classes do Bootstrap 5 e, para o que for do projeto, as classes de sustentagro.css;
+  - funciona com 360 px de largura (row/col do Bootstrap empilham sozinhos).
+  RF-06, RN-21. Protótipo: Tela 3.
+{% endcomment %}
+{% block titulo %}{{ ong.nome }}{% endblock %}
+{% block conteudo %}
+<div class="capa-ong grande"{% if ong.capa %} style="background-image: url('{{ ong.capa.url }}')"{% endif %}>
+  <div class="container position-relative h-100" style="min-height: 11rem">
+    {% if ong.logo %}<img class="logo-ong" src="{{ ong.logo.url }}" alt="">{% else %}<span class="logo-ong">{{ ong.nome_curto|slice:":2"|upper }}</span>{% endif %}
+  </div>
+</div>
+
+<div class="container">
+  <header class="pt-5 pb-2 d-grid gap-2">
+    <h1 class="h2 mb-0">{{ ong.nome }}</h1>
+    {% if ong.slogan %}<p class="lead text-body-secondary mb-0">{{ ong.slogan }}</p>{% endif %}
+    <div class="d-flex flex-wrap gap-3">
+      {% for ods in ong.ods.all %}{% include 'componentes/selo_ods.html' with ods=ods com_nome=True %}{% endfor %}
+    </div>
+  </header>
+
+  <div class="row g-4 py-3">
+    <div class="col-12 col-lg-8 d-grid gap-3 align-content-start">
+      <p style="max-width: 66ch">{{ ong.descricao }}</p>
+      <h2 class="h5 mt-2">Do que precisamos agora</h2>
+      {% for necessidade in necessidades %}
+        <article class="card">
+          <div class="card-body d-grid gap-2">
+            <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2">
+              <h3 class="h6 mb-0">{{ necessidade.titulo }}</h3>
+              {% if necessidade.situacao == 'atendida' %}
+                <span class="selo selo-limao">Meta atingida</span>
+              {% else %}
+                <span class="selo selo-apoio">{{ necessidade.get_tipo_display|default:necessidade.tipo|capfirst }}</span>
+              {% endif %}
+            </div>
+            <p class="mb-0 tabular">
+              {% if necessidade.tipo == 'dinheiro' %}
+                <strong class="text-numero">R$ {{ necessidade.confirmado|floatformat:"2g" }}</strong>
+                de R$ {{ necessidade.meta|floatformat:"2g" }}
+              {% else %}
+                <strong class="text-numero">{{ necessidade.confirmado|floatformat:"-2g" }}</strong>
+                de {{ necessidade.meta|floatformat:"-2g" }} {{ necessidade.unidade }}
+              {% endif %}
+            </p>
+            {% include 'componentes/barra_progresso.html' with percentual=necessidade.percentual %}
+          </div>
+        </article>
+      {% empty %}
+        <p class="text-body-secondary">Esta ONG não tem necessidades abertas no momento.</p>
+      {% endfor %}
+    </div>
+
+    <aside class="col-12 col-lg-4">
+      <div class="card"><div class="card-body d-grid gap-3">
+        <h2 class="h6 mb-0">Como ajudar</h2>
+        {# Botões só para os tipos de ajuda que a ONG aceita (P-04). Camada 2: BL-42, BL-43 #}
+        <div class="d-grid gap-2">
+          {% if ong.aceita_itens %}<a class="btn btn-primary" href="{% url 'doacoes:contribuir' ong.pk 'itens' %}">Quero doar itens</a>{% endif %}
+          {% if ong.aceita_voluntariado %}<a class="btn btn-outline-primary" href="{% url 'doacoes:contribuir' ong.pk 'voluntariado' %}">Quero ser voluntário(a)</a>{% endif %}
+          {% if ong.aceita_dinheiro %}<a class="btn btn-outline-primary" href="{% url 'doacoes:contribuir' ong.pk 'dinheiro' %}">Doar dinheiro por Pix</a>{% endif %}
+        </div>
+        <dl class="mb-0 small d-grid gap-2">
+          <div><dt class="text-body-secondary fw-normal">Cidade</dt><dd class="mb-0">{{ ong.localidade.nome }}</dd></div>
+          <div><dt class="text-body-secondary fw-normal">Famílias atendidas por mês</dt><dd class="mb-0 tabular">{{ ong.familias_por_mes }}</dd></div>
+          <div><dt class="text-body-secondary fw-normal">Contato</dt><dd class="mb-0">{{ ong.telefone }}<br>{{ ong.email_contato }}</dd></div>
+        </dl>
+      </div></div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

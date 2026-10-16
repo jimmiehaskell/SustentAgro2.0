@@ -1,0 +1,5 @@
+{# Uso: {% include 'componentes/barra_progresso.html' with percentual=necessidade.percentual %} #}
+<div class="progress{% if percentual >= 100 %} cheia{% endif %}" role="progressbar" aria-label="{{ percentual }}% da meta"
+     aria-valuenow="{{ percentual }}" aria-valuemin="0" aria-valuemax="100">
+  <div class="progress-bar" style="width: {{ percentual }}%"></div>
+</div>

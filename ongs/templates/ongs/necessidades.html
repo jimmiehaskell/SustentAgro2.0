@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block titulo %}Necessidades{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <h1 class="h3">Necessidades</h1>
+  {% include 'componentes/aviso_construcao.html' with item='BL-16' responsavel='Júlia' tela='10' %}
+  {% include 'componentes/abas_ong.html' with aba=aba %}
+  <ul class="list-group">
+    {% for n in ong.necessidades.all %}<li class="list-group-item">{{ n.titulo }} · {{ n.confirmado|floatformat:"-2" }} de {{ n.meta|floatformat:"-2" }} {{ n.unidade }} · {{ n.situacao }}</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

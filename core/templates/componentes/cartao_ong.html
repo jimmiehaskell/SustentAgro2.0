@@ -1,0 +1,21 @@
+{# Cartão de ONG da lista e do carrossel (RF-05). Uso: {% include 'componentes/cartao_ong.html' with ong=ong precisa=necessidade %} #}
+<a href="{% url 'ongs:detalhe' ong.pk %}" class="card h-100 text-reset text-decoration-none overflow-hidden">
+  <div class="capa-ong"{% if ong.capa %} style="background-image: url('{{ ong.capa.url }}')"{% endif %}>
+    {% if ong.logo %}<img class="logo-ong" src="{{ ong.logo.url }}" alt="">{% else %}<span class="logo-ong">{{ ong.nome_curto|slice:":2"|upper }}</span>{% endif %}
+  </div>
+  <div class="card-body pt-4 d-flex flex-column gap-2">
+    <h3 class="h6 mb-0">{{ ong.nome }}</h3>
+    <span class="small text-body-secondary">{{ ong.localidade.nome }}</span>
+    <p class="small text-body-secondary mb-0">{{ ong.slogan }}</p>
+    <div class="d-flex flex-wrap gap-2">
+      {% for ods in ong.ods.all %}{% include 'componentes/selo_ods.html' with ods=ods com_nome=False %}{% endfor %}
+    </div>
+    {% if precisa %}
+      <div class="precisa mt-auto d-grid gap-1">
+        <b>Precisa agora</b>
+        <span>{{ precisa.titulo }} · <span class="tabular">{% if precisa.tipo == 'dinheiro' %}R$ {{ precisa.confirmado|floatformat:"2g" }} de R$ {{ precisa.meta|floatformat:"2g" }}{% else %}{{ precisa.confirmado|floatformat:"-1g" }} de {{ precisa.meta|floatformat:"-1g" }} {{ precisa.unidade }}{% endif %}</span></span>
+        {% include 'componentes/barra_progresso.html' with percentual=precisa.percentual %}
+      </div>
+    {% endif %}
+  </div>
+</a>
