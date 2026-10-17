@@ -16,9 +16,6 @@ services:
       DB_HOST: postgres
       DB_PORT: '5432'
       MEDIA_ROOT: /app/storage/uploads
-      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-}
-      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-}
-      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-}
     ports:
       # Só em 127.0.0.1: quem fala com a internet é o Nginx do host
       - '127.0.0.1:${APP_PORT:?defina APP_PORT no .env}:8000'
