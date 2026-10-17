@@ -59,9 +59,6 @@ jobs:
           DB_NAME=sustentagro
           DB_USER=sustentagro_app
           DB_PASSWORD=senha-da-aplicacao-ci
-          DJANGO_SUPERUSER_USERNAME=admin
-          DJANGO_SUPERUSER_EMAIL=admin@example.com
-          DJANGO_SUPERUSER_PASSWORD=senha-do-admin-ci
           ENV
           mkdir -p staticfiles storage/uploads
           sudo chown -R 33:33 staticfiles storage
@@ -74,7 +71,8 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/)" = "200"
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/ongs/1/)" = "200"
           test -f staticfiles/css/sustentagro.css
-          docker compose exec -T app python create_user.py
+          docker compose exec -T -e DJANGO_SUPERUSER_USERNAME=admin -e DJANGO_SUPERUSER_EMAIL=admin@example.com \
+            -e DJANGO_SUPERUSER_PASSWORD=senha-do-admin-ci app python manage.py createsuperuser --noinput
       - name: Logs em caso de falha
         if: failure()
         run: docker compose logs
