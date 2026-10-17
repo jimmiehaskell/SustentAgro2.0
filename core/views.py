@@ -1,5 +1,6 @@
 from django.conf import settings
-from django.http import Http404
+from django.db import connection
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import TemplateView
@@ -46,3 +47,13 @@ def definir_perfil_mock(request, perfil):
     if not url_has_allowed_host_and_scheme(proximo, allowed_hosts={request.get_host()}):
         proximo = '/'
     return redirect(proximo)
+
+
+def saude(request):
+    """Usado pelo healthcheck do container e pela conferência após cada publicação.
+    Responde 200 quando a aplicação e o banco estão de pé; 503 se o banco não responde."""
+    try:
+        connection.ensure_connection()
+    except Exception:
+        return HttpResponse('banco: erro', status=503, content_type='text/plain; charset=utf-8')
+    return HttpResponse('ok', content_type='text/plain; charset=utf-8')

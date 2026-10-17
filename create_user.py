@@ -23,4 +23,6 @@ if not User.objects.filter(username=username).exists():
         password
     )
 
-    print('Superuser criado.')
+    print('Superusuário criado.')
+else:
+    print('Superusuário já existe.')

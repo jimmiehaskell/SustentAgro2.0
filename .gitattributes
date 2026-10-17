@@ -5,3 +5,7 @@
 *.jpeg binary
 *.pdf binary
 *.svg text
+
+# Scripts executados dentro de containers Linux: sempre LF
+*.sh text eol=lf
+Dockerfile text eol=lf

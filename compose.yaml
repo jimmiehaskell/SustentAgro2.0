@@ -1,0 +1,58 @@
+# Containers do SustentAgro (ADR-006). O nome do projeto Compose vem do nome da pasta.
+# Porta, senhas e hosts ficam no .env (veja .env.example). Nunca rode "docker compose config" sem --quiet.
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    # Só as variáveis da aplicação: a senha do superusuário do banco (POSTGRES_PASSWORD) não entra aqui
+    environment:
+      SECRET_KEY: ${SECRET_KEY:?defina SECRET_KEY no .env}
+      DEBUG: 'False'
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:?defina ALLOWED_HOSTS no .env}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
+      DB_NAME: ${DB_NAME:?defina DB_NAME no .env}
+      DB_USER: ${DB_USER:?defina DB_USER no .env}
+      DB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
+      DB_HOST: postgres
+      DB_PORT: '5432'
+      MEDIA_ROOT: /app/storage/uploads
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-}
+    ports:
+      # Só em 127.0.0.1: quem fala com a internet é o Nginx do host
+      - '127.0.0.1:${APP_PORT:?defina APP_PORT no .env}:8000'
+    volumes:
+      # Lidos direto do disco pelo Nginx do host (RNF-03)
+      - ./staticfiles:/app/staticfiles
+      - ./storage/uploads:/app/storage/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [web, db]
+
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [db]
+
+networks:
+  web: {}
+  db:
+    internal: true
+
+volumes:
+  pgdata: {}

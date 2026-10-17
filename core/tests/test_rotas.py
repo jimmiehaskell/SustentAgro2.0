@@ -29,6 +29,11 @@ class TelasAbremTest(TestCase):
                 resposta = self.client.get(reverse(nome, kwargs=kwargs))
                 self.assertEqual(resposta.status_code, 200)
 
+    def test_saude_responde_ok(self):
+        resposta = self.client.get(reverse('core:saude'))
+        self.assertEqual(resposta.status_code, 200)
+        self.assertEqual(resposta.content, b'ok')
+
     def test_ong_inexistente_da_404(self):
         self.assertEqual(self.client.get(reverse('ongs:detalhe', kwargs={'pk': 999})).status_code, 404)
 

@@ -37,6 +37,14 @@ O CI (`.github/workflows/ci.yml`) roda `check`, `makemigrations --check` e os te
 - Mixins de perfil em `core/mixins.py`. As views da área logada ainda não usam mixins porque estão em mock; passam a usar na camada 1.
 - Visual: Bootstrap 5.3.3 por CDN (com SRI) + `core/static/css/sustentagro.css` (paleta "Campo suave", tema claro/escuro por `data-bs-theme`). Componentes em `core/templates/componentes/`. Tela-exemplo: `ongs/templates/ongs/detalhe.html`.
 
+## Deploy
+
+- WSGI com Gunicorn (ADR-006): `Dockerfile` (python:3.13-slim, processo como `www-data`), `compose.yaml` com os serviços `app` e `postgres` (o script de backup do servidor espera esse nome) e as redes `web` e `db` (interna). A porta publicada vem de `APP_PORT` no `.env` e sempre começa com `127.0.0.1:`.
+- O app recebe só as variáveis listadas em `environment` do compose (nunca o `POSTGRES_PASSWORD`). `docker/entrypoint.sh` roda `migrate` e `collectstatic` a cada início; `docker/postgres/init/01-app-db.sh` cria o banco e o usuário da aplicação na primeira inicialização.
+- Estáticos em `staticfiles/` e uploads em `storage/uploads/` (`MEDIA_ROOT` pelo ambiente), montados do host e servidos pelo Nginx. `/saude/` responde `ok` (usado pelo healthcheck).
+- O job `imagem` do CI sobe o compose completo e confere `/saude/`, `/` e o `collectstatic`.
+- O roteiro de publicação e o site do Nginx com os valores reais ficam em `.claude/`, fora do Git.
+
 ## Testes
 
 `core/tests/test_rotas.py` garante que as 15 telas abrem. Os testes de aceitação das regras (`*/tests/`) estão marcados com `@skip('Remova ao implementar o BL-xx')` e usam as fábricas de `core/tests/fabricas.py`, que importam os models dentro das funções. Ao implementar um item, remova o skip; não altere o teste para fazê-lo passar.

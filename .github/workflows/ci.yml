@@ -42,3 +42,39 @@ jobs:
         run: python manage.py makemigrations --check --dry-run
       - name: Testes (PostgreSQL)
         run: python manage.py test --verbosity 2
+
+  imagem:
+    # Constrói a imagem e sobe o compose completo (app + PostgreSQL), como no servidor
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Criar o .env do teste
+        run: |
+          cat > .env <<'ENV'
+          APP_PORT=8000
+          SECRET_KEY=chave-so-para-o-ci
+          ALLOWED_HOSTS=localhost,127.0.0.1
+          CSRF_TRUSTED_ORIGINS=http://localhost:8000
+          POSTGRES_PASSWORD=senha-do-superusuario-ci
+          DB_NAME=sustentagro
+          DB_USER=sustentagro_app
+          DB_PASSWORD=senha-da-aplicacao-ci
+          DJANGO_SUPERUSER_USERNAME=admin
+          DJANGO_SUPERUSER_EMAIL=admin@example.com
+          DJANGO_SUPERUSER_PASSWORD=senha-do-admin-ci
+          ENV
+          mkdir -p staticfiles storage/uploads
+          sudo chown -R 33:33 staticfiles storage
+      - name: Subir os containers
+        run: docker compose up -d --build --wait --wait-timeout 180
+      - name: Conferir a aplicação
+        run: |
+          docker compose ps
+          test "$(curl -s http://127.0.0.1:8000/saude/)" = "ok"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/ongs/1/)" = "200"
+          test -f staticfiles/css/sustentagro.css
+          docker compose exec -T app python create_user.py
+      - name: Logs em caso de falha
+        if: failure()
+        run: docker compose logs
