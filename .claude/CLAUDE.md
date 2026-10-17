@@ -43,6 +43,7 @@ O CI (`.github/workflows/ci.yml`) roda `check`, `makemigrations --check` e os te
 - O app recebe só as variáveis listadas em `environment` do compose (nunca o `POSTGRES_PASSWORD`). `docker/entrypoint.sh` roda `migrate` e `collectstatic` a cada início; `docker/postgres/init/01-app-db.sh` cria o banco e o usuário da aplicação na primeira inicialização.
 - Estáticos em `staticfiles/` e uploads em `storage/uploads/` (`MEDIA_ROOT` pelo ambiente), montados do host e servidos pelo Nginx. `/saude/` responde `ok` (usado pelo healthcheck).
 - O job `imagem` do CI sobe o compose completo e confere `/saude/`, `/` e o `collectstatic`.
+- PR de publicação `main → prod`: abrir com o modelo `.github/PULL_REQUEST_TEMPLATE/publicacao.md`, pelo link https://github.com/jimmiehaskell/SustentAgro2.0/compare/prod...main?quick_pull=1&template=publicacao.md (o modelo padrão `PULL_REQUEST_TEMPLATE.md` é o dos itens do backlog).
 - Publicação automática: o servidor busca a branch `prod` periodicamente e publica sozinho (backup antes, volta da imagem se `/saude/` falhar). A `prod` só muda por PR `main → prod` do scrum master, com método **Merge** (não squash) e checks `testes` e `imagem`. PRs dos devs vão sempre para o `main`.
 - O `compose.yaml` e o `docker/postgres/` do repositório servem ao desenvolvimento e ao CI; o servidor usa cópias próprias, então mudanças neles precisam ser aplicadas à mão no servidor.
 - Migrations rodam a cada início do container e não são desfeitas pela volta automática: precisam ser compatíveis com a versão anterior do código.
