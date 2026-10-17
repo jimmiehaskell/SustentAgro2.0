@@ -18,6 +18,7 @@ Fecha #<!-- número da issue -->
 - [ ] Removi o `@skip` dos testes deste item, e eles passam.
 - [ ] Há teste para cada RN implementada e para os casos E-xx relacionados.
 - [ ] Quem não é dono do dado recebe 404 ao tentar editá-lo.
+- [ ] Se há migration: a versão anterior do código continua funcionando com o banco já migrado.
 - [ ] O CI está verde.
 
 ## Como testar
