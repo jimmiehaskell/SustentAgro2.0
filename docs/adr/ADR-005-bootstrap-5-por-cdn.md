@@ -10,7 +10,7 @@ O código atual mistura Bootstrap 4 e Tailwind v3 (`base.html`) com Tailwind v4 
 Bootstrap 5 por CDN, com versão fixa, mais um único arquivo de estilos do projeto (`core/static/css/sustentagro.css`) para cores e ajustes. Os componentes repetidos (cartão de ONG, selo de ODS, barra de progresso, cartão de oferta) viram templates parciais usados com `{% include %}`, feitos no M1. O gráfico usa Chart.js por CDN. Saem o Tailwind, o Bootstrap 4, o `package.json` e o `package-lock.json`.
 
 ## Paleta e tipografia (D-32, 16/10/2026)
-As variáveis do Bootstrap são sobrescritas no `sustentagro.css` com a paleta "Campo suave": `--bs-primary` `#3D7A16`, limão suave `#A6E36B` só em detalhes, verde claro de apoio `#EAF7DC`, carvão `#1D1F1C`. O tema escuro usa o modo de cor do Bootstrap 5.3 (`data-bs-theme="dark"`), definido pelo tema do sistema e alternável por um botão. Títulos em Bricolage Grotesque e texto em Figtree, pelo Google Fonts. Os valores exatos dos dois temas estão no `:root` do `prototipo.html`.
+As variáveis do Bootstrap são sobrescritas no `sustentagro.css` com a paleta "Campo suave": `--bs-primary` `#3D7A16`, limão suave `#A6E36B` só em detalhes, verde claro de apoio `#EAF7DC`, carvão `#1D1F1C`. O tema escuro usa o modo de cor do Bootstrap 5.3 (`data-bs-theme="dark"`), definido pelo tema do sistema e alternável por um botão. Títulos em Montserrat (D-33; antes, Bricolage Grotesque) e texto em Figtree, pelo Google Fonts. Os valores exatos dos dois temas estão no `:root` do `prototipo.html`.
 
 ## Alternativas consideradas
 | Alternativa | Por que não foi escolhida |
