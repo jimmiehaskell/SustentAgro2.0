@@ -78,7 +78,17 @@ O menu e as telas mudam conforme o perfil, como no protótipo (`docs/prototipo.h
   está certa; não apague o teste.
 - Nunca envie direto para o `main`, nem o `.env`, nem o `db.sqlite3`.
 
-## 6. Trocar uma tela de mock para banco
+## 6. Como o código chega ao site
+
+- Todo PR de vocês vai para o **`main`**. Nunca abram PR para a branch `prod`.
+- A `prod` é o que está no ar. Só o Jimmie publica, com um PR `main → prod` usando **Merge** (não *squash*).
+  Cada merge na `prod` é publicado automaticamente no servidor em 1 ou 2 minutos.
+- O servidor faz backup antes de publicar e volta sozinho para a versão anterior se a nova não responder.
+  Mas ele **não desfaz migrations**: por isso, uma migration precisa ser compatível com a versão anterior do código.
+  Na prática: para tornar um campo obrigatório, primeiro crie o campo com valor padrão (ou aceitando vazio),
+  publique, e só depois torne obrigatório. Na dúvida, pergunte ao Jimmie no PR.
+
+## 7. Trocar uma tela de mock para banco
 
 1. Crie os models do item (os campos estão comentados no `models.py` do app).
 2. `python manage.py makemigrations <app>` e `python manage.py migrate`.
@@ -86,7 +96,7 @@ O menu e as telas mudam conforme o perfil, como no protótipo (`docs/prototipo.h
 4. O template não deve mudar: se mudar, algum nome de campo está diferente do modelo de dados.
 5. Proteja a view com o mixin certo.
 
-## 7. Dúvidas
+## 8. Dúvidas
 
 Antes de inventar uma regra, procure o código dela (RF-xx, RN-xx) com `Ctrl+Shift+F` no editor, dentro de
 `docs/`. Se não achar, pergunte ao Jimmie na própria issue.

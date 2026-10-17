@@ -1,5 +1,5 @@
-# O Git guarda tudo com LF; no Windows, o checkout converte para CRLF (.editorconfig)
-* text=auto
+# Tudo em LF, inclusive no Windows (contrato de deploy do servidor). Os arquivos antigos em legado/ ficam como estão.
+* text=auto eol=lf
 *.png binary
 *.jpg binary
 *.jpeg binary
