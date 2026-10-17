@@ -275,7 +275,7 @@ Removidas do escopo: gateway de pagamento e geocodificação de endereço.
 - **Prazo**: até cerca de 10/11/2026, 4 semanas a partir de 13/10/2026 (D-19).
 - **Equipe**: 4 pessoas programando (grupo Desenvolvimento), dividindo backend e frontend, com Jimmie como scrum master e apoio (D-29, `project-plan.md` §0).
 - **Tecnologia**: evolução do app Django 5.2 existente.
-- **Hospedagem**: servidor próprio (VPS). Só o Nginx do host fica exposto; aplicação em container com porta apenas em localhost; banco em container próprio em rede interna; nenhuma linguagem no host. Para Django, a documentação prevê Gunicorn atrás de `proxy_pass` e estáticos do `collectstatic` servidos pelo Nginx, desenho que ainda não foi testado nessa VPS.
+- **Hospedagem**: servidor próprio (VPS). Só o Nginx do host fica exposto; aplicação em container com porta apenas em localhost ; banco em container próprio em rede interna; nenhuma linguagem no host. Para Django, a documentação prevê Gunicorn atrás de `proxy_pass` e estáticos do `collectstatic` servidos pelo Nginx, desenho que ainda não foi testado nessa VPS.
 - **Domínio**: subdomínio de domínio do scrum master, com DNS no provedor de DNS em modo "Somente DNS" e certificado novo (D-22).
 - **Orçamento**: sem custos; a única integração possível (RF-35) precisa ser gratuita.
 
