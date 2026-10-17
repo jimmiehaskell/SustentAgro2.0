@@ -72,11 +72,22 @@ Quatro semanas, de 13/10 a 10/11/2026 (P-10).
 |---|---|---|---|---|---|
 | M0 — Pré-projeto | 14 a 17/10 | Aprovar Fases 2 a 4b e o novo PDF | Ler os documentos e o protótipo | Receber o novo PDF (17/10) e começar o DreamShaper | Aprovação de cada fase |
 | M1 — Esqueleto | até 19/10 | Rotas e views de todas as telas com dados mock; `base.html`; uma tela-exemplo completa como padrão; repositório com os 4 como colaboradores | Preparar o ambiente (Python, Git, rodar o projeto local) | Preencher o DreamShaper com o PDF | M0 |
-| M2 — Telas mock | 19 a 26/10 | Docker e primeira publicação na VPS; revisar PRs | Montar todas as telas sobre o esqueleto, seguindo o protótipo; versão celular. No fim, models da camada 1 com o apoio de Jimmie | Continuar o DreamShaper | M1 |
+| M2 — Telas mock | 19 a 26/10 | Revisar PRs (Docker e primeira publicação já feitos em 17/10) | Montar todas as telas sobre o esqueleto, seguindo o protótipo; versão celular. No fim, models da camada 1 com o apoio de Jimmie | Continuar o DreamShaper | M1 |
 | M3 — Colheita real | 27/10 a 02/11 | Acompanhar as regras da Colheita (saldo, reserva, recebimento); publicar na VPS; revisar PRs | Camada 1 com banco: cadastro/login, localidades, Colheita, painel, dados de demonstração | Primeiras fotos das telas publicadas | M2 |
 | M4 — Extras e ensaio | 03 a 08/11 | Publicar; revisar PRs | Camada 2, depois camada 3, até 07/11; gravar os vídeos do fluxo da Colheita | Fotos e vídeos no DreamShaper; relatório; ensaio da apresentação | M3 |
 | Congelamento | 08 e 09/11 | Última publicação até 09/11 | Só correção de defeitos | Ensaio final | M4 |
 | Apresentação | 10/11 | — | — | Apresentação ao avaliador | — |
+
+### Situação em 17/10/2026
+
+| Marco | Situação |
+|---|---|
+| M0 · Pré-projeto | Concluído em 17/10 (fases 1 a 4b, protótipo e PDF do projeto) |
+| M1 · Esqueleto | Concluído em 17/10, dois dias antes do previsto (BL-01 a BL-08) |
+| Primeira publicação (BL-10, previsto para o M2) | Concluída em 17/10, já com publicação automática a cada merge na branch `prod` |
+| M2 · Telas mock | Começa em 19/10, como previsto |
+
+**Decisão (17/10/2026):** as datas dos marcos não mudam. Os dois dias ganhos no M1 e a publicação já feita viram margem para o grupo Desenvolvimento, que não tem experiência prévia em Django (R-01).
 
 ## 3. Releases
 
