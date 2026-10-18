@@ -26,10 +26,12 @@ class OfertasView(TemplateView):
             limite = LIMITES_KM[dist]
             if limite is not None:
                 ofertas = [o for o in ofertas if o.distancia_km <= limite]
+            # RF-22: direcionadas à ONG primeiro, depois urgentes, depois as mais perto
+            ofertas.sort(key=lambda o: (o.ong_destino is None, not o.urgente, o.distancia_km))
         else:
             # Visitante e doador não veem ofertas direcionadas (RN-04)
             ofertas = [o for o in ofertas if o.ong_destino is None]
-        context.update(ofertas=ofertas, dist=dist, versao_ong=perfil == 'ong')
+        context.update(ofertas=ofertas, dist=dist, versao_ong=perfil == 'ong', localidade_da_ong='Ceilândia')
         return context
 
 

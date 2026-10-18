@@ -2,8 +2,10 @@
 
 MOCK: na camada 1, saldo e distancia_km passam a ser calculados (BL-33, BL-34, ADR-003).
 """
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
+
+from django.utils import timezone
 
 from core.mocks_util import lista, obj
 from ongs.mocks import LOCALIDADES, ONGS
@@ -19,19 +21,20 @@ _AGRICULTORES = {
 
 
 def _oferta(pk, produto, categoria, quantidade, saldo, unidade, localidade, distancia, colher_ate, estado,
-            destino, preco, transporte, agricultor, retirada, urgente=False, ong_destino=None):
+            destino, preco, transporte, agricultor, retirada, urgente=False, ong_destino=None,
+            aberta_a_todas_em=None):
     return obj(pk=pk, produto=produto, categoria=categoria, quantidade=Decimal(quantidade),
                saldo=Decimal(saldo), unidade=unidade, localidade=_LOCAL[localidade], distancia_km=distancia,
                colher_ate=colher_ate, estado=estado, destino=destino,
                preco_unitario=Decimal(preco) if preco else None, transporte=transporte,
                agricultor=_AGRICULTORES[agricultor], local_retirada=retirada, situacao='aberta',
-               urgente=urgente, vencida=False, ong_destino=ong_destino)
+               urgente=urgente, vencida=False, ong_destino=ong_destino, aberta_a_todas_em=aberta_a_todas_em)
 
 
 OFERTAS = lista(
     _oferta(106, 'Couve-manteiga', 'hortalicas', 30, 30, 'un', 'Brazlândia', 21, date(2026, 10, 24), 'excedente',
             'doar', None, 'ong_busca', 'Antônio Ribeiro', 'Chácara 12, Núcleo Rural Alexandre Gusmão',
-            ong_destino=ONGS[0]),
+            ong_destino=ONGS[0], aberta_a_todas_em=timezone.now() + timedelta(hours=31)),  # RN-04: 48 h só para a ONG
     _oferta(101, 'Alface crespa', 'hortalicas', 40, 25, 'un', 'Brazlândia', 21, date(2026, 10, 18), 'excedente',
             'doar', None, 'ong_busca', 'Antônio Ribeiro', 'Chácara 12, Núcleo Rural Alexandre Gusmão',
             urgente=True),
