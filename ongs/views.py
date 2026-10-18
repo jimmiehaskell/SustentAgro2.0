@@ -2,6 +2,7 @@ from django.http import Http404
 from django.views.generic import TemplateView
 
 from ongs import mocks
+from ongs.choices import TipoNecessidade
 
 
 class ListaOngsView(TemplateView):
@@ -16,11 +17,19 @@ class ListaOngsView(TemplateView):
         filtros = {'q': q.get('q', ''), 'ods': q.get('ods', ''), 'tipo': q.get('tipo', ''),
                    'cidade': q.get('cidade', '')}
         ongs = list(mocks.ONGS)
-        # MOCK: filtro simplificado só para a tela responder; a regra real (E lógico) é do BL-30
+        # MOCK: filtros em memória, combinados por E lógico (RF-04); no BL-30 viram filtros da consulta
+        if filtros['q']:
+            termo = filtros['q'].casefold()
+            ongs = [o for o in ongs
+                    if any(termo in campo.casefold() for campo in (o.nome, o.nome_curto, o.slogan, o.descricao))]
         if filtros['ods'].isdigit():
             ongs = [o for o in ongs if any(ods.numero == int(filtros['ods']) for ods in o.ods)]
+        if filtros['tipo'] in TipoNecessidade.values:
+            ongs = [o for o in ongs if getattr(o, f"aceita_{filtros['tipo']}")]
+        if filtros['cidade']:
+            ongs = [o for o in ongs if o.localidade.nome == filtros['cidade']]
         context.update(filtros=filtros, ongs=[(o, mocks.precisa_agora(o)) for o in ongs],
-                       ods=mocks.ODS, localidades=mocks.LOCALIDADES)
+                       ods=mocks.ODS, tipos=TipoNecessidade.choices, localidades=mocks.LOCALIDADES)
         return context
 
 
