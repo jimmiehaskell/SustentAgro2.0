@@ -63,8 +63,8 @@ class MinhasOfertasView(TemplateView):
 
 
 class MinhasReservasView(TemplateView):
-    """Tela 11 · Minhas reservas da ONG (BL-19, Gabriel). RF-23, RF-27, RN-17.
-    MOCK: trocar na camada 1 (BL-35). Proteger com OngAtivaRequeridaMixin.
+    """Tela 11 · Minhas reservas da ONG (BL-19, Gabriel). RF-23, RF-24, RF-27, RN-17.
+    MOCK: trocar na camada 1 (BL-35) e cancelar na camada 3 (BL-47). Proteger com OngAtivaRequeridaMixin.
     """
     template_name = 'colheita/minhas_reservas.html'
 

@@ -11,12 +11,18 @@ from core.mocks_util import lista, obj
 from ongs.mocks import LOCALIDADES, ONGS
 
 _LOCAL = {l.nome: l for l in LOCALIDADES}
+
+# O e-mail fica no Usuario, ligado ao PerfilPessoa por perfil.usuario (RF-27)
+def _agricultor(nome_completo, telefone, email):
+    return obj(nome_completo=nome_completo, telefone=telefone, usuario=obj(email=email))
+
+
 _AGRICULTORES = {
-    'Antônio Ribeiro': obj(nome_completo='Antônio Ribeiro', telefone='(61) 98123-4567'),
-    'Lúcia Ferreira': obj(nome_completo='Lúcia Ferreira', telefone='(61) 99654-2210'),
-    'José Almeida': obj(nome_completo='José Almeida', telefone='(61) 98877-1122'),
-    'Rosa Nunes': obj(nome_completo='Rosa Nunes', telefone='(61) 99210-3344'),
-    'Carlos Menezes': obj(nome_completo='Carlos Menezes', telefone='(61) 98400-5566'),
+    'Antônio Ribeiro': _agricultor('Antônio Ribeiro', '(61) 98123-4567', 'antonio.ribeiro@exemplo.com'),
+    'Lúcia Ferreira': _agricultor('Lúcia Ferreira', '(61) 99654-2210', 'lucia.ferreira@exemplo.com'),
+    'José Almeida': _agricultor('José Almeida', '(61) 98877-1122', 'jose.almeida@exemplo.com'),
+    'Rosa Nunes': _agricultor('Rosa Nunes', '(61) 99210-3344', 'rosa.nunes@exemplo.com'),
+    'Carlos Menezes': _agricultor('Carlos Menezes', '(61) 98400-5566', 'carlos.menezes@exemplo.com'),
 }
 
 
