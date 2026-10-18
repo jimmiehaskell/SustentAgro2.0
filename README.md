@@ -48,4 +48,4 @@ Django 5.2 com páginas geradas no servidor, Bootstrap 5, PostgreSQL em produç�
 
 A versão 1 (site estático) está em [`legado/`](legado/).
 
-Publicado em https://sustentagro.jimmiehaskell.dev (deploy automático pela branch prod).
+Publicado em https://sustentagro.jimmiehaskell.dev 

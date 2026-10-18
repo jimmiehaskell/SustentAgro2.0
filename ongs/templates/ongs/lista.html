@@ -14,9 +14,13 @@
             {% for o in ods %}<option value="{{ o.numero }}" {% if filtros.ods == o.numero|stringformat:'s' %}selected{% endif %}>{{ o.numero }} · {{ o.nome }}</option>{% endfor %}
           </select></div>
         <div><label class="form-label" for="f-tipo">Tipo de ajuda</label>
-          <select class="form-select" id="f-tipo" name="tipo"><option value="">Todos</option><option value="itens">Itens</option><option value="dinheiro">Dinheiro</option><option value="voluntariado">Voluntariado</option></select></div>
+          <select class="form-select" id="f-tipo" name="tipo"><option value="">Todos</option>
+            {% for valor, rotulo in tipos %}<option value="{{ valor }}" {% if filtros.tipo == valor %}selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+          </select></div>
         <div><label class="form-label" for="f-cidade">Cidade</label>
-          <select class="form-select" id="f-cidade" name="cidade"><option value="">Todas</option>{% for l in localidades %}<option>{{ l.nome }}</option>{% endfor %}</select></div>
+          <select class="form-select" id="f-cidade" name="cidade"><option value="">Todas</option>
+            {% for l in localidades %}<option value="{{ l.nome }}" {% if filtros.cidade == l.nome %}selected{% endif %}>{{ l.nome }}</option>{% endfor %}
+          </select></div>
         <button class="btn btn-primary" type="submit">Filtrar</button>
         <a class="btn btn-outline-secondary" href="{% url 'ongs:lista' %}">Limpar filtros</a>
       </form>
