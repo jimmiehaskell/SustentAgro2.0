@@ -1,11 +1,120 @@
 {% extends 'base.html' %}
+{% comment %}
+  Tela 6 · Publicar oferta (BL-17). RF-18, RF-21, RN-13 (preço só para venda), RN-16 (kg com 1 casa; un inteiro).
+  Os name dos campos são os do model Oferta (colheita/models.py).
+{% endcomment %}
 {% block titulo %}Publicar oferta{% endblock %}
 {% block conteudo %}
+{% now "Y-m-d" as hoje %}
 <div class="container py-4">
-  <h1 class="h3">Publicar oferta</h1>
-  {% include 'componentes/aviso_construcao.html' with item='BL-17' responsavel='Gabriel' tela='6' %}
-  {# RF-18, RN-13 (preço só para venda), RN-16 (kg com 1 casa; un inteiro) #}
-  <p class="text-body-secondary">Categorias: {% for valor, rotulo in categorias %}{{ rotulo }}{% if not forloop.last %}, {% endif %}{% endfor %}.
-  Localidade sugerida: {{ localidade_do_agricultor }}. ONGs para destino opcional: {{ ongs|length }}.</p>
+  <div class="row"><div class="col-12 col-lg-9 d-grid gap-3">
+    <div>
+      <h1 class="h3 mb-1">Publicar oferta</h1>
+      <p class="text-body-secondary mb-0">Conte o que sobrou ou saiu do padrão. As ONGs perto de você veem a oferta e reservam o quanto conseguem receber.</p>
+    </div>
+
+    {# MOCK: na camada 1 (BL-32) este formulário faz POST, valida com colheita.services.validar_oferta e grava a Oferta #}
+    <form class="card form-oferta">
+      <div class="card-body row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="pub-categoria">Categoria</label>
+          <select class="form-select" id="pub-categoria" name="categoria" required>
+            {% for valor, rotulo in categorias %}<option value="{{ valor }}">{{ rotulo }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="pub-produto">Produto</label>
+          <input class="form-control" id="pub-produto" name="produto" maxlength="80" placeholder="Ex.: Alface crespa" required>
+        </div>
+
+        <div class="col-7 col-md-6">
+          <label class="form-label" for="pub-quantidade">Quantidade</label>
+          <input class="form-control text-end" id="pub-quantidade" name="quantidade" type="number" min="0.1" step="0.1"
+                 required aria-describedby="pub-quantidade-ajuda">
+          <div class="form-text" id="pub-quantidade-ajuda">Em kg aceita uma casa decimal; em unidades, só números inteiros.</div>
+        </div>
+        <div class="col-5 col-md-6">
+          <label class="form-label" for="pub-unidade">Unidade</label>
+          <select class="form-select" id="pub-unidade" name="unidade" required>
+            <option value="un">unidades</option>
+            <option value="kg">kg</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="pub-colher-ate">Colher até</label>
+          <input class="form-control" id="pub-colher-ate" name="colher_ate" type="date" min="{{ hoje }}" required>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="pub-localidade">Localidade</label>
+          <select class="form-select" id="pub-localidade" name="localidade" required aria-describedby="pub-localidade-ajuda">
+            {% for localidade in localidades %}
+              <option value="{{ localidade.nome }}"{% if localidade.nome == localidade_do_agricultor %} selected{% endif %}>{{ localidade.nome }} ({{ localidade.uf }})</option>
+            {% endfor %}
+          </select>
+          <div class="form-text" id="pub-localidade-ajuda">Já vem com a do seu cadastro.</div>
+        </div>
+
+        <fieldset class="col-12 col-md-6">
+          <legend class="form-label fs-6 mb-2">Estado</legend>
+          {% for valor, rotulo in estados %}
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="estado" id="estado-{{ valor }}" value="{{ valor }}"{% if forloop.first %} checked{% endif %}>
+              <label class="form-check-label" for="estado-{{ valor }}">{{ rotulo }}</label>
+            </div>
+          {% endfor %}
+        </fieldset>
+        <fieldset class="col-12 col-md-6">
+          <legend class="form-label fs-6 mb-2">Destino</legend>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="destino" id="destino-doar" value="doar" checked>
+            <label class="form-check-label" for="destino-doar">Doar</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="destino" id="destino-vender" value="vender">
+            <label class="form-check-label" for="destino-vender">Vender a preço justo</label>
+          </div>
+        </fieldset>
+
+        {# RN-13: o preço só aparece quando o destino é vender (regra em sustentagro.css, .form-oferta) #}
+        <div class="col-12 col-md-6 campo-preco">
+          <label class="form-label" for="pub-preco">Preço por unidade (R$)</label>
+          <input class="form-control text-end" id="pub-preco" name="preco_unitario" type="number" min="0.01" step="0.01"
+                 placeholder="2,50" aria-describedby="pub-preco-ajuda">
+          <div class="form-text" id="pub-preco-ajuda">O pagamento é combinado direto com a ONG, fora do site.</div>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label" for="pub-retirada">Local de retirada</label>
+          <input class="form-control" id="pub-retirada" name="local_retirada" maxlength="200"
+                 placeholder="Ex.: Chácara 12, Núcleo Rural Alexandre Gusmão" required aria-describedby="pub-retirada-ajuda">
+          <div class="form-text" id="pub-retirada-ajuda">Só a ONG que reservar vê este endereço.</div>
+        </div>
+
+        <fieldset class="col-12 col-md-6">
+          <legend class="form-label fs-6 mb-2">Transporte</legend>
+          {% for valor, rotulo in transportes %}
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="transporte" id="transporte-{{ valor }}" value="{{ valor }}"{% if forloop.first %} checked{% endif %}>
+              <label class="form-check-label" for="transporte-{{ valor }}">{% if valor == 'agricultor_leva' %}Eu levo{% else %}{{ rotulo }}{% endif %}</label>
+            </div>
+          {% endfor %}
+        </fieldset>
+        {# RF-21, RN-04: com ONG de destino, só ela vê a oferta nas primeiras 48 h (regra na camada 3) #}
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="pub-ong-destino">ONG de destino (opcional)</label>
+          <select class="form-select" id="pub-ong-destino" name="ong_destino" aria-describedby="pub-ong-destino-ajuda">
+            <option value="">Aberta a todas as ONGs</option>
+            {% for ong in ongs %}<option value="{{ ong.pk }}">{{ ong.nome }}</option>{% endfor %}
+          </select>
+          <div class="form-text" id="pub-ong-destino-ajuda">Se escolher uma, só ela vê a oferta nas primeiras 48 horas.</div>
+        </div>
+
+        <div class="col-12">
+          <button type="button" class="btn btn-primary">Publicar oferta</button>
+        </div>
+      </div>
+    </form>
+  </div></div>
 </div>
 {% endblock %}

@@ -1,4 +1,8 @@
 {% extends 'base.html' %}
+{% comment %}
+  Tela 7 · Ofertas da Colheita (BL-18). RF-19, RF-20, RF-22, RF-28, D-26.
+  Duas versões: ONG ativa (distância, filtros, reserva) e visitante/doador (só consulta).
+{% endcomment %}
 {% block titulo %}Colheita Solidária{% endblock %}
 {% block conteudo %}
 <div class="container py-4 d-grid gap-3">
@@ -6,22 +10,32 @@
     {# E-06: ONG não aprovada não vê ofertas #}
     <div class="alert alert-warning"><strong>As ofertas aparecem depois da aprovação.</strong> Acompanhe a situação em <a href="{% url 'ongs:minha_ong' %}">Minha conta</a>.</div>
   {% elif versao_ong %}
-    <div><h1 class="h3 mb-1">Ofertas perto de você</h1><p class="text-body-secondary mb-0">Distâncias calculadas a partir da localidade da sua ONG.</p></div>
-    {% include 'componentes/aviso_construcao.html' with item='BL-18' responsavel='Gabriel' tela='7 (perfil ONG ativa)' %}
+    <div><h1 class="h3 mb-1">Ofertas perto de você</h1><p class="text-body-secondary mb-0">Distâncias calculadas a partir de {{ localidade_da_ong }}, a localidade da sua ONG.</p></div>
     {# RF-19: filtros "até 30 km", "até 60 km" e "todas" #}
-    <nav class="d-flex gap-2 flex-wrap" aria-label="Distância máxima">
-      <a class="btn btn-sm {% if dist == '30' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?dist=30">até 30 km</a>
-      <a class="btn btn-sm {% if dist == '60' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?dist=60">até 60 km</a>
-      <a class="btn btn-sm {% if dist == 'todas' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?dist=todas">todas</a>
+    <nav class="d-flex gap-2 flex-wrap align-items-center" aria-label="Distância máxima">
+      <span class="small text-body-secondary">Distância</span>
+      <a class="btn btn-sm {% if dist == '30' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?dist=30"{% if dist == '30' %} aria-current="true"{% endif %}>até 30 km</a>
+      <a class="btn btn-sm {% if dist == '60' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?dist=60"{% if dist == '60' %} aria-current="true"{% endif %}>até 60 km</a>
+      <a class="btn btn-sm {% if dist == 'todas' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="?dist=todas"{% if dist == 'todas' %} aria-current="true"{% endif %}>todas</a>
     </nav>
     {% for oferta in ofertas %}{% include 'componentes/cartao_oferta.html' with oferta=oferta versao_ong=True %}
-    {% empty %}<div class="card card-body text-center">Nenhuma oferta nesta distância.</div>{% endfor %}
+    {% empty %}
+      <div class="card card-body text-center d-grid gap-1">
+        <strong>Nenhuma oferta nesta distância</strong>
+        <span class="text-body-secondary">Amplie a distância para ver ofertas mais longe.</span>
+      </div>
+    {% endfor %}
   {% else %}
-    <div><h1 class="h3 mb-1">Colheita Solidária</h1><p class="text-body-secondary mb-0">Alimento bom que sobrou no campo ou saiu do padrão de venda.</p></div>
-    {% include 'componentes/aviso_construcao.html' with item='BL-18' responsavel='Gabriel' tela='7 (perfil visitante)' %}
+    <div><h1 class="h3 mb-1">Colheita Solidária</h1><p class="text-body-secondary mb-0">Alimento bom que sobrou no campo ou saiu do padrão de venda. As ONGs cadastradas reservam e combinam a retirada com quem plantou.</p></div>
     {# RF-28, D-26: sem distância, contato nem botão; convite para cadastro #}
-    <div class="alert alert-success mb-0"><strong>Você representa uma ONG?</strong> <a href="{% url 'contas:cadastro_perfil' 'ong' %}">Cadastre-se</a> para ver a distância e reservar.</div>
-    {% for oferta in ofertas %}{% include 'componentes/cartao_oferta.html' with oferta=oferta versao_ong=False %}{% endfor %}
+    <div class="alert alert-success mb-0 d-grid gap-2">
+      <div><strong>Você representa uma ONG?</strong> Cadastre a sua para ver a distância de cada oferta e reservar. Agricultor(a)? Cadastre-se para publicar o seu excedente.</div>
+      <div><a class="btn btn-sm btn-primary" href="{% url 'contas:cadastro' %}">Cadastrar</a></div>
+    </div>
+    {% for oferta in ofertas %}{% include 'componentes/cartao_oferta.html' with oferta=oferta versao_ong=False %}
+    {% empty %}
+      <div class="card card-body text-center text-body-secondary">Nenhuma oferta disponível no momento.</div>
+    {% endfor %}
   {% endif %}
 </div>
 {% endblock %}

@@ -2,36 +2,45 @@
 
 MOCK: na camada 1, saldo e distancia_km passam a ser calculados (BL-33, BL-34, ADR-003).
 """
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
+
+from django.utils import timezone
 
 from core.mocks_util import lista, obj
 from ongs.mocks import LOCALIDADES, ONGS
 
 _LOCAL = {l.nome: l for l in LOCALIDADES}
+
+# O e-mail fica no Usuario, ligado ao PerfilPessoa por perfil.usuario (RF-27)
+def _agricultor(nome_completo, telefone, email):
+    return obj(nome_completo=nome_completo, telefone=telefone, usuario=obj(email=email))
+
+
 _AGRICULTORES = {
-    'Antônio Ribeiro': obj(nome_completo='Antônio Ribeiro', telefone='(61) 98123-4567'),
-    'Lúcia Ferreira': obj(nome_completo='Lúcia Ferreira', telefone='(61) 99654-2210'),
-    'José Almeida': obj(nome_completo='José Almeida', telefone='(61) 98877-1122'),
-    'Rosa Nunes': obj(nome_completo='Rosa Nunes', telefone='(61) 99210-3344'),
-    'Carlos Menezes': obj(nome_completo='Carlos Menezes', telefone='(61) 98400-5566'),
+    'Antônio Ribeiro': _agricultor('Antônio Ribeiro', '(61) 98123-4567', 'antonio.ribeiro@exemplo.com'),
+    'Lúcia Ferreira': _agricultor('Lúcia Ferreira', '(61) 99654-2210', 'lucia.ferreira@exemplo.com'),
+    'José Almeida': _agricultor('José Almeida', '(61) 98877-1122', 'jose.almeida@exemplo.com'),
+    'Rosa Nunes': _agricultor('Rosa Nunes', '(61) 99210-3344', 'rosa.nunes@exemplo.com'),
+    'Carlos Menezes': _agricultor('Carlos Menezes', '(61) 98400-5566', 'carlos.menezes@exemplo.com'),
 }
 
 
 def _oferta(pk, produto, categoria, quantidade, saldo, unidade, localidade, distancia, colher_ate, estado,
-            destino, preco, transporte, agricultor, retirada, urgente=False, ong_destino=None):
+            destino, preco, transporte, agricultor, retirada, urgente=False, ong_destino=None,
+            aberta_a_todas_em=None):
     return obj(pk=pk, produto=produto, categoria=categoria, quantidade=Decimal(quantidade),
                saldo=Decimal(saldo), unidade=unidade, localidade=_LOCAL[localidade], distancia_km=distancia,
                colher_ate=colher_ate, estado=estado, destino=destino,
                preco_unitario=Decimal(preco) if preco else None, transporte=transporte,
                agricultor=_AGRICULTORES[agricultor], local_retirada=retirada, situacao='aberta',
-               urgente=urgente, vencida=False, ong_destino=ong_destino)
+               urgente=urgente, vencida=False, ong_destino=ong_destino, aberta_a_todas_em=aberta_a_todas_em)
 
 
 OFERTAS = lista(
     _oferta(106, 'Couve-manteiga', 'hortalicas', 30, 30, 'un', 'Brazlândia', 21, date(2026, 10, 24), 'excedente',
             'doar', None, 'ong_busca', 'Antônio Ribeiro', 'Chácara 12, Núcleo Rural Alexandre Gusmão',
-            ong_destino=ONGS[0]),
+            ong_destino=ONGS[0], aberta_a_todas_em=timezone.now() + timedelta(hours=31)),  # RN-04: 48 h só para a ONG
     _oferta(101, 'Alface crespa', 'hortalicas', 40, 25, 'un', 'Brazlândia', 21, date(2026, 10, 18), 'excedente',
             'doar', None, 'ong_busca', 'Antônio Ribeiro', 'Chácara 12, Núcleo Rural Alexandre Gusmão',
             urgente=True),
