@@ -1,10 +1,11 @@
-{# Cartão de oferta (RF-19, RF-28). Uso: {% include 'componentes/cartao_oferta.html' with oferta=oferta versao_ong=True %} #}
+{# Cartão de oferta (RF-19, RF-22, RF-28). Uso: {% include 'componentes/cartao_oferta.html' with oferta=oferta versao_ong=True %} #}
+{% load l10n %}
 <article class="card{% if oferta.ong_destino and versao_ong %} oferta-direcionada{% endif %}">
   <div class="card-body d-flex flex-wrap gap-3 justify-content-between">
     <div class="d-grid gap-1">
       <div class="d-flex flex-wrap gap-2 align-items-center">
         <h3 class="h6 mb-0">{{ oferta.produto }}</h3>
-        {% if versao_ong and oferta.ong_destino %}<span class="selo selo-limao">Para a sua ONG</span>{% endif %}
+        {% if versao_ong and oferta.ong_destino %}<span class="selo selo-limao">Para a sua ONG · abre a todas em {{ oferta.aberta_a_todas_em|timeuntil }}</span>{% endif %}
         {% if versao_ong and oferta.urgente %}<span class="selo selo-limao">Urgente</span>{% endif %}
         <span class="selo selo-apoio">{% if oferta.destino == 'vender' %}Venda · R$ {{ oferta.preco_unitario|floatformat:2 }}/{{ oferta.unidade }}{% else %}Doação{% endif %}</span>
       </div>
@@ -12,15 +13,23 @@
         <span>{{ oferta.localidade.nome }}</span>
         {% if versao_ong %}<span class="fw-bold text-numero">{{ oferta.distancia_km }} km</span>{% endif %}
         <span>Colher até {{ oferta.colher_ate|date:"d/m" }}</span>
+        {% if versao_ong %}
+          <span>{% if oferta.transporte == 'ong_busca' %}A ONG busca{% else %}O agricultor leva{% endif %}</span>
+        {% else %}
+          <span>{% if oferta.estado == 'excedente' %}Excedente{% else %}Fora do padrão{% endif %}</span>
+        {% endif %}
       </div>
       {% if versao_ong %}<div class="small text-body-secondary">Retirada: {{ oferta.local_retirada }}</div>{% endif %}
       <div class="tabular">{% if versao_ong %}Saldo{% else %}Disponível{% endif %} <strong class="text-numero">{{ oferta.saldo|floatformat:"-1" }} {{ oferta.unidade }}</strong>{% if versao_ong %} de {{ oferta.quantidade|floatformat:"-1" }} {{ oferta.unidade }}{% endif %}</div>
     </div>
     {% if versao_ong %}
       {# MOCK: na camada 1 (BL-34) este formulário faz POST e chama colheita.services.reservar_oferta #}
+      {# RF-20: reserva parcial, de 1 até o saldo #}
       <form class="d-grid gap-2 align-self-center" style="min-width: 10rem">
         <label class="small text-body-secondary" for="qtd-{{ oferta.pk }}">Quantidade ({{ oferta.unidade }})</label>
-        <input class="form-control text-end" id="qtd-{{ oferta.pk }}" type="number" min="0" step="{% if oferta.unidade == 'kg' %}0.1{% else %}1{% endif %}" value="10">
+        <input class="form-control text-end" id="qtd-{{ oferta.pk }}" name="quantidade" type="number"
+               min="{% if oferta.unidade == 'kg' %}0.1{% else %}1{% endif %}" max="{{ oferta.saldo|unlocalize }}"
+               step="{% if oferta.unidade == 'kg' %}0.1{% else %}1{% endif %}" placeholder="até {{ oferta.saldo|floatformat:'-1' }}">
         <button type="button" class="btn btn-primary">Reservar</button>
       </form>
     {% endif %}
