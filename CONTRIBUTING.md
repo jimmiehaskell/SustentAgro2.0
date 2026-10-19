@@ -12,6 +12,7 @@ git clone https://github.com/jimmiehaskell/SustentAgro2.0.git
 cd SustentAgro2.0
 python -m venv .venv
 source .venv/Scripts/activate      # Git Bash no Windows; no PowerShell: .venv\Scripts\Activate.ps1
+source .venv/bin/activate          # no Mac/Linux (no lugar da linha acima)
 pip install -r requirements.txt
 cp .env.example .env               # depois troque a SECRET_KEY por qualquer texto longo
 python manage.py migrate
