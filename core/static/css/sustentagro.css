@@ -123,3 +123,109 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand { font-family: var(--sa-fonte-display);
 .barra-mock { background: #1d1f1c; color: #e6eae2; font-size: .8rem; }
 .barra-mock a { color: #a6e36b; }
 .barra-mock a.atual { color: #fff; font-weight: 700; text-decoration: none; }
+
+/* Tela 04: medidas e componentes de docs/prototipo.html, restritos à BL-11. */
+.cadastro-pagina {
+  --cadastro-sombra: 0 1px 2px rgb(31 36 28 / .06), 0 2px 8px rgb(31 36 28 / .04);
+  --cadastro-perigo: #b42318;
+  container: cadastro / inline-size;
+  font-family: "Figtree", "Segoe UI", system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+[data-bs-theme="dark"] .cadastro-pagina {
+  --cadastro-sombra: 0 1px 2px rgb(0 0 0 / .3);
+  --cadastro-perigo: #ff8a80;
+}
+.cadastro-pagina h1, .cadastro-pagina h2, .cadastro-pagina h3 {
+  font-family: var(--sa-fonte-display); line-height: 1.15; margin: 0; font-weight: 700;
+}
+.cadastro-pagina p, .cadastro-pagina form { margin: 0; }
+.cadastro-pagina button, .cadastro-pagina input, .cadastro-pagina select { font: inherit; color: inherit; }
+.cadastro-pagina :focus-visible { outline: 2px solid var(--bs-link-color); outline-offset: 2px; }
+.cadastro-pagina .largura { max-width: 1120px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.cadastro-pagina .secao { padding-block: 36px; display: grid; gap: 20px; }
+.cadastro-pagina .cabeca-secao { display: grid; gap: 6px; }
+.cadastro-pagina .cabeca-secao h1 { font-size: 26px; }
+.cadastro-pagina .cabeca-secao p { color: var(--bs-secondary-color); max-width: 64ch; }
+.cadastro-pagina .cartao { background: var(--sa-superficie); border: 1px solid var(--bs-border-color);
+  border-radius: 8px; box-shadow: var(--cadastro-sombra); }
+.cadastro-pagina .perfis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.cadastro-pagina .cartao-perfil { width: 100%; height: 100%; padding: 18px; display: grid; gap: 8px;
+  text-align: left; cursor: pointer; color: var(--bs-body-color); align-content: start; }
+.cadastro-pagina .cartao-perfil[aria-pressed="true"] { border-color: var(--sa-verde); box-shadow: 0 0 0 2px var(--sa-verde); }
+.cadastro-pagina .cartao-perfil h3 { font-size: 17px; }
+.cadastro-pagina .cartao-perfil p { font-size: 13.5px; color: var(--bs-secondary-color); }
+.cadastro-pagina .icone { width: 40px; height: 40px; border-radius: 10px; background: var(--sa-apoio);
+  color: var(--sa-sobre-apoio); display: grid; place-items: center; }
+.cadastro-pagina .estreito { max-width: 760px; }
+.cadastro-pagina .formulario { padding: 22px; display: grid; gap: 18px; }
+.cadastro-pagina .formulario h2 { font-size: 21px; }
+.cadastro-pagina .grade-form { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cadastro-pagina .inteira { grid-column: 1 / -1; }
+.cadastro-pagina .campo { display: grid; gap: 5px; }
+.cadastro-pagina .campo > label, .cadastro-pagina .rotulo-campo { font-size: 13.5px; font-weight: 600; }
+.cadastro-pagina .ajuda { font-size: 12.5px; color: var(--bs-secondary-color); }
+.cadastro-pagina .erro { font-size: 12.5px; color: var(--cadastro-perigo); font-weight: 600; }
+.cadastro-pagina .entrada { width: 100%; min-width: 0; padding: 8px 10px; border: 1px solid var(--bs-border-color);
+  border-radius: 6px; background: var(--sa-superficie); }
+.cadastro-pagina .num { font-variant-numeric: tabular-nums; }
+.cadastro-pagina fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.cadastro-pagina legend { float: none; line-height: inherit; margin-bottom: 6px; padding: 0; }
+.cadastro-pagina .opcoes { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.cadastro-pagina .opcoes label { display: flex; gap: 6px; align-items: center; font-size: 14px; font-weight: 500; }
+.cadastro-pagina input[type="checkbox"] { margin: 4px 3px 3px 4px; padding: 0; flex-shrink: 0; }
+.cadastro-pagina .aviso-caixa { border-radius: 8px; padding: 14px 16px; display: grid; gap: 4px; }
+.cadastro-pagina .aviso-caixa.info { background: var(--sa-apoio); color: var(--sa-sobre-apoio); }
+.cadastro-pagina .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border-radius: 6px; padding: 8px 16px; font-weight: 700; font-size: 14px; line-height: 1.5;
+  cursor: pointer; border: 1px solid transparent; text-decoration: none; transition: none;
+  background: var(--sa-verde); color: var(--sa-sobre-verde); }
+.cadastro-pagina .btn:hover { background: var(--sa-verde-forte); }
+.cadastro-pagina .btn:focus-visible { box-shadow: none; }
+.cadastro-toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%); background: var(--bs-body-color); color: var(--bs-body-bg); padding: 10px 18px;
+  border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 8px 24px rgb(0 0 0 / .2);
+  z-index: 30; max-width: calc(100% - 32px); }
+@container cadastro (max-width: 760px) { .cadastro-pagina .perfis { grid-template-columns: 1fr; } }
+@container cadastro (max-width: 640px) { .cadastro-pagina .grade-form { grid-template-columns: 1fr; } }
+
+/* Ajusta o menu compartilhado somente quando a Tela 04 está presente. */
+body:has(.cadastro-pagina) .navbar { padding: 0; }
+body:has(.cadastro-pagina) .navbar > .container {
+  max-width: 1120px; padding: 12px 16px; gap: 22px; justify-content: flex-start;
+}
+body:has(.cadastro-pagina) .navbar-brand {
+  padding: 0; margin: 0; font-size: 20px; font-weight: 800 !important;
+  letter-spacing: -.01em; line-height: 1.5;
+}
+body:has(.cadastro-pagina) .marca-icone { width: 26px; height: 26px; }
+body:has(.cadastro-pagina) .navbar-nav { gap: 18px !important; }
+body:has(.cadastro-pagina) .navbar .nav-link {
+  padding: 4px 0; font-size: 14.5px; font-weight: 500; color: var(--bs-body-color);
+}
+body:has(.cadastro-pagina) .navbar .btn-primary { padding: 6px 14px; font-size: 13px; font-weight: 700; }
+body:has(.cadastro-pagina) .navbar-toggler {
+  margin-left: auto; padding: 6px 10px; border-radius: 6px; border-color: var(--bs-border-color);
+  color: var(--bs-body-color); font-size: 15px; line-height: 1.5;
+}
+body:has(.cadastro-pagina) .navbar-toggler-icon { display: none; }
+body:has(.cadastro-pagina) .navbar-toggler::after { content: "Menu"; }
+body:has(.cadastro-pagina) .navbar .collapsing { transition: none; }
+body:has(.cadastro-pagina) > footer { margin-top: 0 !important; padding-block: 22px !important; }
+body:has(.cadastro-pagina) > footer .container { max-width: 1120px; padding-inline: 16px; font-size: 13px; gap: 8px 20px !important; }
+@media (min-width: 701px) {
+  body:has(.cadastro-pagina) .navbar-toggler { display: none; }
+  body:has(.cadastro-pagina) .navbar-collapse { display: flex !important; flex-basis: auto; }
+  body:has(.cadastro-pagina) .navbar-nav { flex-direction: row; }
+}
+@media (max-width: 700px) {
+  body:has(.cadastro-pagina) .navbar-toggler { display: inline-block; }
+  body:has(.cadastro-pagina) .navbar-collapse { flex-basis: 100%; }
+  body:has(.cadastro-pagina) .navbar-nav,
+  body:has(.cadastro-pagina) .navbar-collapse > .d-flex {
+    flex-direction: column; align-items: flex-start !important; gap: 6px !important;
+  }
+  body:has(.cadastro-pagina) .navbar-collapse > .d-flex { margin-top: 22px; }
+}
