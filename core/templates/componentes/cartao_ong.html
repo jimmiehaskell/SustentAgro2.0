@@ -10,6 +10,17 @@
     <div class="d-flex flex-wrap gap-2">
       {% for ods in ong.ods.all %}{% include 'componentes/selo_ods.html' with ods=ods com_nome=False %}{% endfor %}
     </div>
+    <div class="d-flex flex-wrap gap-1">
+  {% if ong.aceita_itens %}
+    <span class="selo selo-neutro">Itens</span>
+  {% endif %}
+  {% if ong.aceita_dinheiro %}
+    <span class="selo selo-neutro">Dinheiro</span>
+  {% endif %}
+  {% if ong.aceita_voluntariado %}
+    <span class="selo selo-neutro">Voluntariado</span>
+  {% endif %}
+</div>
     {% if precisa %}
       <div class="precisa mt-auto d-grid gap-1">
         <b>Precisa agora</b>

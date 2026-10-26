@@ -17,17 +17,21 @@ EQUIPE = [
 
 
 class InicioView(TemplateView):
-    """Tela 1 · Início (BL-14, Júlia). RF-01, RF-02, RF-03, RF-34."""
     template_name = 'core/inicio.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # MOCK: trocar na camada 1 (BL-30) por Ods com a contagem de ONGs ativas e Ong.objects ativas
-        ongs = ongs_mocks.ONGS
+        ongs = [ong for ong in ongs_mocks.ONGS if ong.situacao == 'ativa']
         context['ods_com_contagem'] = [
-            (ods, sum(1 for ong in ongs if ods in ong.ods)) for ods in ongs_mocks.ODS
+            (ods, sum(1 for ong in ongs if ods in ong.ods)) 
+            for ods in ongs_mocks.ODS
         ]
         context['ongs'] = ongs
+        context['ongs_com_necessidade'] = [
+            (ong, ongs_mocks.precisa_agora(ong))
+            for ong in ongs
+        ]
         context['equipe'] = EQUIPE
         return context
 
