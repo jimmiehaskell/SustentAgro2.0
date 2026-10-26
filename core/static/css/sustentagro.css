@@ -191,6 +191,11 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand { font-family: var(--sa-fonte-display);
 @container cadastro (max-width: 760px) { .cadastro-pagina .perfis { grid-template-columns: 1fr; } }
 @container cadastro (max-width: 640px) { .cadastro-pagina .grade-form { grid-template-columns: 1fr; } }
 
+/* Tela 05: formulário de login com a largura e centralização do protótipo. */
+.login-pagina .login { max-width: 420px; margin: 0 auto; }
+.login-pagina .ajuda-acesso { font-size: 13px; color: var(--bs-secondary-color); }
+.login-pagina .form-label { margin-bottom: 0; }
+
 /* Ajusta o menu compartilhado somente quando a Tela 04 está presente. */
 body:has(.cadastro-pagina) .navbar { padding: 0; }
 body:has(.cadastro-pagina) .navbar > .container {
