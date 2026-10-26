@@ -243,47 +243,37 @@ h3,
 /* Carrossel de ONGs da tela inicial */
 .carrossel-ongs {
   display: flex;
-  align-items: stretch;
+  flex-direction: row;
+  flex-wrap: nowrap;
   gap: .75rem;
   overflow-x: auto;
   padding: .25rem .1rem .75rem;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  scrollbar-color: var(--bs-border-color) transparent;
+  -webkit-overflow-scrolling: touch;
 }
 
-.item-carrossel-ong {
-  flex: 0 0 145px;
+.carrossel-ongs > .item-carrossel-ong {
+  flex: 0 0 260px;   /* não encolhe, não cresce, 220px fixos */
+  width: 260px;
+  max-width: 260px;
   min-width: 0;
   scroll-snap-align: start;
 }
 
-.item-carrossel-ong .card {
+.carrossel-ongs .item-carrossel-ong > .card,
+.carrossel-ongs .item-carrossel-ong > * {
   height: 100%;
+  width: 100%;
 }
 
-.carrossel-ongs .capa-ong {
-  min-height: 4rem;
-}
-
-.carrossel-ongs .logo-ong {
-  width: 2rem;
-  height: 2rem;
-  font-size: .75rem;
-}
-
-@media (min-width: 768px) {
-  .item-carrossel-ong {
-    flex-basis: 185px;
+@media (max-width: 767.98px) {
+  .carrossel-ongs > .item-carrossel-ong {
+    flex-basis: 145px;
+    width: 145px;
+    max-width: 145px;
   }
 }
-
-@media (min-width: 1200px) {
-  .item-carrossel-ong {
-    flex-basis: 220px;
-  }
-}
-
 /* "Precisa agora" no cartão da ONG */
 .precisa {
   background: var(--bs-tertiary-bg);

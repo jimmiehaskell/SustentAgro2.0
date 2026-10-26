@@ -73,3 +73,22 @@
   </section>
 </div>
 {% endblock %}
+{% block scripts %}
+<script>
+  const carrossel = document.getElementById('carrossel-ongs');
+
+  document.querySelectorAll('[data-carrossel]').forEach((botao) => {
+    botao.addEventListener('click', () => {
+      const item = carrossel?.querySelector('.item-carrossel-ong');
+
+      if (item) {
+        const distancia = item.getBoundingClientRect().width + 12;
+        carrossel.scrollBy({
+          left: distancia * Number(botao.dataset.carrossel),
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}
