@@ -2,6 +2,7 @@ from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 from core.perfis import destino_minha_conta, perfil_da_requisicao
+from contas import mocks as contas_mocks
 from doacoes import mocks as doacoes_mocks
 from ongs import mocks as ongs_mocks
 
@@ -40,4 +41,6 @@ class ContribuicoesView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['contribuicoes'] = doacoes_mocks.CONTRIBUICOES_DA_PESSOA
+        context['pessoa'] = contas_mocks.PERFIL_PESSOA
+        context['menu_pessoa_mock'] = context['pessoa']
         return context

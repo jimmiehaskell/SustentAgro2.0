@@ -1,13 +1,82 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block titulo %}Minhas contribuições{% endblock %}
 {% block conteudo %}
-<div class="container py-4">
-  <h1 class="h3">Minhas contribuições</h1>
-  {% include 'componentes/aviso_construcao.html' with item='BL-13' responsavel='Vinicius' tela='14' %}
-  <ul class="list-group">
-    {% for c in contribuicoes %}
-      <li class="list-group-item d-flex justify-content-between gap-2"><span>{{ c.tipo }} · {{ c.ong.nome }} · {{ c.quantidade|floatformat:"-2" }}</span><span class="selo selo-neutro">{{ c.situacao }}</span></li>
-    {% endfor %}
-  </ul>
+<div class="contribuicoes-pagina">
+  <div class="container largura">
+    <section class="secao" aria-labelledby="titulo-contribuicoes">
+      <header class="conta-cabeca d-flex flex-wrap align-items-center justify-content-between">
+        <div class="cabeca-secao">
+          <h1 id="titulo-contribuicoes">Minhas contribuições</h1>
+          <p>{{ pessoa.nome_completo }}</p>
+        </div>
+      </header>
+
+      <div class="lista-itens d-grid">
+        {% for c in contribuicoes %}
+          <article class="card cartao linha-item" id="contribuicao-{{ c.pk }}">
+            <div class="topo d-flex flex-wrap justify-content-between align-items-baseline">
+              <h2>
+                {% if c.tipo == 'itens' %}
+                  {{ c.quantidade|floatformat:"-2" }} {{ c.necessidade.titulo|lower }}
+                {% elif c.tipo == 'voluntariado' %}
+                  {# MOCK: texto do exemplo aprovado; adaptar à necessidade na camada 2 (BL-45). #}
+                  Voluntariado · cozinha aos sábados
+                {% elif c.necessidade %}
+                  {# MOCK: nome curto do exemplo aprovado; adaptar à necessidade na camada 2 (BL-45). #}
+                  R$ {{ c.quantidade|floatformat:"2" }} · máquinas de costura
+                {% else %}
+                  R$ {{ c.quantidade|floatformat:"2" }} · doação livre
+                {% endif %}
+              </h2>
+              {% if c.situacao == 'pendente' %}
+                <span class="selo selo-aviso">Aguardando a ONG</span>
+              {% elif c.situacao == 'confirmada' %}
+                <span class="selo selo-apoio">Confirmada</span>
+              {% elif c.situacao == 'recusada' %}
+                <span class="selo selo-perigo">Recusada pela ONG</span>
+              {% endif %}
+            </div>
+            <div class="meta d-flex flex-wrap">
+              <span>{{ c.ong.nome }}</span>
+              <span>
+                {% if c.situacao == 'confirmada' %}
+                  Confirmada em {{ c.confirmada_em|date:"d/m" }}
+                {% elif c.situacao == 'recusada' %}
+                  {# MOCK: o modelo ainda não tem data de recusa (BL-45). #}
+                  Recusada em 25/09
+                {% elif c.tipo == 'itens' %}
+                  Prometida em {{ c.criada_em|date:"d/m" }}
+                {% else %}
+                  Registrada em {{ c.criada_em|date:"d/m" }}
+                {% endif %}
+              </span>
+            </div>
+            {% if c.situacao == 'pendente' %}
+              <div class="acoes d-flex flex-wrap align-items-end">
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-cancelar-contribuicao="{{ c.pk }}">Cancelar</button>
+              </div>
+            {% endif %}
+          </article>
+        {% empty %}
+          <p>Você ainda não tem contribuições.</p>
+        {% endfor %}
+      </div>
+
+      <section class="card cartao linha-item" aria-labelledby="titulo-agricultor">
+        <h2 id="titulo-agricultor">Você também planta?</h2>
+        <p class="convite-agricultor">Ative o perfil de agricultor(a) para publicar excedente na Colheita Solidária, sem criar outra conta.</p>
+        <div class="acoes d-flex flex-wrap align-items-end">
+          {% if pessoa.eh_agricultor %}
+            <span class="selo selo-apoio" id="perfil-agricultor-ativo">Perfil de agricultor(a) ativo</span>
+          {% else %}
+            <button class="btn btn-outline-secondary btn-sm" type="button" id="ativar-agricultor">Ativar perfil de agricultor(a)</button>
+          {% endif %}
+        </div>
+      </section>
+    </section>
+  </div>
+  <div class="contribuicoes-toast" id="aviso-contribuicoes" role="status" aria-live="polite" hidden></div>
 </div>
 {% endblock %}
+{% block scripts %}<script src="{% static 'contas/js/contribuicoes.js' %}"></script>{% endblock %}

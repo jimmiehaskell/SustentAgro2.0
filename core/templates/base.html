@@ -56,7 +56,21 @@
       {% endwith %}
       <div class="d-flex flex-wrap align-items-center gap-3">
         <button type="button" class="btn btn-sm btn-outline-secondary" id="botao-tema" aria-label="Alternar tema claro e escuro">Tema</button>
-        {% if perfil != 'visitante' %}
+        {% if menu_pessoa_mock %}
+          {# MOCK: trocar na camada 1 pelo perfil autenticado (BL-28). Restrito à BL-13. #}
+          <span class="small text-body-secondary">{{ menu_pessoa_mock.nome_completo }}</span>
+          <a class="nav-link" href="{% url 'contas:contribuicoes' %}">Minha conta</a>
+          {% if request.user.is_authenticated %}
+            <form method="post" action="{% url 'contas:sair' %}" class="m-0">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-link nav-link p-0">Sair</button>
+            </form>
+          {% elif modo_debug %}
+            <a class="nav-link" href="{% url 'core:perfil_mock' 'visitante' %}?proximo={% url 'core:inicio' %}">Sair</a>
+          {% else %}
+            <a class="nav-link" href="{% url 'core:inicio' %}">Sair</a>
+          {% endif %}
+        {% elif perfil != 'visitante' %}
           <span class="small text-body-secondary">{{ perfil_nome }}</span>
           <a class="nav-link" href="{% url url_minha_conta %}">Minha conta</a>
           <form method="post" action="{% url 'contas:sair' %}" class="m-0">
