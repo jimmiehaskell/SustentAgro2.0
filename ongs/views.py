@@ -6,7 +6,7 @@ from ongs.choices import TipoNecessidade
 
 
 class ListaOngsView(TemplateView):
-    """Tela 2 · Lista de ONGs (BL-15, Júlia). RF-04, RF-05, UC-01.
+    """
     MOCK: trocar na camada 1 (BL-30) por Ong.objects ativas com os filtros da querystring.
     """
     template_name = 'ongs/lista.html'
