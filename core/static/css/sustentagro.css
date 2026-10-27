@@ -114,6 +114,10 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand { font-family: var(--sa-fonte-display);
 .oferta-direcionada { border-color: var(--sa-verde) !important; }
 /* Publicar oferta: o preço só aparece quando o destino é vender (RN-13) */
 .form-oferta:has(#destino-doar:checked) .campo-preco { display: none; }
+/* Minhas ofertas do agricultor (Tela 13): reserva com o contato da ONG (RF-27) */
+.contato-reserva { background: var(--bs-tertiary-bg); border-radius: .375rem; padding: .6rem .75rem; font-size: .85rem;
+  display: grid; gap: .1rem; }
+.contato-reserva strong { font-size: .7rem; letter-spacing: .07em; text-transform: uppercase; color: var(--bs-secondary-color); }
 
 /* Aviso de tela em construção (camada 0) */
 .aviso-construcao { border: 1px dashed var(--bs-border-color); border-radius: .5rem; padding: .75rem 1rem;
