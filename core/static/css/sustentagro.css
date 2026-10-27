@@ -117,7 +117,7 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand { font-family: var(--sa-fonte-display);
 
 /* Painel de impacto (Tela 8) */
 .indicador .valor { font-family: var(--sa-fonte-display); font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 800; line-height: 1.15; }
-.grafico-kg { position: relative; height: 15rem; }
+.grafico-kg { position: relative; height: 15rem; min-width: 0; } /* min-width: deixa o Chart.js encolher dentro do grid */
 .fatia-ods { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .3rem .75rem; font-size: .85rem; }
 .fatia-ods .progress { grid-column: 1 / -1; }
 .painel-vazio { text-align: center; padding: 2.5rem 1rem; color: var(--bs-secondary-color); }
