@@ -3,10 +3,149 @@
 {% block conteudo %}
 <div class="container py-4">
   <h1 class="h3">Necessidades</h1>
-  {% include 'componentes/aviso_construcao.html' with item='BL-16' responsavel='Júlia' tela='10' %}
+
   {% include 'componentes/abas_ong.html' with aba=aba %}
-  <ul class="list-group">
-    {% for n in ong.necessidades.all %}<li class="list-group-item">{{ n.titulo }} · {{ n.confirmado|floatformat:"-2" }} de {{ n.meta|floatformat:"-2" }} {{ n.unidade }} · {{ n.situacao }}</li>{% endfor %}
-  </ul>
+
+  <div class="d-grid gap-3">
+    {% for n in ong.necessidades.all %}
+      <article class="card">
+        <div class="card-body d-grid gap-3">
+          <div>
+            <h2 class="h5 mb-1">{{ n.titulo }}</h2>
+            <span class="text-body-secondary">
+              {% if n.tipo == 'itens' %}Itens
+              {% elif n.tipo == 'dinheiro' %}Dinheiro
+              {% elif n.tipo == 'voluntariado' %}Voluntariado
+              {% endif %}
+              · {{ n.situacao|capfirst }}
+            </span>
+          </div>
+
+          <p class="mb-0">
+            {{ n.confirmado|floatformat:"-2" }} de
+            {{ n.meta|floatformat:"-2" }} {{ n.unidade }}
+          </p>
+
+          <div class="progress"
+               role="progressbar"
+               aria-label="Progresso de {{ n.titulo }}"
+               aria-valuenow="{{ n.percentual }}"
+               aria-valuemin="0"
+               aria-valuemax="100">
+            {% if n.percentual >= 100 %}
+              <div class="progress-bar w-100"></div>
+            {% elif n.percentual >= 75 %}
+              <div class="progress-bar w-75"></div>
+            {% elif n.percentual >= 50 %}
+              <div class="progress-bar w-50"></div>
+            {% elif n.percentual >= 25 %}
+              <div class="progress-bar w-25"></div>
+            {% else %}
+              <div class="progress-bar" aria-hidden="true"></div>
+            {% endif %}
+          </div>
+
+          {% if n.situacao == 'aberta' %}
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-outline-primary"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#editar-{{ n.pk }}"
+                      aria-expanded="false"
+                      aria-controls="editar-{{ n.pk }}">
+                Editar
+              </button>
+
+              <button class="btn btn-outline-danger"
+                      type="button"
+                      disabled
+                      aria-describedby="aviso-encerrar-{{ n.pk }}">
+                Encerrar
+              </button>
+
+              <span id="aviso-encerrar-{{ n.pk }}" class="small text-body-secondary">
+                A ação ficará disponível quando a gestão de necessidades for implementada.
+              </span>
+            </div>
+
+            <div class="collapse" id="editar-{{ n.pk }}">
+              <form class="border rounded p-3 d-grid gap-3">
+                <h3 class="h6">Editar necessidade</h3>
+
+                <div>
+                  <label class="form-label" for="titulo-{{ n.pk }}">Título</label>
+                  <input class="form-control"
+                         id="titulo-{{ n.pk }}"
+                         value="{{ n.titulo }}">
+                </div>
+
+                <div>
+                  <label class="form-label" for="meta-{{ n.pk }}">Meta</label>
+                  <input class="form-control"
+                         id="meta-{{ n.pk }}"
+                         type="number"
+                         min="1"
+                         step="0.1"
+                         value="{{ n.meta }}">
+                </div>
+
+                <p class="small text-body-secondary mb-0">
+                  Formulário demonstrativo: as alterações ainda não são salvas.
+                </p>
+              </form>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+    {% empty %}
+      <div class="card card-body text-body-secondary">
+        Nenhuma necessidade cadastrada.
+      </div>
+    {% endfor %}
+
+    <section class="card">
+      <div class="card-body">
+        <h2 class="h5">Nova necessidade</h2>
+
+        <form class="d-grid gap-3">
+          <div>
+            <label class="form-label" for="nova-titulo">Título</label>
+            <input class="form-control"
+                   id="nova-titulo"
+                   placeholder="Ex.: Cestas básicas">
+          </div>
+
+          <div>
+            <label class="form-label" for="novo-tipo">Tipo</label>
+            <select class="form-select" id="novo-tipo">
+              <option value="itens">Itens</option>
+              <option value="dinheiro">Dinheiro</option>
+              <option value="voluntariado">Voluntariado</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="form-label" for="nova-unidade">Unidade</label>
+            <input class="form-control"
+                   id="nova-unidade"
+                   placeholder="Ex.: cestas, kg, voluntários ou R$">
+          </div>
+
+          <div>
+            <label class="form-label" for="nova-meta">Meta</label>
+            <input class="form-control"
+                   id="nova-meta"
+                   type="number"
+                   min="1"
+                   step="0.1">
+          </div>
+
+          <p class="small text-body-secondary mb-0">
+            Formulário demonstrativo: a necessidade ainda não é salva.
+          </p>
+        </form>
+      </div>
+    </section>
+  </div>
 </div>
 {% endblock %}

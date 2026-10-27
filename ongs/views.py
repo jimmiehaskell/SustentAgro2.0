@@ -1,6 +1,6 @@
 from django.http import Http404
 from django.views.generic import TemplateView
-
+from core.mixins import OngAtivaRequeridaMixin, OngRequeridaMixin
 from ongs import mocks
 from ongs.choices import TipoNecessidade
 
@@ -49,7 +49,7 @@ class DetalheOngView(TemplateView):
         return context
 
 
-class MinhaOngView(TemplateView):
+class MinhaOngView(OngRequeridaMixin, TemplateView):
     """Tela 9 · Minha conta da ONG: situação e perfil (BL-16, Júlia). RF-11, RF-12, RN-20.
     MOCK: trocar na camada 1 (BL-31). Proteger com OngRequeridaMixin (aceita pendente e reprovada).
     """
@@ -61,8 +61,8 @@ class MinhaOngView(TemplateView):
         return context
 
 
-class NecessidadesView(TemplateView):
-    """Tela 10 · Necessidades da ONG (BL-16, Júlia). RF-13, RN-21. Camada 2 (BL-41).
+class NecessidadesView(OngAtivaRequeridaMixin, TemplateView):
+    """Camada 2 (BL-41).
     MOCK: trocar na camada 2. Proteger com OngAtivaRequeridaMixin.
     """
     template_name = 'ongs/necessidades.html'

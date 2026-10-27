@@ -33,12 +33,13 @@ def _necessidade(pk, titulo, tipo, unidade, meta, confirmado, situacao='aberta')
 
 
 def _ong(pk, nome, nome_curto, localidade, slogan, ods, aceita, familias, telefone, email, pix, descricao,
-         necessidades):
+         necessidades, motivo_reprovacao=''):
     return obj(pk=pk, nome=nome, nome_curto=nome_curto, localidade=_LOCAL[localidade], slogan=slogan,
                descricao=descricao, logo=None, capa=None, telefone=telefone, email_contato=email, site='',
                chave_pix=pix, familias_por_mes=familias, aceita_itens='itens' in aceita,
                aceita_dinheiro='dinheiro' in aceita, aceita_voluntariado='voluntariado' in aceita,
-               situacao='ativa', ods=lista(*[_ODS[n] for n in ods]), necessidades=lista(*necessidades))
+               situacao='ativa', motivo_reprovacao=motivo_reprovacao,
+               ods=lista(*[_ODS[n] for n in ods]), necessidades=lista(*necessidades))
 
 
 ONGS = lista(

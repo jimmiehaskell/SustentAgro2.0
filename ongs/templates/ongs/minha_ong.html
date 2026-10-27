@@ -3,7 +3,24 @@
 {% block conteudo %}
 <div class="container py-4">
   <h1 class="h3">Minha conta</h1>
-  {% include 'componentes/aviso_construcao.html' with item='BL-16' responsavel='Júlia' tela='9' %}
+
+  {% if perfil == 'ong-pendente' %}
+  <div class="alert alert-warning">
+    <strong>Cadastro em análise</strong>
+    <p class="mb-0">Sua ONG ainda não aparece nas telas públicas. Você pode completar o perfil enquanto aguarda a análise.</p>
+  </div>
+{% elif perfil == 'ong-reprovada' %}
+  <div class="alert alert-danger">
+    <strong>Cadastro não aprovado</strong>
+    <p class="mb-0">Motivo: {{ ong.motivo_reprovacao }}</p>
+  </div>
+{% else %}
+  <div class="alert alert-success">
+    <strong>ONG ativa</strong>
+    <p class="mb-0">Seu cadastro foi aprovado e sua página está pública.</p>
+  </div>
+{% endif %}
+
   {% include 'componentes/abas_ong.html' with aba=aba %}
   {# RN-20: perfil = ong | ong-pendente | ong-reprovada; mostrar a situação e o motivo, se reprovada #}
   <p>Perfil atual: <strong>{{ perfil }}</strong> · ONG de exemplo: {{ ong.nome }} ({{ ong.localidade.nome }})</p>
