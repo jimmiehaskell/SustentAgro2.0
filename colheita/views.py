@@ -57,8 +57,8 @@ class MinhasOfertasView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['agricultor'] = mocks.AGRICULTOR
         context['ofertas'] = mocks.OFERTAS_DO_AGRICULTOR
-        context['reservas'] = [r for r in mocks.RESERVAS_DA_ONG if r.situacao == 'ativa']
         return context
 
 

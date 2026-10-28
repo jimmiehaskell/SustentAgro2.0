@@ -24,7 +24,7 @@ Projeto acadêmico do Itinerário 5 – Trilha Cultura e Desenvolvimento Social,
 ## Rodar localmente
 
 ```bash
-python -m venv .venv && source .venv/Scripts/activate
+python -m venv .venv && source .venv/Scripts/activate   # no Mac/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 python manage.py migrate
