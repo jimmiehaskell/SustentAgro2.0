@@ -32,6 +32,7 @@ class AConfirmarView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['ong'] = ongs_mocks.ONGS[0]  # MOCK: a ONG logada (Cozinha Solidária Sol Nascente)
         context['pendentes'] = mocks.PENDENTES_DA_ONG
         context['aba'] = 'doacoes'
         return context

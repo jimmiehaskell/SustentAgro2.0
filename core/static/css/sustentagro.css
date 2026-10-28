@@ -130,6 +130,11 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand { font-family: var(--sa-fonte-display);
 .aviso-construcao { border: 1px dashed var(--bs-border-color); border-radius: .5rem; padding: .75rem 1rem;
   font-size: .85rem; color: var(--bs-secondary-color); }
 
+/* Contribuir (Tela 15): doação livre esconde a necessidade (D-24) e caixa da chave Pix (RF-17) */
+.form-dinheiro:has(#destino-livre:checked) .campo-necessidade { display: none; }
+.caixa-pix { background: var(--sa-apoio); color: var(--sa-sobre-apoio); border-radius: .5rem; padding: .85rem 1rem; }
+.caixa-pix code { color: inherit; font-size: 1rem; overflow-wrap: anywhere; }
+
 /* Barra do perfil simulado: só aparece com DEBUG */
 .barra-mock { background: #1d1f1c; color: #e6eae2; font-size: .8rem; }
 .barra-mock a { color: #a6e36b; }

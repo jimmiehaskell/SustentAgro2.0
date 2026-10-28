@@ -1,16 +1,100 @@
 {% extends 'base.html' %}
+{% load static %}
+{% comment %}
+  Tela 15 · Contribuir (BL-22). RF-14 (itens), RF-15 (voluntariado), RF-17 (dinheiro).
+  Tudo fica pendente até a ONG confirmar; só então a barra da necessidade avança (RF-16).
+{% endcomment %}
 {% block titulo %}Contribuir{% endblock %}
 {% block conteudo %}
-<div class="container py-4">
-  <h1 class="h3">Contribuir</h1>
-  {% include 'componentes/aviso_construcao.html' with item='BL-22' responsavel='Pedro' tela='15' %}
-  <p>ONG: <strong>{{ ong.nome }}</strong> · forma escolhida: <strong>{{ tipo }}</strong></p>
-  <ul class="nav nav-pills mb-3">
+<div class="container py-4" style="max-width: 46rem">
+  <h1 class="h3 mb-1">Contribuir com {{ ong.nome }}</h1>
+  <p class="text-body-secondary">Escolha como você quer ajudar.</p>
+
+  <ul class="nav nav-underline mb-3">
     {% if ong.aceita_itens %}<li class="nav-item"><a class="nav-link {% if tipo == 'itens' %}active{% endif %}" href="{% url 'doacoes:contribuir' ong.pk 'itens' %}">Doar itens</a></li>{% endif %}
     {% if ong.aceita_voluntariado %}<li class="nav-item"><a class="nav-link {% if tipo == 'voluntariado' %}active{% endif %}" href="{% url 'doacoes:contribuir' ong.pk 'voluntariado' %}">Ser voluntário(a)</a></li>{% endif %}
     {% if ong.aceita_dinheiro %}<li class="nav-item"><a class="nav-link {% if tipo == 'dinheiro' %}active{% endif %}" href="{% url 'doacoes:contribuir' ong.pk 'dinheiro' %}">Doar dinheiro</a></li>{% endif %}
   </ul>
-  <ul class="list-group">{% for n in necessidades %}<li class="list-group-item">{{ n.titulo }}</li>{% empty %}<li class="list-group-item">Sem necessidade aberta deste tipo{% if tipo == 'dinheiro' %}: só doação livre{% endif %}.</li>{% endfor %}</ul>
-  {% if tipo == 'dinheiro' %}<p class="mt-3">Chave Pix: <code>{{ ong.chave_pix }}</code></p>{% endif %}
+
+  {# MOCK: na camada 2 (BL-42, BL-43) o formulário faz POST e grava a Contribuicao pendente #}
+  {% if tipo == 'itens' %}
+    {% if necessidades %}
+      <form class="card card-body d-grid gap-3">
+        <div>
+          <label class="form-label" for="necessidade">Necessidade</label>
+          <select class="form-select" id="necessidade" name="necessidade">
+            {% for n in necessidades %}<option value="{{ n.pk }}">{{ n.titulo }} · {{ n.confirmado|floatformat:"-2" }} de {{ n.meta|floatformat:"-2" }} {{ n.unidade }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="quantidade">Quantidade que você vai entregar</label>
+          <input class="form-control" style="max-width: 10rem" id="quantidade" name="quantidade" type="number" min="1" step="1" value="5">
+          <div class="form-text">A barra só avança quando a ONG confirmar que recebeu.</div>
+        </div>
+        <div><button class="btn btn-primary" type="button">Registrar promessa de doação</button></div>
+      </form>
+    {% else %}
+      <div class="card card-body text-center text-body-secondary">Esta ONG não tem necessidade de itens aberta agora.</div>
+    {% endif %}
+
+  {% elif tipo == 'voluntariado' %}
+    {% if necessidades %}
+      <form class="card card-body d-grid gap-3">
+        <div>
+          <label class="form-label" for="necessidade">Vaga de voluntariado</label>
+          <select class="form-select" id="necessidade" name="necessidade">
+            {% for n in necessidades %}<option value="{{ n.pk }}">{{ n.titulo }} · {{ n.confirmado|floatformat:"-2" }} de {{ n.meta|floatformat:"-2" }} {{ n.unidade }}</option>{% endfor %}
+          </select>
+        </div>
+        <p class="small text-body-secondary mb-0">A ONG vê seu nome e telefone e entra em contato para combinar. Sua inscrição fica pendente até ela confirmar.</p>
+        <div><button class="btn btn-primary" type="button">Quero me inscrever</button></div>
+      </form>
+    {% else %}
+      <div class="card card-body text-center text-body-secondary">Esta ONG não tem vaga de voluntariado aberta agora.</div>
+    {% endif %}
+
+  {% else %}
+    <form class="card card-body d-grid gap-3 form-dinheiro">
+      <fieldset>
+        <legend class="form-label fs-6">Para onde vai o dinheiro</legend>
+        {% if necessidades %}
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="destino" id="destino-necessidade" value="necessidade" checked>
+            <label class="form-check-label" for="destino-necessidade">Para uma necessidade</label>
+          </div>
+        {% endif %}
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="destino" id="destino-livre" value="livre"{% if not necessidades %} checked{% endif %}>
+          <label class="form-check-label" for="destino-livre">Doação livre à ONG</label>
+        </div>
+      </fieldset>
+      {% if necessidades %}
+        {# D-24: sem necessidade, a doação é livre (o campo some por CSS, em sustentagro.css .form-dinheiro) #}
+        <div class="campo-necessidade">
+          <label class="form-label" for="necessidade">Necessidade</label>
+          <select class="form-select" id="necessidade" name="necessidade">
+            {% for n in necessidades %}<option value="{{ n.pk }}">{{ n.titulo }} · R$ {{ n.confirmado|floatformat:"2g" }} de R$ {{ n.meta|floatformat:"2g" }}</option>{% endfor %}
+          </select>
+        </div>
+      {% endif %}
+      <div>
+        <label class="form-label" for="valor">Valor (R$)</label>
+        <input class="form-control" style="max-width: 10rem" id="valor" name="quantidade" type="number" min="1" step="0.01" value="50.00">
+      </div>
+      <div class="caixa-pix d-grid gap-2">
+        <strong>Chave Pix da ONG</strong>
+        <code id="chave-pix">{{ ong.chave_pix }}</code>
+        <span class="small">Faça o Pix pelo aplicativo do seu banco. O SustentAgro não recebe nem movimenta dinheiro: só registra a sua doação para a ONG confirmar.</span>
+        <div><button class="btn btn-outline-primary btn-sm" type="button" data-copiar="chave-pix">Copiar chave</button></div>
+      </div>
+      <div><button class="btn btn-primary" type="button">Registrar doação</button></div>
+    </form>
+  {% endif %}
+
+  <p class="mt-3"><a href="{% url 'ongs:detalhe' ong.pk %}">Voltar para a página da ONG</a></p>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{% if tipo == 'dinheiro' %}<script src="{% static 'doacoes/copiar_pix.js' %}"></script>{% endif %}
 {% endblock %}

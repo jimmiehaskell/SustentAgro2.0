@@ -1,10 +1,56 @@
 {% extends 'base.html' %}
+{% load l10n %}
+{% comment %}
+  Tela 12 · Doações a confirmar pela ONG (BL-22). RF-16, RN-02.
+  A barra da necessidade só avança com o que a ONG confirma ter recebido.
+{% endcomment %}
 {% block titulo %}Doações a confirmar{% endblock %}
 {% block conteudo %}
 <div class="container py-4">
-  <h1 class="h3">Doações a confirmar</h1>
-  {% include 'componentes/aviso_construcao.html' with item='BL-22' responsavel='Pedro' tela='12' %}
+  <h1 class="h3 mb-1">Minha conta</h1>
+  <p class="text-body-secondary">{{ ong.nome }}</p>
   {% include 'componentes/abas_ong.html' with aba=aba %}
-  <ul class="list-group">{% for c in pendentes %}<li class="list-group-item">{{ c.pessoa.nome_completo }} · {{ c.tipo }} · {{ c.necessidade.titulo }} · {{ c.quantidade|floatformat:"-2" }}</li>{% endfor %}</ul>
+
+  <p class="text-body-secondary">Confirme só o que chegou de fato. A barra da necessidade avança com a quantidade ou o valor confirmado.</p>
+
+  <div class="d-grid gap-3">
+    {% for c in pendentes %}
+      <article class="card card-body d-grid gap-2">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <h2 class="h6 mb-0">
+            {{ c.necessidade.titulo }}
+            {% if c.tipo == 'itens' %}· <span class="tabular">{{ c.quantidade|floatformat:"-2" }} {{ c.necessidade.unidade }}</span>
+            {% elif c.tipo == 'dinheiro' %}· <span class="tabular">R$ {{ c.quantidade|floatformat:"2g" }}</span>{% endif %}
+          </h2>
+          <span class="selo selo-limao">{% if c.tipo == 'voluntariado' %}Inscrição pendente{% else %}Promessa pendente{% endif %}</span>
+        </div>
+        <div class="small text-body-secondary">
+          {{ c.pessoa.nome_completo }} ·
+          {% if c.tipo == 'dinheiro' %}Pix para a chave {{ ong.chave_pix }}{% else %}<a class="text-nowrap" href="tel:{{ c.pessoa.telefone }}">{{ c.pessoa.telefone }}</a>{% endif %}
+        </div>
+
+        {# MOCK: na camada 2 (BL-44) este formulário faz POST e chama doacoes.services.confirmar ou recusar #}
+        <form class="d-flex flex-wrap gap-2 align-items-end">
+          {% if c.tipo == 'itens' %}
+            <div>
+              <label class="form-label small mb-1" for="recebido-{{ c.pk }}">Recebidas ({{ c.necessidade.unidade }})</label>
+              <input class="form-control text-end" style="max-width: 8rem" id="recebido-{{ c.pk }}" name="quantidade_confirmada"
+                     type="number" min="1" step="1" value="{{ c.quantidade|unlocalize|floatformat:'0' }}">
+            </div>
+          {% elif c.tipo == 'dinheiro' %}
+            <div>
+              <label class="form-label small mb-1" for="recebido-{{ c.pk }}">Valor recebido (R$)</label>
+              <input class="form-control text-end" style="max-width: 9rem" id="recebido-{{ c.pk }}" name="quantidade_confirmada"
+                     type="number" min="0.01" step="0.01" value="{{ c.quantidade|unlocalize }}">
+            </div>
+          {% endif %}
+          <button type="button" class="btn btn-primary">Confirmar</button>
+          <button type="button" class="btn btn-outline-secondary">Recusar</button>
+        </form>
+      </article>
+    {% empty %}
+      <div class="card card-body text-center text-body-secondary">Nenhuma doação ou inscrição esperando confirmação.</div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}
