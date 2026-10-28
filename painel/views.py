@@ -11,6 +11,12 @@ class PainelView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # MOCK: /impacto/?vazio=1 mostra o estado vazio, como o botão "Ver sem dados" do protótipo
+        if self.request.GET.get('vazio'):
+            context['indicadores'] = mocks.INDICADORES_VAZIO
+            context['kg_por_mes'] = []
+            context['fatia_por_ods'] = []
+            return context
         context['indicadores'] = mocks.INDICADORES
         context['kg_por_mes'] = mocks.KG_POR_MES
         context['fatia_por_ods'] = mocks.FATIA_POR_ODS

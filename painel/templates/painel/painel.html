@@ -1,17 +1,60 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block titulo %}Impacto da rede{% endblock %}
 {% block conteudo %}
 <div class="container py-4">
-  <h1 class="h3">Impacto da rede</h1>
-  {% include 'componentes/aviso_construcao.html' with item='BL-20' responsavel='Pedro' tela='8' %}
-  {# RF-29: indicadores; RF-30: gráfico com Chart.js por CDN (ADR-005); RF-31: fatia por ODS #}
+  <h1 class="h3 mb-1">Impacto da rede</h1>
+  <p class="text-body-secondary">Números calculados a partir das ações confirmadas pelas ONGs: colheitas recebidas, doações e voluntariado.</p>
+
+  {# RF-29: indicadores (RN-08 a RN-11) #}
   <div class="row g-3 mb-3">
-    <div class="col-6 col-lg-3"><div class="card card-body"><span class="h4 text-numero mb-0">{{ indicadores.kg_salvos|floatformat:"0" }} kg</span><span class="small text-body-secondary">salvos do desperdício</span></div></div>
-    <div class="col-6 col-lg-3"><div class="card card-body"><span class="h4 text-numero mb-0">{{ indicadores.familias_atendidas }}</span><span class="small text-body-secondary">famílias atendidas por mês</span></div></div>
-    <div class="col-6 col-lg-3"><div class="card card-body"><span class="h4 text-numero mb-0">R$ {{ indicadores.renda_gerada|floatformat:2 }}</span><span class="small text-body-secondary">de renda para agricultores</span></div></div>
-    <div class="col-6 col-lg-3"><div class="card card-body"><span class="h4 text-numero mb-0">{{ indicadores.ongs_ativas }}</span><span class="small text-body-secondary">ONGs ativas</span></div></div>
+    <div class="col-6 col-lg-3"><div class="card card-body indicador h-100"><span class="valor text-numero">{{ indicadores.kg_salvos|floatformat:"0g" }} kg</span><span class="small text-body-secondary">de alimento salvo do desperdício</span></div></div>
+    <div class="col-6 col-lg-3"><div class="card card-body indicador h-100"><span class="valor text-numero">{{ indicadores.familias_atendidas|floatformat:"0g" }}</span><span class="small text-body-secondary">famílias atendidas por mês</span></div></div>
+    <div class="col-6 col-lg-3"><div class="card card-body indicador h-100"><span class="valor text-numero">R$ {{ indicadores.renda_gerada|floatformat:"2g" }}</span><span class="small text-body-secondary">de renda gerada para agricultores</span></div></div>
+    <div class="col-6 col-lg-3"><div class="card card-body indicador h-100"><span class="valor text-numero">{{ indicadores.ongs_ativas }}</span><span class="small text-body-secondary">ONGs ativas na rede</span></div></div>
   </div>
-  <p class="small text-body-secondary">Kg por mês: {% for mes, kg in kg_por_mes %}{{ mes }} {{ kg }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
-  <p class="small text-body-secondary">Por ODS: {% for ods, pct in fatia_por_ods %}{{ ods.numero }} ({{ pct }}%){% if not forloop.last %} · {% endif %}{% endfor %}</p>
+
+  <div class="row g-3">
+    {# RF-30: kg por mês, pela data do recebimento (RN-23, E-09). Gráfico com Chart.js por CDN (ADR-005) #}
+    <div class="col-12 col-lg-7">
+      <div class="card card-body h-100 d-grid gap-2 align-content-start">
+        <h2 class="h5 mb-0">Quilos recebidos por mês</h2>
+        {% if kg_por_mes %}
+          <div class="grafico-kg"><canvas id="grafico-kg" role="img" aria-label="Quilos recebidos por mês: {% for mes, kg in kg_por_mes %}{{ mes }} {{ kg }} kg{% if not forloop.last %}, {% endif %}{% endfor %}"></canvas></div>
+          <p class="small text-body-secondary mb-0">Mês da confirmação do recebimento. O último mês ainda está em andamento.</p>
+          {{ kg_por_mes|json_script:"dados-kg-por-mes" }}
+        {% else %}
+          <div class="painel-vazio">Ainda não há colheitas recebidas. O gráfico aparece quando uma ONG confirmar o primeiro recebimento.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# RF-31: percentual das ações confirmadas por ODS (RN-07, E-10) #}
+    <div class="col-12 col-lg-5">
+      <div class="card card-body h-100 d-grid gap-2 align-content-start">
+        <h2 class="h5 mb-0">Ações confirmadas por ODS</h2>
+        {% for ods, pct in fatia_por_ods %}
+          <div class="fatia-ods">
+            {% include 'componentes/selo_ods.html' with ods=ods com_nome=True %}
+            <strong class="tabular">{{ pct }}%</strong>
+            <div class="progress" role="progressbar" aria-label="ODS {{ ods.numero }}: {{ pct }}% das ações confirmadas"
+                 aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" style="width: {{ pct }}%; background: {{ ods.cor }}"></div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="painel-vazio">Sem ações confirmadas ainda.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{% if kg_por_mes %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+        integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC" crossorigin="anonymous"></script>
+<script src="{% static 'painel/grafico_kg.js' %}"></script>
+{% endif %}
 {% endblock %}
