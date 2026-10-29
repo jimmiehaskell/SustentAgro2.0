@@ -3,6 +3,15 @@
 Toda função que muda dados levanta django.core.exceptions.ValidationError com uma mensagem em
 português quando a regra não é atendida; a view mostra essa mensagem para a pessoa.
 """
+import math
+from datetime import date
+from decimal import Decimal
+
+from django.core.exceptions import ValidationError
+
+from colheita.choices import Destino, Unidade
+
+RAIO_DA_TERRA_KM = 6371.0
 
 
 def distancia_km(origem, destino):
@@ -10,7 +19,11 @@ def distancia_km(origem, destino):
     usando latitude e longitude. Mesma localidade = 0. Devolve float arredondado para 1 casa.
     Testes: colheita/tests/test_distancia.py
     """
-    raise NotImplementedError('BL-33')
+    lat1, lon1 = math.radians(origem.latitude), math.radians(origem.longitude)
+    lat2, lon2 = math.radians(destino.latitude), math.radians(destino.longitude)
+    a = (math.sin((lat2 - lat1) / 2) ** 2
+         + math.cos(lat1) * math.cos(lat2) * math.sin((lon2 - lon1) / 2) ** 2)
+    return round(2 * RAIO_DA_TERRA_KM * math.asin(math.sqrt(a)), 1)
 
 
 def saldo(oferta):
@@ -25,8 +38,44 @@ def validar_oferta(oferta):
     - destino = vender sem preço, ou destino = doar com preço;
     - unidade = un com quantidade fracionada;
     - colher_ate no passado.
+    Também recusa quantidade ou preço menores ou iguais a zero. Os erros saem por campo, para o
+    formulário mostrar cada mensagem ao lado do campo certo.
+    Testes: colheita/tests/test_oferta.py
     """
-    raise NotImplementedError('BL-32')
+    erros = {}
+
+    if oferta.quantidade <= 0:
+        erros['quantidade'] = 'Informe uma quantidade maior que zero.'
+    else:
+        erro_fracao = erro_de_fracao(oferta.quantidade, oferta.unidade)
+        if erro_fracao:
+            erros['quantidade'] = erro_fracao
+
+    if oferta.destino == Destino.VENDER:
+        if oferta.preco_unitario is None:
+            erros['preco_unitario'] = 'Informe o preço para vender a oferta.'
+        elif oferta.preco_unitario <= 0:
+            erros['preco_unitario'] = 'O preço precisa ser maior que zero.'
+    elif oferta.preco_unitario is not None:
+        erros['preco_unitario'] = 'Oferta de doação não tem preço.'
+
+    # Mesma referência de "hoje" dos testes (date.today(), relógio do sistema)
+    if oferta.colher_ate < date.today():
+        erros['colher_ate'] = 'A data "colher até" não pode estar no passado.'
+
+    if erros:
+        raise ValidationError(erros)
+
+
+def erro_de_fracao(quantidade, unidade):
+    """RN-16, E-01. Devolve a mensagem de erro se a quantidade tem mais casas decimais do que a unidade
+    aceita (kg: uma casa; un: só inteiros), ou None se está certa. Serve também à reserva e ao recebimento.
+    """
+    if unidade == Unidade.UN and quantidade != quantidade.to_integral_value():
+        return 'Em unidades, informe só números inteiros.'
+    if unidade == Unidade.KG and quantidade != quantidade.quantize(Decimal('0.1')):
+        return 'Em kg, informe no máximo uma casa decimal.'
+    return None
 
 
 def reservar_oferta(oferta, ong, quantidade):
