@@ -68,8 +68,19 @@
 
   <section class="py-4" id="sobre">
     <h2 class="h4">Sobre o SustentAgro</h2>
-    {# RF-34 (desejável): texto do projeto e a equipe (P-09) #}
-    <ul class="small">{% for nome in equipe %}<li>{{ nome }}</li>{% endfor %}</ul>
+    {# RF-34, P-09: texto do projeto e os 11 nomes da lista oficial da equipe #}
+    <div class="row g-4">
+      <div class="col-12 col-lg-7">
+        <p class="text-body-secondary">Alimento bom para consumo se perde no campo por ser excedente ou por estar fora do padrão estético, enquanto ONGs e cozinhas comunitárias têm demanda que não conseguem atender. O SustentAgro liga agricultores familiares, ONGs e quem quer ajudar, e mostra o impacto dessa rede em números públicos.</p>
+        <p class="text-body-secondary">Projeto do Itinerário 5, Trilha Cultura e Desenvolvimento Social, com foco nos ODS 2, 8 e 10.</p>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="card card-body">
+          <h3 class="h6">Equipe do projeto</h3>
+          <ul class="small mb-0">{% for nome in equipe %}<li>{{ nome }}</li>{% endfor %}</ul>
+        </div>
+      </div>
+    </div>
   </section>
 </div>
 {% endblock %}
