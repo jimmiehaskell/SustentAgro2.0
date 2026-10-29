@@ -13,3 +13,6 @@ KG_POR_MES = [('mai', 320), ('jun', 540), ('jul', 610), ('ago', 880), ('set', 11
 
 # (ODS, percentual das ações confirmadas) (RN-07)
 FATIA_POR_ODS = [(_ODS[2], 34), (_ODS[1], 22), (_ODS[10], 18), (_ODS[4], 12), (_ODS[8], 9), (_ODS[5], 5)]
+
+# Estado vazio, antes da primeira ação confirmada (protótipo: botão "Ver sem dados")
+INDICADORES_VAZIO = obj(kg_salvos=Decimal(0), familias_atendidas=0, renda_gerada=Decimal(0), ongs_ativas=0)
