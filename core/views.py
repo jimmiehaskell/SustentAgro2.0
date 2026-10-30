@@ -17,6 +17,7 @@ EQUIPE = [
 
 
 class InicioView(TemplateView):
+    """Tela 1 · Início (BL-14, Júlia). RF-01, RF-02, RF-03, RF-34."""
     template_name = 'core/inicio.html'
 
     def get_context_data(self, **kwargs):
