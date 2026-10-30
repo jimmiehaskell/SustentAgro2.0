@@ -17,10 +17,11 @@ class ContribuirView(TemplateView):
         context = super().get_context_data(**kwargs)
         ong = ongs_mocks.ong_por_pk(kwargs['ong_pk'])
         tipo = kwargs['tipo']
-        if ong is None or tipo not in TIPOS:
+        if ong is None or tipo not in TIPOS or not getattr(ong, f'aceita_{tipo}'):
             raise Http404
         context.update(ong=ong, tipo=tipo,
-                       necessidades=[n for n in ong.necessidades if n.situacao == 'aberta' and n.tipo == tipo])
+                       necessidades=[(n, n.meta - n.confirmado) for n in ong.necessidades
+                                     if n.situacao == 'aberta' and n.tipo == tipo])
         return context
 
 

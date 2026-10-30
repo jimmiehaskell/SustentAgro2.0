@@ -10,7 +10,7 @@ class TelaContribuirTest(TestCase):
     def test_doar_itens(self):  # RF-14
         resposta = self._abrir('itens')
         self.assertContains(resposta, 'Registrar promessa de doação')
-        self.assertContains(resposta, 'Cestas básicas')
+        self.assertContains(resposta, 'Cestas básicas · faltam 18 cestas')   # protótipo: quanto falta
         self.assertNotContains(resposta, 'Tela em construção')
 
     def test_ser_voluntario(self):  # RF-15
@@ -24,6 +24,9 @@ class TelaContribuirTest(TestCase):
 
     def test_tipo_invalido_da_404(self):
         self.assertEqual(self._abrir('outra-coisa').status_code, 404)
+
+    def test_tipo_que_a_ong_nao_aceita_da_404(self):  # UC-07
+        self.assertEqual(self._abrir('dinheiro', ong_pk=2).status_code, 404)
 
 
 class TelaAConfirmarTest(TestCase):

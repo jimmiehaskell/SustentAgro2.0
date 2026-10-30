@@ -23,7 +23,7 @@
         <div>
           <label class="form-label" for="necessidade">Necessidade</label>
           <select class="form-select" id="necessidade" name="necessidade">
-            {% for n in necessidades %}<option value="{{ n.pk }}">{{ n.titulo }} · {{ n.confirmado|floatformat:"-2" }} de {{ n.meta|floatformat:"-2" }} {{ n.unidade }}</option>{% endfor %}
+            {% for n, falta in necessidades %}<option value="{{ n.pk }}">{{ n.titulo }} · faltam {{ falta|floatformat:"-2" }} {{ n.unidade }}</option>{% endfor %}
           </select>
         </div>
         <div>
@@ -43,7 +43,7 @@
         <div>
           <label class="form-label" for="necessidade">Vaga de voluntariado</label>
           <select class="form-select" id="necessidade" name="necessidade">
-            {% for n in necessidades %}<option value="{{ n.pk }}">{{ n.titulo }} · {{ n.confirmado|floatformat:"-2" }} de {{ n.meta|floatformat:"-2" }} {{ n.unidade }}</option>{% endfor %}
+            {% for n, falta in necessidades %}<option value="{{ n.pk }}">{{ n.titulo }} · {{ falta|floatformat:"-2" }} vagas</option>{% endfor %}
           </select>
         </div>
         <p class="small text-body-secondary mb-0">A ONG vê seu nome e telefone e entra em contato para combinar. Sua inscrição fica pendente até ela confirmar.</p>
@@ -73,7 +73,7 @@
         <div class="campo-necessidade">
           <label class="form-label" for="necessidade">Necessidade</label>
           <select class="form-select" id="necessidade" name="necessidade">
-            {% for n in necessidades %}<option value="{{ n.pk }}">{{ n.titulo }} · R$ {{ n.confirmado|floatformat:"2g" }} de R$ {{ n.meta|floatformat:"2g" }}</option>{% endfor %}
+            {% for n, falta in necessidades %}<option value="{{ n.pk }}">{{ n.titulo }} · faltam R$ {{ falta|floatformat:"2g" }}</option>{% endfor %}
           </select>
         </div>
       {% endif %}

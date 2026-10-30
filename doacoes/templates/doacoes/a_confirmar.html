@@ -22,7 +22,7 @@
             {% if c.tipo == 'itens' %}· <span class="tabular">{{ c.quantidade|floatformat:"-2" }} {{ c.necessidade.unidade }}</span>
             {% elif c.tipo == 'dinheiro' %}· <span class="tabular">R$ {{ c.quantidade|floatformat:"2g" }}</span>{% endif %}
           </h2>
-          <span class="selo selo-limao">{% if c.tipo == 'voluntariado' %}Inscrição pendente{% else %}Promessa pendente{% endif %}</span>
+          <span class="selo selo-aviso">{% if c.tipo == 'voluntariado' %}Inscrição pendente{% else %}Promessa pendente{% endif %}</span>
         </div>
         <div class="small text-body-secondary">
           {{ c.pessoa.nome_completo }} ·
@@ -33,7 +33,7 @@
         <form class="d-flex flex-wrap gap-2 align-items-end">
           {% if c.tipo == 'itens' %}
             <div>
-              <label class="form-label small mb-1" for="recebido-{{ c.pk }}">Recebidas ({{ c.necessidade.unidade }})</label>
+              <label class="form-label small mb-1" for="recebido-{{ c.pk }}">Recebidas</label>
               <input class="form-control text-end" style="max-width: 8rem" id="recebido-{{ c.pk }}" name="quantidade_confirmada"
                      type="number" min="1" step="1" value="{{ c.quantidade|unlocalize|floatformat:'0' }}">
             </div>
@@ -44,8 +44,8 @@
                      type="number" min="0.01" step="0.01" value="{{ c.quantidade|unlocalize }}">
             </div>
           {% endif %}
-          <button type="button" class="btn btn-primary">Confirmar</button>
-          <button type="button" class="btn btn-outline-secondary">Recusar</button>
+          <button type="button" class="btn btn-primary btn-sm">Confirmar</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">Recusar</button>
         </form>
       </article>
     {% empty %}
