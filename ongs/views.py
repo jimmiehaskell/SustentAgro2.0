@@ -16,12 +16,15 @@ class ListaOngsView(TemplateView):
         q = self.request.GET
         filtros = {'q': q.get('q', ''), 'ods': q.get('ods', ''), 'tipo': q.get('tipo', ''),
                    'cidade': q.get('cidade', '')}
-        ongs = list(mocks.ONGS)
+        ongs = [ong for ong in mocks.ONGS if ong.situacao == 'ativa']
         # MOCK: filtros em memória, combinados por E lógico (RF-04); no BL-30 viram filtros da consulta
         if filtros['q']:
             termo = filtros['q'].casefold()
             ongs = [o for o in ongs
-                    if any(termo in campo.casefold() for campo in (o.nome, o.nome_curto, o.slogan, o.descricao))]
+                    if any(
+                        termo in campo.casefold()
+                          for campo in (o.nome, o.nome_curto, o.slogan, o.descricao, o.localidade.nome,*(ods.nome for ods in o.ods))
+                          )]
         if filtros['ods'].isdigit():
             ongs = [o for o in ongs if any(ods.numero == int(filtros['ods']) for ods in o.ods)]
         if filtros['tipo'] in TipoNecessidade.values:
