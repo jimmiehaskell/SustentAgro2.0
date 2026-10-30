@@ -135,6 +135,41 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand { font-family: var(--sa-fonte-display);
 .barra-mock a { color: #a6e36b; }
 .barra-mock a.atual { color: #fff; font-weight: 700; text-decoration: none; }
 
+/* Carrossel de ONGs da tela inicial */
+.carrossel-ongs {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: .75rem;
+  overflow-x: auto;
+  padding: .25rem .1rem .75rem;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.carrossel-ongs > .item-carrossel-ong {
+  flex: 0 0 260px;   /* não encolhe, não cresce, 220px fixos */
+  width: 260px;
+  max-width: 260px;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.carrossel-ongs .item-carrossel-ong > .card,
+.carrossel-ongs .item-carrossel-ong > * {
+  height: 100%;
+  width: 100%;
+}
+
+@media (max-width: 767.98px) {
+  .carrossel-ongs > .item-carrossel-ong {
+    flex-basis: 145px;
+    width: 145px;
+    max-width: 145px;
+  }
+}
+
 /* Tela 04: detalhes visuais próprios do cadastro. */
 .cadastro-pagina .formulario-cadastro { max-width: 760px; }
 .cadastro-pagina .cartao-perfil { color: var(--bs-body-color); }
@@ -146,133 +181,3 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand { font-family: var(--sa-fonte-display);
   transform: translateX(-50%); background: var(--bs-body-color); color: var(--bs-body-bg); padding: 10px 18px;
   border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 8px 24px rgb(0 0 0 / .2);
   z-index: 30; max-width: calc(100% - 32px); }
-
-/* Ajusta o menu compartilhado somente quando a Tela 04 está presente. */
-body:has(.cadastro-pagina) .navbar { padding: 0; }
-body:has(.cadastro-pagina) .navbar > .container {
-  max-width: 1120px; padding: 12px 16px; gap: 22px; justify-content: flex-start;
-}
-body:has(.cadastro-pagina) .navbar-brand {
-  padding: 0; margin: 0; font-size: 20px; font-weight: 800 !important;
-  letter-spacing: -.01em; line-height: 1.5;
-}
-body:has(.cadastro-pagina) .marca-icone { width: 26px; height: 26px; }
-body:has(.cadastro-pagina) .navbar-nav { gap: 18px !important; }
-body:has(.cadastro-pagina) .navbar .nav-link {
-  padding: 4px 0; font-size: 14.5px; font-weight: 500; color: var(--bs-body-color);
-}
-body:has(.cadastro-pagina) .navbar .btn-primary { padding: 6px 14px; font-size: 13px; font-weight: 700; }
-body:has(.cadastro-pagina) .navbar-toggler {
-  margin-left: auto; padding: 6px 10px; border-radius: 6px; border-color: var(--bs-border-color);
-  color: var(--bs-body-color); font-size: 15px; line-height: 1.5;
-}
-body:has(.cadastro-pagina) .navbar-toggler-icon { display: none; }
-body:has(.cadastro-pagina) .navbar-toggler::after { content: "Menu"; }
-body:has(.cadastro-pagina) .navbar .collapsing { transition: none; }
-body:has(.cadastro-pagina) > footer { margin-top: 0 !important; padding-block: 22px !important; }
-body:has(.cadastro-pagina) > footer .container { max-width: 1120px; padding-inline: 16px; font-size: 13px; gap: 8px 20px !important; }
-@media (min-width: 701px) {
-  body:has(.cadastro-pagina) .navbar-toggler { display: none; }
-  body:has(.cadastro-pagina) .navbar-collapse { display: flex !important; flex-basis: auto; }
-  body:has(.cadastro-pagina) .navbar-nav { flex-direction: row; }
-}
-@media (max-width: 700px) {
-  body:has(.cadastro-pagina) .navbar-toggler { display: inline-block; }
-  body:has(.cadastro-pagina) .navbar-collapse { flex-basis: 100%; }
-  body:has(.cadastro-pagina) .navbar-nav,
-  body:has(.cadastro-pagina) .navbar-collapse > .d-flex {
-    flex-direction: column; align-items: flex-start !important; gap: 6px !important;
-  }
-  body:has(.cadastro-pagina) .navbar-collapse > .d-flex { margin-top: 22px; }
-
-/* Tela 05: formulário de login com a largura e centralização do protótipo. */
-.login-pagina .login { max-width: 420px; margin: 0 auto; }
-.login-pagina .ajuda-acesso { font-size: 13px; color: var(--bs-secondary-color); }
-.login-pagina .form-label { margin-bottom: 0; }
-
-
-/* Tela 14 · Minha conta da pessoa (BL-13). Medidas de docs/prototipo.html. */
-.contribuicoes-pagina {
-  --conta-sombra: 0 1px 2px rgb(31 36 28 / .06), 0 2px 8px rgb(31 36 28 / .04);
-  --conta-aviso: #8a5a00;
-  --conta-aviso-apoio: #fff4d6;
-  --conta-perigo: #b42318;
-  --conta-perigo-apoio: #fdecea;
-  font-size: 15px;
-  line-height: 1.5;
-}
-[data-bs-theme="dark"] .contribuicoes-pagina {
-  --conta-sombra: 0 1px 2px rgb(0 0 0 / .3);
-  --conta-aviso: #f2c14e;
-  --conta-aviso-apoio: #3a3020;
-  --conta-perigo: #ff8a80;
-  --conta-perigo-apoio: #3a1f1d;
-}
-.contribuicoes-pagina .largura { max-width: 1120px; padding-inline: 16px; }
-.contribuicoes-pagina .secao { padding-block: 36px; display: grid; gap: 20px; }
-.contribuicoes-pagina .conta-cabeca { gap: 12px; }
-.contribuicoes-pagina .cabeca-secao { display: grid; gap: 6px; }
-.contribuicoes-pagina h1, .contribuicoes-pagina h2 { line-height: 1.15; margin: 0; }
-.contribuicoes-pagina h1 { font-size: 26px; }
-.contribuicoes-pagina .cabeca-secao p { color: var(--bs-secondary-color); max-width: 64ch; }
-.contribuicoes-pagina p { margin: 0; }
-.contribuicoes-pagina .lista-itens { gap: 12px; }
-.contribuicoes-pagina .cartao { background: var(--sa-superficie); border: 1px solid var(--bs-border-color);
-  border-radius: 8px; box-shadow: var(--conta-sombra); }
-.contribuicoes-pagina .linha-item { padding: 16px; display: grid; gap: 10px; min-width: 0; }
-.contribuicoes-pagina .topo { gap: 10px; }
-.contribuicoes-pagina .linha-item h2 { font-size: 16.5px; }
-.contribuicoes-pagina .meta { gap: 4px 14px; color: var(--bs-secondary-color); font-size: 13px; }
-.contribuicoes-pagina .acoes { gap: 8px; }
-.contribuicoes-pagina .selo-aviso { background: var(--conta-aviso-apoio); color: var(--conta-aviso); }
-.contribuicoes-pagina .selo-perigo { background: var(--conta-perigo-apoio); color: var(--conta-perigo); }
-.contribuicoes-pagina .acoes .btn { padding: 5px 12px; border: 1px solid var(--bs-border-color);
-  border-radius: 6px; background: transparent; color: var(--bs-body-color); font-size: 13px;
-  font-weight: 700; line-height: 1.5; box-shadow: none; }
-.contribuicoes-pagina .acoes .btn:hover { background: var(--bs-tertiary-bg); }
-.contribuicoes-pagina .convite-agricultor { color: var(--bs-secondary-color); font-size: 14px; }
-.contribuicoes-toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-  transform: translateX(-50%); background: var(--bs-body-color); color: var(--bs-body-bg);
-  padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 14px;
-  box-shadow: 0 8px 24px rgb(0 0 0 / .2); z-index: 30; max-width: calc(100% - 32px); }
-
-/* Menu e rodapé da Tela 14 nas medidas do protótipo, sem alterar as demais telas. */
-body:has(.contribuicoes-pagina) .navbar { padding: 0; }
-body:has(.contribuicoes-pagina) .navbar > .container {
-  max-width: 1120px; padding: 12px 16px; gap: 22px; justify-content: flex-start;
-}
-body:has(.contribuicoes-pagina) .navbar-brand {
-  padding: 0; margin: 0; font-size: 20px; font-weight: 800 !important;
-  letter-spacing: -.01em; line-height: 1.5;
-}
-body:has(.contribuicoes-pagina) .marca-icone { width: 26px; height: 26px; }
-body:has(.contribuicoes-pagina) .navbar-nav { gap: 18px !important; }
-body:has(.contribuicoes-pagina) .navbar .nav-link {
-  padding: 4px 0; font-size: 14.5px; font-weight: 500; color: var(--bs-body-color);
-}
-body:has(.contribuicoes-pagina) .navbar .btn-primary { padding: 6px 14px; font-size: 13px; font-weight: 700; }
-body:has(.contribuicoes-pagina) .navbar-toggler {
-  margin-left: auto; padding: 6px 10px; border-radius: 6px; border-color: var(--bs-border-color);
-  color: var(--bs-body-color); font-size: 15px; line-height: 1.5;
-}
-body:has(.contribuicoes-pagina) .navbar-toggler-icon { display: none; }
-body:has(.contribuicoes-pagina) .navbar-toggler::after { content: "Menu"; }
-body:has(.contribuicoes-pagina) .navbar .collapsing { transition: none; }
-body:has(.contribuicoes-pagina) > footer { margin-top: 0 !important; padding-block: 22px !important; }
-body:has(.contribuicoes-pagina) > footer .container {
-  max-width: 1120px; padding-inline: 16px; font-size: 13px; gap: 8px 20px !important;
-}
-@media (min-width: 701px) {
-  body:has(.contribuicoes-pagina) .navbar-toggler { display: none; }
-  body:has(.contribuicoes-pagina) .navbar-collapse { display: flex !important; flex-basis: auto; }
-  body:has(.contribuicoes-pagina) .navbar-nav { flex-direction: row; }
-}
-@media (max-width: 700px) {
-  body:has(.contribuicoes-pagina) .navbar-toggler { display: inline-block; }
-  body:has(.contribuicoes-pagina) .navbar-collapse { flex-basis: 100%; }
-  body:has(.contribuicoes-pagina) .navbar-nav,
-  body:has(.contribuicoes-pagina) .navbar-collapse > .d-flex {
-    flex-direction: column; align-items: flex-start !important; gap: 6px !important;
-  }
-  body:has(.contribuicoes-pagina) .navbar-collapse > .d-flex { margin-top: 22px; }
-}
