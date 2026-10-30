@@ -146,3 +146,38 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand { font-family: var(--sa-fonte-display);
 .barra-mock { background: #1d1f1c; color: #e6eae2; font-size: .8rem; }
 .barra-mock a { color: #a6e36b; }
 .barra-mock a.atual { color: #fff; font-weight: 700; text-decoration: none; }
+
+/* Carrossel de ONGs da tela inicial */
+.carrossel-ongs {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: .75rem;
+  overflow-x: auto;
+  padding: .25rem .1rem .75rem;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.carrossel-ongs > .item-carrossel-ong {
+  flex: 0 0 260px;   /* não encolhe, não cresce, 220px fixos */
+  width: 260px;
+  max-width: 260px;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.carrossel-ongs .item-carrossel-ong > .card,
+.carrossel-ongs .item-carrossel-ong > * {
+  height: 100%;
+  width: 100%;
+}
+
+@media (max-width: 767.98px) {
+  .carrossel-ongs > .item-carrossel-ong {
+    flex-basis: 145px;
+    width: 145px;
+    max-width: 145px;
+  }
+}
