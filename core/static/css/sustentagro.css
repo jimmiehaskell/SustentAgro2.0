@@ -181,3 +181,15 @@ h1, h2, h3, .h1, .h2, .h3, .navbar-brand { font-family: var(--sa-fonte-display);
     max-width: 145px;
   }
 }
+
+/* Tela 04: detalhes visuais próprios do cadastro. */
+.cadastro-pagina .formulario-cadastro { max-width: 760px; }
+.cadastro-pagina .cartao-perfil { color: var(--bs-body-color); }
+.cadastro-pagina .cartao-perfil.selecionado { border-color: var(--sa-verde); box-shadow: 0 0 0 2px var(--sa-verde); }
+.cadastro-pagina .icone { width: 40px; height: 40px; border-radius: 10px; background: var(--sa-apoio);
+  color: var(--sa-sobre-apoio); display: grid; place-items: center; }
+.cadastro-pagina .alert-success { --bs-alert-bg: var(--sa-apoio); --bs-alert-color: var(--sa-sobre-apoio); --bs-alert-border-color: var(--sa-apoio); }
+.cadastro-toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%); background: var(--bs-body-color); color: var(--bs-body-bg); padding: 10px 18px;
+  border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 8px 24px rgb(0 0 0 / .2);
+  z-index: 30; max-width: calc(100% - 32px); }
