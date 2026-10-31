@@ -85,5 +85,5 @@ def ong_por_pk(pk):
 
 
 def precisa_agora(ong):
-    abertas = [n for n in ong.necessidades if n.situacao == 'aberta']
-    return abertas[-1] if abertas else None
+    """Necessidade aberta mais recente, usada no cartão da lista (RF-05)."""
+    return next((n for n in ong.necessidades if n.situacao == 'aberta'), None)
