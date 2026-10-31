@@ -14,6 +14,8 @@ from colheita.choices import Destino, SituacaoReserva, Unidade
 
 RAIO_DA_TERRA_KM = 6371.0
 
+RAIO_DA_TERRA_KM = 6371.0
+
 
 def distancia_km(origem, destino):
     """RN-15 (BL-33, Gabriel). Distância em linha reta (fórmula de haversine) entre duas localidades,
