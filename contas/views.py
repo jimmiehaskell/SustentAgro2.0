@@ -42,5 +42,4 @@ class ContribuicoesView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['contribuicoes'] = doacoes_mocks.CONTRIBUICOES_DA_PESSOA
         context['pessoa'] = contas_mocks.PERFIL_PESSOA
-        context['menu_pessoa_mock'] = context['pessoa']
         return context

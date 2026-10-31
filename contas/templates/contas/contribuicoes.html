@@ -3,48 +3,46 @@
 {% block titulo %}Minhas contribuições{% endblock %}
 {% block conteudo %}
 <div class="contribuicoes-pagina">
-  <div class="container largura">
-    <section class="secao" aria-labelledby="titulo-contribuicoes">
-      <header class="conta-cabeca d-flex flex-wrap align-items-center justify-content-between">
-        <div class="cabeca-secao">
-          <h1 id="titulo-contribuicoes">Minhas contribuições</h1>
-          <p>{{ pessoa.nome_completo }}</p>
+  <div class="container py-4">
+    <section class="d-grid gap-4" aria-labelledby="titulo-contribuicoes">
+      <header class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-grid gap-2">
+          <h1 class="h3 mb-0" id="titulo-contribuicoes">Minhas contribuições</h1>
+          <p class="text-body-secondary mb-0">{{ pessoa.nome_completo }}</p>
         </div>
       </header>
 
-      <div class="lista-itens d-grid">
+      <div class="d-grid gap-3">
         {% for c in contribuicoes %}
-          <article class="card cartao linha-item" id="contribuicao-{{ c.pk }}">
-            <div class="topo d-flex flex-wrap justify-content-between align-items-baseline">
-              <h2>
-                {% if c.tipo == 'itens' %}
-                  {{ c.quantidade|floatformat:"-2" }} {{ c.necessidade.titulo|lower }}
-                {% elif c.tipo == 'voluntariado' %}
-                  {# MOCK: texto do exemplo aprovado; adaptar à necessidade na camada 2 (BL-45). #}
-                  Voluntariado · cozinha aos sábados
-                {% elif c.necessidade %}
-                  {# MOCK: nome curto do exemplo aprovado; adaptar à necessidade na camada 2 (BL-45). #}
-                  R$ {{ c.quantidade|floatformat:"2" }} · máquinas de costura
-                {% else %}
-                  R$ {{ c.quantidade|floatformat:"2" }} · doação livre
+          <article class="card" id="contribuicao-{{ c.pk }}">
+            <div class="card-body d-grid gap-3">
+              <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2">
+                <h2 class="h6 mb-0">
+                  {% if c.tipo == 'itens' %}
+                    {{ c.quantidade|floatformat:"-2" }} {{ c.necessidade.titulo|lower }}
+                  {% elif c.tipo == 'voluntariado' %}
+                    Voluntariado · {{ c.necessidade.titulo }}
+                  {% elif c.necessidade %}
+                    R$ {{ c.quantidade|floatformat:"2" }} · {{ c.necessidade.titulo }}
+                  {% else %}
+                    R$ {{ c.quantidade|floatformat:"2" }} · doação livre
+                  {% endif %}
+                </h2>
+                {% if c.situacao == 'pendente' %}
+                  <span class="selo selo-aviso">Aguardando a ONG</span>
+                {% elif c.situacao == 'confirmada' %}
+                  <span class="selo selo-apoio">Confirmada</span>
+                {% elif c.situacao == 'recusada' %}
+                  <span class="selo selo-perigo">Recusada pela ONG</span>
                 {% endif %}
-              </h2>
-              {% if c.situacao == 'pendente' %}
-                <span class="selo selo-aviso">Aguardando a ONG</span>
-              {% elif c.situacao == 'confirmada' %}
-                <span class="selo selo-apoio">Confirmada</span>
-              {% elif c.situacao == 'recusada' %}
-                <span class="selo selo-perigo">Recusada pela ONG</span>
-              {% endif %}
             </div>
-            <div class="meta d-flex flex-wrap">
+            <div class="d-flex flex-wrap gap-3 small text-body-secondary">
               <span>{{ c.ong.nome }}</span>
               <span>
                 {% if c.situacao == 'confirmada' %}
                   Confirmada em {{ c.confirmada_em|date:"d/m" }}
                 {% elif c.situacao == 'recusada' %}
-                  {# MOCK: o modelo ainda não tem data de recusa (BL-45). #}
-                  Recusada em 25/09
+                  Registrada em {{ c.criada_em|date:"d/m" }}
                 {% elif c.tipo == 'itens' %}
                   Prometida em {{ c.criada_em|date:"d/m" }}
                 {% else %}
@@ -53,30 +51,33 @@
               </span>
             </div>
             {% if c.situacao == 'pendente' %}
-              <div class="acoes d-flex flex-wrap align-items-end">
+              <div class="d-flex flex-wrap align-items-end gap-2">
                 <button class="btn btn-outline-secondary btn-sm" type="button" data-cancelar-contribuicao="{{ c.pk }}">Cancelar</button>
               </div>
             {% endif %}
+            </div>
           </article>
         {% empty %}
           <p>Você ainda não tem contribuições.</p>
         {% endfor %}
       </div>
 
-      <section class="card cartao linha-item" aria-labelledby="titulo-agricultor">
-        <h2 id="titulo-agricultor">Você também planta?</h2>
-        <p class="convite-agricultor">Ative o perfil de agricultor(a) para publicar excedente na Colheita Solidária, sem criar outra conta.</p>
-        <div class="acoes d-flex flex-wrap align-items-end">
-          {% if pessoa.eh_agricultor %}
-            <span class="selo selo-apoio" id="perfil-agricultor-ativo">Perfil de agricultor(a) ativo</span>
-          {% else %}
-            <button class="btn btn-outline-secondary btn-sm" type="button" id="ativar-agricultor">Ativar perfil de agricultor(a)</button>
-          {% endif %}
+      <section class="card" aria-labelledby="titulo-agricultor">
+        <div class="card-body d-grid gap-3">
+          <h2 class="h6 mb-0" id="titulo-agricultor">Você também planta?</h2>
+          <p class="text-body-secondary mb-0">Ative o perfil de agricultor(a) para publicar excedente na Colheita Solidária, sem criar outra conta.</p>
+          <div class="d-flex flex-wrap align-items-end gap-2">
+            {% if pessoa.eh_agricultor %}
+              <span class="selo selo-apoio" id="perfil-agricultor-ativo">Perfil de agricultor(a) ativo</span>
+            {% else %}
+              <button class="btn btn-outline-secondary btn-sm" type="button" id="ativar-agricultor">Ativar perfil de agricultor(a)</button>
+            {% endif %}
+        </div>
         </div>
       </section>
     </section>
   </div>
-  <div class="contribuicoes-toast" id="aviso-contribuicoes" role="status" aria-live="polite" hidden></div>
+  <div class="alert alert-info m-3" id="aviso-contribuicoes" role="status" aria-live="polite" hidden></div>
 </div>
 {% endblock %}
 {% block scripts %}<script src="{% static 'contas/js/contribuicoes.js' %}"></script>{% endblock %}
