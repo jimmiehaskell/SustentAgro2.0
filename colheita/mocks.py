@@ -56,11 +56,26 @@ OFERTAS = lista(
 
 # Reservas da Cozinha Solidária Sol Nascente (Tela 11)
 RESERVAS_DA_ONG = lista(
-    obj(pk=1, oferta=OFERTAS[1], quantidade=Decimal(15), situacao='ativa', quantidade_recebida=None,
+    obj(pk=1, oferta=OFERTAS[1], ong=ONGS[0], quantidade=Decimal(15), situacao='ativa', quantidade_recebida=None,
         recebida_em=None, criada_em=date(2026, 10, 15)),
-    obj(pk=2, oferta=OFERTAS[2], quantidade=Decimal(50), situacao='recebida', quantidade_recebida=Decimal(48),
+    obj(pk=2, oferta=OFERTAS[2], ong=ONGS[0], quantidade=Decimal(50), situacao='recebida', quantidade_recebida=Decimal(48),
         recebida_em=date(2026, 10, 10), criada_em=date(2026, 10, 8)),
 )
 
-# Ofertas do agricultor Antônio Ribeiro (Tela 13)
-OFERTAS_DO_AGRICULTOR = lista(OFERTAS[1], OFERTAS[0])
+# Ofertas do agricultor Antônio Ribeiro (Tela 13). Cada oferta traz as reservas com a ONG (RF-25, RF-27),
+# como o related_name 'reservas' do model
+AGRICULTOR = obj(nome_completo='Antônio Ribeiro', localidade=_LOCAL['Brazlândia'])
+
+_MILHO = _oferta(107, 'Milho verde', 'graos', 300, 40, 'un', 'Brazlândia', 21, date(2026, 10, 10), 'excedente',
+                 'vender', '0.80', 'ong_busca', 'Antônio Ribeiro', 'Chácara 12, Núcleo Rural Alexandre Gusmão')
+_MILHO.vencida = True
+_MILHO.reservas = lista(
+    obj(pk=3, oferta=_MILHO, ong=ONGS[0], quantidade=Decimal(150), situacao='recebida',
+        quantidade_recebida=Decimal(150), recebida_em=date(2026, 10, 9), criada_em=date(2026, 10, 6)),
+    obj(pk=4, oferta=_MILHO, ong=ONGS[1], quantidade=Decimal(120), situacao='recebida',
+        quantidade_recebida=Decimal(110), recebida_em=date(2026, 10, 10), criada_em=date(2026, 10, 7)),
+)
+OFERTAS[1].reservas = lista(RESERVAS_DA_ONG[0])
+OFERTAS[0].reservas = lista()
+
+OFERTAS_DO_AGRICULTOR = lista(OFERTAS[1], OFERTAS[0], _MILHO)

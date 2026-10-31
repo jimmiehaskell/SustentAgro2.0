@@ -1,29 +1,28 @@
 {% extends 'base.html' %}
-{% load static %}
 {% block titulo %}Criar conta{% endblock %}
 {% block conteudo %}
 <div class="cadastro-pagina">
-  <div class="largura"><section class="secao">
-    <div class="cabeca-secao"><h1>Criar conta</h1><p>Escolha como você vai usar o SustentAgro. Quem doa também pode virar agricultor(a) depois, em Minha conta.</p></div>
+  <div class="container py-4"><section class="d-grid gap-4">
+    <div><h1 class="h2">Criar conta</h1><p class="text-body-secondary mb-0">Escolha como você vai usar o SustentAgro. Quem doa também pode virar agricultor(a) depois, em Minha conta.</p></div>
     {# RF-07: três perfis; cada um com o próprio formulário. tipo = pessoa | agricultor | ong #}
-    <div class="perfis" aria-label="Perfil de cadastro">
-      <form action="{% url 'contas:cadastro_perfil' 'pessoa' %}" method="get">
-        <button class="cartao cartao-perfil" type="submit" data-perfil-cad="pessoa" aria-pressed="{% if tipo == 'pessoa' %}true{% else %}false{% endif %}">
-          <span class="icone" aria-hidden="true">♥</span><h3>Quero doar ou ser voluntário(a)</h3><p>Prometa itens, doe por Pix ou se inscreva para ajudar uma ONG.</p>
-        </button>
-      </form>
-      <form action="{% url 'contas:cadastro_perfil' 'agricultor' %}" method="get">
-        <button class="cartao cartao-perfil" type="submit" data-perfil-cad="agricultor" aria-pressed="{% if tipo == 'agricultor' %}true{% else %}false{% endif %}">
-          <span class="icone" aria-hidden="true">✿</span><h3>Sou agricultor(a) familiar</h3><p>Publique o excedente ou o que saiu do padrão para doar ou vender a preço justo.</p>
-        </button>
-      </form>
-      <form action="{% url 'contas:cadastro_perfil' 'ong' %}" method="get">
-        <button class="cartao cartao-perfil" type="submit" data-perfil-cad="ong" aria-pressed="{% if tipo == 'ong' %}true{% else %}false{% endif %}">
-          <span class="icone" aria-hidden="true">⌂</span><h3>Represento uma ONG</h3><p>Mostre do que vocês precisam e reserve alimento do campo perto de vocês.</p>
-        </button>
-      </form>
+    <div class="row g-3" aria-label="Perfil de cadastro">
+      <div class="col-12 col-md-4">
+        <a class="card h-100 text-decoration-none cartao-perfil{% if tipo == 'pessoa' %} selecionado{% endif %}" href="{% url 'contas:cadastro_perfil' 'pessoa' %}"{% if tipo == 'pessoa' %} aria-current="page"{% endif %}>
+          <div class="card-body d-grid gap-2 align-content-start"><span class="icone" aria-hidden="true">♥</span><h3 class="h6 mb-0">Quero doar ou ser voluntário(a)</h3><p class="small text-body-secondary mb-0">Prometa itens, doe por Pix ou se inscreva para ajudar uma ONG.</p></div>
+        </a>
+      </div>
+      <div class="col-12 col-md-4">
+        <a class="card h-100 text-decoration-none cartao-perfil{% if tipo == 'agricultor' %} selecionado{% endif %}" href="{% url 'contas:cadastro_perfil' 'agricultor' %}"{% if tipo == 'agricultor' %} aria-current="page"{% endif %}>
+          <div class="card-body d-grid gap-2 align-content-start"><span class="icone" aria-hidden="true">✿</span><h3 class="h6 mb-0">Sou agricultor(a) familiar</h3><p class="small text-body-secondary mb-0">Publique o excedente ou o que saiu do padrão para doar ou vender a preço justo.</p></div>
+        </a>
+      </div>
+      <div class="col-12 col-md-4">
+        <a class="card h-100 text-decoration-none cartao-perfil{% if tipo == 'ong' %} selecionado{% endif %}" href="{% url 'contas:cadastro_perfil' 'ong' %}"{% if tipo == 'ong' %} aria-current="page"{% endif %}>
+          <div class="card-body d-grid gap-2 align-content-start"><span class="icone" aria-hidden="true">⌂</span><h3 class="h6 mb-0">Represento uma ONG</h3><p class="small text-body-secondary mb-0">Mostre do que vocês precisam e reserve alimento do campo perto de vocês.</p></div>
+        </a>
+      </div>
     </div>
-    <form class="cartao formulario estreito" id="form-cadastro" method="post" aria-label="Cadastro por perfil">
+    <form class="card card-body d-grid gap-3 formulario-cadastro" id="form-cadastro" method="post" aria-label="Cadastro por perfil">
       {% csrf_token %}
       {% include 'contas/componentes/formulario_cadastro.html' %}
       <div><button class="btn btn-primary" type="button" id="simular-cadastro" disabled>Criar conta</button></div>
@@ -33,4 +32,59 @@
   <div class="cadastro-toast" id="resultado-cadastro" role="status" aria-live="polite" hidden></div>
 </div>
 {% endblock %}
-{% block scripts %}<script src="{% static 'contas/js/cadastro.js' %}"></script>{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  const pagina = document.querySelector('.cadastro-pagina');
+  let avisoTimer;
+
+  // Demonstração do estado de erro previsto no protótipo, sem consulta externa.
+  function cnpjValido(valor) {
+    const cnpj = String(valor).replace(/\D/g, '');
+    if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
+    function digito(tamanho) {
+      const pesos = tamanho === 12
+        ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+        : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+      const resto = pesos.reduce((soma, peso, i) => soma + peso * Number(cnpj[i]), 0) % 11;
+      return resto < 2 ? 0 : 11 - resto;
+    }
+    return digito(12) === Number(cnpj[12]) && digito(13) === Number(cnpj[13]);
+  }
+
+  // MOCK: trocar na camada 1 pelo envio aos formulários de cadastro (BL-28, BL-29).
+  function simularCadastro(evento) {
+    evento.preventDefault();
+    if (!pagina.querySelector('#form-cadastro').reportValidity()) return;
+    const cnpj = pagina.querySelector('#cad-cnpj');
+    if (cnpj) {
+      const ajuda = pagina.querySelector('#cad-cnpj-msg');
+      if (!cnpjValido(cnpj.value)) {
+        ajuda.className = 'invalid-feedback d-block';
+        ajuda.textContent = 'CNPJ inválido: os dígitos verificadores não conferem. Confira o número no cartão do CNPJ.';
+        cnpj.classList.add('is-invalid');
+        cnpj.setAttribute('aria-invalid', 'true');
+        cnpj.focus();
+        return;
+      }
+      cnpj.removeAttribute('aria-invalid');
+      cnpj.classList.remove('is-invalid');
+      ajuda.className = 'form-text';
+      ajuda.textContent = 'Confira os 14 dígitos. Teste um número errado para ver o aviso.';
+    }
+    const resultado = pagina.querySelector('#resultado-cadastro');
+    resultado.textContent = 'Simulação concluída. Nenhuma conta foi criada e nenhum dado foi salvo.';
+    resultado.hidden = false;
+    clearTimeout(avisoTimer);
+    avisoTimer = setTimeout(() => { resultado.hidden = true; }, 3200);
+  }
+
+  pagina.querySelector('#form-cadastro').addEventListener('submit', simularCadastro);
+  const botao = pagina.querySelector('#simular-cadastro');
+  botao.addEventListener('click', simularCadastro);
+  botao.disabled = false;
+  const cnpj = pagina.querySelector('#cad-cnpj');
+  if (cnpj) cnpj.setAttribute('aria-describedby', 'cad-cnpj-msg');
+})();
+</script>
+{% endblock %}
