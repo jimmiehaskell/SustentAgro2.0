@@ -3,6 +3,7 @@
 Toda função que muda dados levanta django.core.exceptions.ValidationError com uma mensagem em
 português quando a regra não é atendida; a view mostra essa mensagem para a pessoa.
 """
+import math
 from datetime import date
 from decimal import Decimal
 
@@ -10,13 +11,19 @@ from django.core.exceptions import ValidationError
 
 from colheita.choices import Destino, Unidade
 
+RAIO_DA_TERRA_KM = 6371.0
+
 
 def distancia_km(origem, destino):
     """RN-15 (BL-33, Gabriel). Distância em linha reta (fórmula de haversine) entre duas localidades,
     usando latitude e longitude. Mesma localidade = 0. Devolve float arredondado para 1 casa.
     Testes: colheita/tests/test_distancia.py
     """
-    raise NotImplementedError('BL-33')
+    lat1, lon1 = math.radians(origem.latitude), math.radians(origem.longitude)
+    lat2, lon2 = math.radians(destino.latitude), math.radians(destino.longitude)
+    a = (math.sin((lat2 - lat1) / 2) ** 2
+         + math.cos(lat1) * math.cos(lat2) * math.sin((lon2 - lon1) / 2) ** 2)
+    return round(2 * RAIO_DA_TERRA_KM * math.asin(math.sqrt(a)), 1)
 
 
 def saldo(oferta):
