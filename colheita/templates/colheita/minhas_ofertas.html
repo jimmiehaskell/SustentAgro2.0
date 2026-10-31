@@ -2,10 +2,58 @@
 {% block titulo %}Minhas ofertas{% endblock %}
 {% block conteudo %}
 <div class="container py-4">
-  <h1 class="h3">Minhas ofertas</h1>
-  {% include 'componentes/aviso_construcao.html' with item='BL-21' responsavel='Pedro' tela='13' %}
-  <ul class="list-group">
-    {% for o in ofertas %}<li class="list-group-item">{{ o.produto }} · saldo {{ o.saldo|floatformat:"-1" }} de {{ o.quantidade|floatformat:"-1" }} {{ o.unidade }}</li>{% endfor %}
-  </ul>
+  <div class="d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+    <div>
+      <h1 class="h3 mb-1">Minhas ofertas</h1>
+      <p class="text-body-secondary mb-0">{{ agricultor.nome_completo }} · {{ agricultor.localidade.nome }}</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'colheita:publicar' %}">Publicar oferta</a>
+  </div>
+
+  {# RF-25: ofertas com saldo, reservas, situação e contato da ONG #}
+  <div class="d-grid gap-3">
+    {% for oferta in ofertas %}
+      <article class="card card-body d-grid gap-2">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <h2 class="h6 mb-0">{{ oferta.produto }}</h2>
+          {% if oferta.situacao == 'cancelada' %}
+            <span class="selo selo-neutro">Cancelada</span>
+          {% elif oferta.vencida %}
+            <span class="selo selo-neutro">Vencida em {{ oferta.colher_ate|date:"d/m" }}</span>
+          {% elif oferta.ong_destino %}
+            {# RN-04: nas primeiras 48 h, só a ONG escolhida pode reservar #}
+            <span class="selo selo-limao">Só para {{ oferta.ong_destino.nome_curto }} · abre a todas em {{ oferta.aberta_a_todas_em|timeuntil }}</span>
+          {% else %}
+            <span class="selo selo-apoio">Aberta{% if oferta.urgente %} · urgente{% endif %}</span>
+          {% endif %}
+        </div>
+
+        <div class="small text-body-secondary d-flex flex-wrap gap-3">
+          <span class="tabular">Saldo <strong class="text-numero">{{ oferta.saldo|floatformat:"-1" }} {{ oferta.unidade }}</strong> de {{ oferta.quantidade|floatformat:"-1" }} {{ oferta.unidade }}</span>
+          <span>Colher até {{ oferta.colher_ate|date:"d/m" }}</span>
+          <span>{% if oferta.destino == 'vender' %}Venda · R$ {{ oferta.preco_unitario|floatformat:2 }}/{{ oferta.unidade }}{% else %}Doação{% endif %}</span>
+        </div>
+
+        {# RF-27: o contato da ONG só aparece depois da reserva #}
+        {% for reserva in oferta.reservas.all %}
+          <div class="contato-reserva">
+            <strong>
+              {% if reserva.situacao == 'recebida' %}Recebida · {{ reserva.quantidade_recebida|floatformat:"-1" }} {{ oferta.unidade }} em {{ reserva.recebida_em|date:"d/m" }}
+              {% else %}Reserva ativa · {{ reserva.quantidade|floatformat:"-1" }} {{ oferta.unidade }}{% endif %}
+            </strong>
+            <span>{{ reserva.ong.nome }} · <a class="text-nowrap" href="tel:{{ reserva.ong.telefone }}">{{ reserva.ong.telefone }}</a> · <a class="text-break" href="mailto:{{ reserva.ong.email_contato }}">{{ reserva.ong.email_contato }}</a></span>
+          </div>
+        {% empty %}
+          <p class="small text-body-secondary mb-0">Nenhuma reserva ainda.</p>
+        {% endfor %}
+      </article>
+    {% empty %}
+      <div class="card card-body text-center">
+        <strong>Você ainda não publicou ofertas</strong>
+        <p class="text-body-secondary">Publique o excedente ou a produção fora do padrão para as ONGs próximas reservarem.</p>
+        <div><a class="btn btn-primary" href="{% url 'colheita:publicar' %}">Publicar oferta</a></div>
+      </div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}
