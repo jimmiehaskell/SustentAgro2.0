@@ -1,13 +1,83 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block titulo %}Minhas contribuições{% endblock %}
 {% block conteudo %}
-<div class="container py-4">
-  <h1 class="h3">Minhas contribuições</h1>
-  {% include 'componentes/aviso_construcao.html' with item='BL-13' responsavel='Vinicius' tela='14' %}
-  <ul class="list-group">
-    {% for c in contribuicoes %}
-      <li class="list-group-item d-flex justify-content-between gap-2"><span>{{ c.tipo }} · {{ c.ong.nome }} · {{ c.quantidade|floatformat:"-2" }}</span><span class="selo selo-neutro">{{ c.situacao }}</span></li>
-    {% endfor %}
-  </ul>
+<div class="contribuicoes-pagina">
+  <div class="container py-4">
+    <section class="d-grid gap-4" aria-labelledby="titulo-contribuicoes">
+      <header class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-grid gap-2">
+          <h1 class="h3 mb-0" id="titulo-contribuicoes">Minhas contribuições</h1>
+          <p class="text-body-secondary mb-0">{{ pessoa.nome_completo }}</p>
+        </div>
+      </header>
+
+      <div class="d-grid gap-3">
+        {% for c in contribuicoes %}
+          <article class="card" id="contribuicao-{{ c.pk }}">
+            <div class="card-body d-grid gap-3">
+              <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2">
+                <h2 class="h6 mb-0">
+                  {% if c.tipo == 'itens' %}
+                    {{ c.quantidade|floatformat:"-2" }} {{ c.necessidade.titulo|lower }}
+                  {% elif c.tipo == 'voluntariado' %}
+                    Voluntariado · {{ c.necessidade.titulo }}
+                  {% elif c.necessidade %}
+                    R$ {{ c.quantidade|floatformat:"2" }} · {{ c.necessidade.titulo }}
+                  {% else %}
+                    R$ {{ c.quantidade|floatformat:"2" }} · doação livre
+                  {% endif %}
+                </h2>
+                {% if c.situacao == 'pendente' %}
+                  <span class="selo selo-aviso">Aguardando a ONG</span>
+                {% elif c.situacao == 'confirmada' %}
+                  <span class="selo selo-apoio">Confirmada</span>
+                {% elif c.situacao == 'recusada' %}
+                  <span class="selo selo-perigo">Recusada pela ONG</span>
+                {% endif %}
+            </div>
+            <div class="d-flex flex-wrap gap-3 small text-body-secondary">
+              <span>{{ c.ong.nome }}</span>
+              <span>
+                {% if c.situacao == 'confirmada' %}
+                  Confirmada em {{ c.confirmada_em|date:"d/m" }}
+                {% elif c.situacao == 'recusada' %}
+                  Registrada em {{ c.criada_em|date:"d/m" }}
+                {% elif c.tipo == 'itens' %}
+                  Prometida em {{ c.criada_em|date:"d/m" }}
+                {% else %}
+                  Registrada em {{ c.criada_em|date:"d/m" }}
+                {% endif %}
+              </span>
+            </div>
+            {% if c.situacao == 'pendente' %}
+              <div class="d-flex flex-wrap align-items-end gap-2">
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-cancelar-contribuicao="{{ c.pk }}">Cancelar</button>
+              </div>
+            {% endif %}
+            </div>
+          </article>
+        {% empty %}
+          <p>Você ainda não tem contribuições.</p>
+        {% endfor %}
+      </div>
+
+      <section class="card" aria-labelledby="titulo-agricultor">
+        <div class="card-body d-grid gap-3">
+          <h2 class="h6 mb-0" id="titulo-agricultor">Você também planta?</h2>
+          <p class="text-body-secondary mb-0">Ative o perfil de agricultor(a) para publicar excedente na Colheita Solidária, sem criar outra conta.</p>
+          <div class="d-flex flex-wrap align-items-end gap-2">
+            {% if pessoa.eh_agricultor %}
+              <span class="selo selo-apoio" id="perfil-agricultor-ativo">Perfil de agricultor(a) ativo</span>
+            {% else %}
+              <button class="btn btn-outline-secondary btn-sm" type="button" id="ativar-agricultor">Ativar perfil de agricultor(a)</button>
+            {% endif %}
+        </div>
+        </div>
+      </section>
+    </section>
+  </div>
+  <div class="alert alert-info m-3" id="aviso-contribuicoes" role="status" aria-live="polite" hidden></div>
 </div>
 {% endblock %}
+{% block scripts %}<script src="{% static 'contas/js/contribuicoes.js' %}"></script>{% endblock %}
