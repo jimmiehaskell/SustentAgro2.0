@@ -77,7 +77,9 @@
       </section>
     </section>
   </div>
-  <div class="alert alert-info m-3" id="aviso-contribuicoes" role="status" aria-live="polite" hidden></div>
+  <div class="alert alert-info shadow position-fixed bottom-0 start-50 translate-middle-x mb-3"
+  style="z-index: 1080; width: min(32rem, calc(100% - 2rem))"
+  id="aviso-contribuicoes" role="status" aria-live="polite" hidden></div>
 </div>
 {% endblock %}
 {% block scripts %}<script src="{% static 'contas/js/contribuicoes.js' %}"></script>{% endblock %}
