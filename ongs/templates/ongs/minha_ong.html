@@ -2,10 +2,109 @@
 {% block titulo %}Minha conta{% endblock %}
 {% block conteudo %}
 <div class="container py-4">
-  <h1 class="h3">Minha conta</h1>
-  {% include 'componentes/aviso_construcao.html' with item='BL-16' responsavel='Júlia' tela='9' %}
+  <h1 class="h3 mb-0">Minha conta</h1>
+  <p class="text-body-secondary">{{ ong.nome }}</p>
   {% include 'componentes/abas_ong.html' with aba=aba %}
   {# RN-20: perfil = ong | ong-pendente | ong-reprovada; mostrar a situação e o motivo, se reprovada #}
-  <p>Perfil atual: <strong>{{ perfil }}</strong> · ONG de exemplo: {{ ong.nome }} ({{ ong.localidade.nome }})</p>
+  {% if perfil == 'ong-pendente' %}
+    <div class="alert alert-warning" role="alert">
+      <strong>Cadastro em análise desde {{ data_cadastro }}</strong><br>
+      A equipe do SustentAgro está conferindo o CNPJ. Enquanto isso, a ONG não aparece no site e não vê as ofertas. Vocês já podem completar o perfil.
+    </div>
+  {% elif perfil == 'ong-reprovada' %}
+    <div class="alert alert-danger" role="alert">
+      <strong>Cadastro não aprovado</strong><br>
+      Motivo: {{ motivo_reprovacao }} Corrija os dados abaixo e fale com a equipe do SustentAgro para uma nova análise.
+    </div>
+  {% elif perfil == 'ong' %}
+    <div class="alert alert-info" role="alert">
+      <strong>ONG ativa</strong><br>
+      Aprovada em {{ data_aprovacao }}. Sua página está pública e vocês já podem reservar ofertas.
+    </div>
+  {% endif %}
+   <form class="card card-body" novalidate aria-label="Perfil público da ONG">
+    <h2 class="h5 mb-3">Perfil público</h2>
+    <div class="row g-3">
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="po-nome">Nome</label>
+        <input class="form-control" id="po-nome" name="nome" value="{{ ong.nome }}">
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="po-curto">Nome curto</label>
+        <input class="form-control" id="po-curto" name="nome_curto" value="{{ ong.nome_curto }}">
+      </div>
+      <div class="col-12">
+        <label class="form-label" for="po-slogan">Frase de apresentação</label>
+        <input class="form-control" id="po-slogan" name="slogan" value="{{ ong.slogan }}">
+      </div>
+      <div class="col-12">
+        <label class="form-label" for="po-desc">Descrição</label>
+        <textarea class="form-control" id="po-desc" name="descricao" rows="4">{{ ong.descricao }}</textarea>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="po-logo">Logo</label>
+        <input class="form-control" id="po-logo" name="logo" type="file" accept=".jpeg,.jpg,.png,.webp">
+        <div class="form-text">JPEG, PNG ou WebP, até 10 MB.</div>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="po-capa">Imagem de capa</label>
+        <input class="form-control" id="po-capa" name="capa" type="file" accept=".jpeg,.jpg,.png,.webp">
+        <div class="form-text">JPEG, PNG ou WebP, até 10 MB.</div>
+      </div>
+
+      <fieldset class="col-12">
+        <legend class="form-label fs-6">Causas (ODS)</legend>
+        <div class="row g-2">
+          {% for o in ods %}
+            <div class="col-12 col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="po-ods-{{ o.numero }}" name="ods" value="{{ o.numero }}" {% if o in ong.ods.all %}checked{% endif %}>
+                <label class="form-check-label" for="po-ods-{{ o.numero }}">{{ o.numero }} · {{ o.nome }}</label>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <fieldset class="col-12">
+        <legend class="form-label fs-6">Tipos de ajuda aceitos</legend>
+        <div class="d-flex flex-wrap gap-3">
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="po-itens" name="aceita_itens" {% if ong.aceita_itens %}checked{% endif %}><label class="form-check-label" for="po-itens">Itens</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="po-dinheiro" name="aceita_dinheiro" {% if ong.aceita_dinheiro %}checked{% endif %}><label class="form-check-label" for="po-dinheiro">Dinheiro</label></div>
+          <div class="form-check"><input class="form-check-input" type="checkbox" id="po-vol" name="aceita_voluntariado" {% if ong.aceita_voluntariado %}checked{% endif %}><label class="form-check-label" for="po-vol">Voluntariado</label></div>
+        </div>
+      </fieldset>
+
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="po-local">Localidade</label>
+        <select class="form-select" id="po-local" name="localidade">
+          {% for l in localidades %}<option value="{{ l.nome }}" {% if l.nome == ong.localidade.nome %}selected{% endif %}>{{ l.nome }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="po-familias">Famílias atendidas por mês</label>
+        <input class="form-control tabular" id="po-familias" name="familias_por_mes" type="number" min="0" value="{{ ong.familias_por_mes }}">
+        <div class="form-text">Entra no total do painel de impacto.</div>
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="po-tel">Telefone</label>
+        <input class="form-control" id="po-tel" name="telefone" value="{{ ong.telefone }}">
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="po-email">E-mail de contato</label>
+        <input class="form-control" id="po-email" name="email_contato" type="email" value="{{ ong.email_contato }}">
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="po-site">Site (opcional)</label>
+        <input class="form-control" id="po-site" name="site" placeholder="https://" value="{{ ong.site }}">
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="po-pix">Chave Pix (opcional)</label>
+        <input class="form-control" id="po-pix" name="chave_pix" value="{{ ong.chave_pix }}">
+        <div class="form-text">Aparece para quem escolher doar dinheiro.</div>
+      </div>
+    </div>
+    <div class="mt-4"><button class="btn btn-primary" type="submit">Salvar perfil</button></div>
+  </form>
 </div>
 {% endblock %}
