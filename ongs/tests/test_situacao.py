@@ -6,7 +6,6 @@ from django.test import TestCase
 from core.tests.fabricas import criar_oferta, criar_ong
 
 
-@skip('Remova ao implementar o BL-29 (depois do BL-25 e do BL-26)')
 class SituacaoOngTest(TestCase):
     def test_aprovar_deixa_a_ong_ativa_e_registra_a_data(self):
         from ongs.services import aprovar_ong
