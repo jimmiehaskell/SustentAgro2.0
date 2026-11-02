@@ -11,7 +11,10 @@
       {# RF-04: filtros combinados por E lógico (ODS, tipo de ajuda, cidade) e busca por texto #}
       <form id="filtros-ongs" class="card card-body d-grid gap-3" method="get">
         <h2 class="h5 mb-0">Filtrar</h2>
-        <div><label class="form-label" for="f-q">Busca</label><input class="form-control" id="f-q" name="q" value="{{ filtros.q }}"placeholder="Nome, causa ou cidade"></div>
+        <div>
+          <label class="form-label" for="f-q">Busca</label>
+          <input class="form-control" id="f-q" name="q" type="search" value="{{ filtros.q }}" placeholder="Nome, causa ou cidade">
+        </div>
         <div><label class="form-label" for="f-ods">Causa (ODS)</label>
           <select class="form-select" id="f-ods" name="ods"><option value="">Todas</option>
             {% for o in ods %}<option value="{{ o.numero }}" {% if filtros.ods == o.numero|stringformat:'s' %}selected{% endif %}>{{ o.numero }} · {{ o.nome }}</option>{% endfor %}
@@ -31,31 +34,35 @@
       <p class="text-body-secondary tabular">{{ ongs|length }} ONG{{ ongs|length|pluralize:"s" }} encontrada{{ ongs|length|pluralize:"s" }}</p>
       <div class="row g-3">
         {% for ong, precisa in ongs %}
-          <div class="col-12 col-lg-6">{% include 'componentes/cartao_ong.html' with ong=ong precisa=precisa %}</div>
+          <div class="col-12 col-lg-6">
+            {% include 'componentes/cartao_ong.html' with ong=ong precisa=precisa %}
+          </div>
         {% empty %}
-          <div class="col-12"><div class="card card-body text-center gap-2 py-4"><strong>Nenhuma ONG encontrada</strong><span class="text-body-secondary">Nenhuma ONG atende a todos os filtros ao mesmo tempo. Tente tirar um deles.</span><a class="btn btn-outline-secondary align-self-center mt-1" href="{% url 'ongs:lista' %}"> Limpar filtros</a></div></div>
+          <div class="col-12">
+            <div class="card card-body text-center gap-2 py-4">
+              <strong>Nenhuma ONG encontrada</strong>
+              <span class="text-body-secondary">Nenhuma ONG atende a todos os filtros ao mesmo tempo. Tente tirar um deles.</span>
+              <a class="btn btn-outline-secondary align-self-center mt-1" href="{% url 'ongs:lista' %}">Limpar filtros</a>
+            </div>
+          </div>
         {% endfor %}
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
+{% block scripts %}
 <script>
   (() => {
     const form = document.getElementById('filtros-ongs');
-    if (!form) return;
+    if (!form) {
+      return;
+    }
 
-    const busca = form.querySelector('[name="q"]');
-    const selects = form.querySelectorAll('select');
-    let temporizador;
-
-    // Aplica a busca após uma breve pausa na digitação.
-    busca.addEventListener('input', () => {
-      clearTimeout(temporizador);
-      temporizador = setTimeout(() => form.requestSubmit(), 500);
-    });
-
-    // Aplica os filtros assim que uma opção é alterada.
-    selects.forEach((select) => {
+    // RF-04: os selects aplicam o filtro assim que mudam.
+    // A busca por texto é enviada com Enter (envio padrão do formulário),
+    // para a página não recarregar enquanto a pessoa ainda digita
+    form.querySelectorAll('select').forEach((select) => {
       select.addEventListener('change', () => form.requestSubmit());
     });
   })();
