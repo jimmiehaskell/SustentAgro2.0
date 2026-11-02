@@ -1,6 +1,6 @@
 from django.http import Http404
 from django.views.generic import TemplateView
-
+from core.perfis import perfil_da_requisicao
 from ongs import mocks
 from ongs.choices import TipoNecessidade
 
@@ -60,11 +60,10 @@ class MinhaOngView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update(ong=mocks.ONGS[0], ods=mocks.ODS, localidades=mocks.LOCALIDADES, aba='perfil')
-        context.update(
-            data_cadastro='16/10/2026', data_aprovacao='02/10/2026',
-            motivo_reprovacao='o CNPJ informado pertence a uma empresa com fins lucrativos, '
-                              'não a uma organização da sociedade civil.')
+        # MOCK: a ONG vem do perfil simulado; no BL-31 vira a ONG do usuário logado
+        ong = {'ong-pendente': mocks.ONG_PENDENTE, 'ong-reprovada': mocks.ONG_REPROVADA}.get(
+            perfil_da_requisicao(self.request), mocks.ONGS[0])
+        context.update(ong=ong, ods=mocks.ODS, localidades=mocks.LOCALIDADES, aba='perfil')
         return context
 
 

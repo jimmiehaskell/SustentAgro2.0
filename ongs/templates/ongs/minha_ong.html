@@ -6,23 +6,24 @@
   <p class="text-body-secondary">{{ ong.nome }}</p>
   {% include 'componentes/abas_ong.html' with aba=aba %}
   {# RN-20: perfil = ong | ong-pendente | ong-reprovada; mostrar a situação e o motivo, se reprovada #}
-  {% if perfil == 'ong-pendente' %}
+  {% if ong.situacao == 'pendente' %}
     <div class="alert alert-warning" role="alert">
-      <strong>Cadastro em análise desde {{ data_cadastro }}</strong><br>
+      <strong>Cadastro em análise desde {{ ong.criada_em|date:"d/m/Y" }}</strong><br>
       A equipe do SustentAgro está conferindo o CNPJ. Enquanto isso, a ONG não aparece no site e não vê as ofertas. Vocês já podem completar o perfil.
     </div>
-  {% elif perfil == 'ong-reprovada' %}
+  {% elif ong.situacao == 'reprovada' %}
     <div class="alert alert-danger" role="alert">
       <strong>Cadastro não aprovado</strong><br>
-      Motivo: {{ motivo_reprovacao }} Corrija os dados abaixo e fale com a equipe do SustentAgro para uma nova análise.
+      Motivo: {{ ong.motivo_reprovacao }} Corrija os dados abaixo e fale com a equipe do SustentAgro para uma nova análise.
     </div>
-  {% elif perfil == 'ong' %}
+  {% elif ong.situacao == 'ativa' %}
     <div class="alert alert-info" role="alert">
       <strong>ONG ativa</strong><br>
-      Aprovada em {{ data_aprovacao }}. Sua página está pública e vocês já podem reservar ofertas.
+      Aprovada em {{ ong.aprovada_em|date:"d/m/Y" }}. Sua página está pública e vocês já podem reservar ofertas.
     </div>
   {% endif %}
-   <form class="card card-body" novalidate aria-label="Perfil público da ONG">
+<form class="card card-body" id="form-perfil-ong" method="post" enctype="multipart/form-data" novalidate aria-label="Perfil público da ONG">
+    {% csrf_token %}
     <h2 class="h5 mb-3">Perfil público</h2>
     <div class="row g-3">
       <div class="col-12 col-md-6">
@@ -107,4 +108,24 @@
     <div class="mt-4"><button class="btn btn-primary" type="submit">Salvar perfil</button></div>
   </form>
 </div>
+<div class="alert alert-info shadow position-fixed bottom-0 start-50 translate-middle-x mb-3"
+     style="z-index: 1080; width: min(32rem, calc(100% - 2rem))"
+     id="aviso-minha-ong" role="status" aria-live="polite" hidden></div>
+{% endblock %}
+{% block scripts %}
+<script>
+  // MOCK: trocar no BL-31 pelo envio real do formulário (apague este bloco)
+  (function () {
+    const form = document.getElementById('form-perfil-ong');
+    const aviso = document.getElementById('aviso-minha-ong');
+    let avisoTimer;
+    form.addEventListener('submit', function (evento) {
+      evento.preventDefault();
+      aviso.textContent = 'Perfil salvo. Simulação: nenhum dado foi alterado.';
+      aviso.hidden = false;
+      clearTimeout(avisoTimer);
+      avisoTimer = setTimeout(function () { aviso.hidden = true; }, 3200);
+    });
+  })();
+</script>
 {% endblock %}
