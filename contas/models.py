@@ -1,7 +1,8 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 
-from contas.choices import TipoConta
+from contas.choices import TipoConta, UF
 
 
 class Usuario(AbstractUser):
@@ -14,24 +15,46 @@ class Usuario(AbstractUser):
         verbose_name_plural = 'usuários'
 
 
-# ---------------------------------------------------------------------------------------------
-# BL-24 (Vinicius): criar os models abaixo, exatamente com estes nomes (modelo de dados, Anexo B).
-#
-# class Localidade(models.Model):                       # RF-33, P-06, A-05
-#     nome       CharField(max_length=80, unique=True)
-#     uf         CharField(max_length=2, choices=UF.choices)
-#     latitude   DecimalField(max_digits=9, decimal_places=6)
-#     longitude  DecimalField(max_digits=9, decimal_places=6)
-#     Meta: ordering = ['nome']
-#
-# class PerfilPessoa(models.Model):                     # RN-12, D-15
-#     usuario        OneToOneField(Usuario, on_delete=CASCADE, related_name='perfil_pessoa')
-#     nome_completo  CharField(max_length=150)
-#     telefone       CharField(max_length=20, blank=True)
-#     eh_doador      BooleanField(default=False)
-#     eh_agricultor  BooleanField(default=False)
-#     localidade     ForeignKey(Localidade, null=True, blank=True, on_delete=PROTECT,
-#                               related_name='perfis')  # obrigatória para agricultor
-#
-# Os testes de tests/test_perfil.py estão marcados com skip: remova o skip ao implementar.
-# ---------------------------------------------------------------------------------------------
+class Localidade(models.Model):
+    """Localidade mantida pelo administrador (RF-33, A-05)."""
+
+    nome = models.CharField(max_length=80, unique=True)
+    uf = models.CharField(max_length=2, choices=UF.choices)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+
+    class Meta:
+        ordering = ['nome']
+
+    def __str__(self):
+        return f'{self.nome} / {self.uf}'
+
+
+class PerfilPessoa(models.Model):
+    """Perfis de doador e agricultor na mesma conta (RN-12, ADR-002)."""
+
+    usuario = models.OneToOneField(
+        Usuario, on_delete=models.CASCADE, related_name='perfil_pessoa')
+    nome_completo = models.CharField(max_length=150)
+    telefone = models.CharField(max_length=20, blank=True)
+    eh_doador = models.BooleanField(default=False)
+    eh_agricultor = models.BooleanField(default=False)
+    localidade = models.ForeignKey(
+        Localidade, null=True, blank=True, on_delete=models.PROTECT,
+        related_name='perfis')
+
+    def __str__(self):
+        return self.nome_completo
+
+    def clean(self):
+        """Valida o perfil em full_clean() e nos formulários do Django Admin."""
+        super().clean()
+        erros = {}
+        # O formulário pode ainda não ter um usuário válido selecionado.
+        usuario = getattr(self, 'usuario', None)
+        if usuario is not None and usuario.tipo_conta == TipoConta.ONG:
+            erros['usuario'] = 'Uma conta de ONG não pode possuir perfil de pessoa.'
+        if self.eh_agricultor and self.localidade_id is None:
+            erros['localidade'] = 'Informe a localidade do agricultor.'
+        if erros:
+            raise ValidationError(erros)
