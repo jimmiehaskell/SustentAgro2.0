@@ -4,6 +4,7 @@ MOCK: na camada 1, as views trocam estas listas por consultas ao banco (BL-30).
 Campos calculados (confirmado, percentual) aparecem prontos aqui; no banco, viram
 propriedades ou anotações com o mesmo nome.
 """
+from datetime import datetime
 from decimal import Decimal
 
 from core.mocks_util import lista, obj
@@ -33,12 +34,15 @@ def _necessidade(pk, titulo, tipo, unidade, meta, confirmado, situacao='aberta')
 
 
 def _ong(pk, nome, nome_curto, localidade, slogan, ods, aceita, familias, telefone, email, pix, descricao,
-         necessidades):
+         necessidades, situacao='ativa', criada_em=datetime(2026, 9, 28), aprovada_em=datetime(2026, 10, 2),
+         motivo_reprovacao=''):
     return obj(pk=pk, nome=nome, nome_curto=nome_curto, localidade=_LOCAL[localidade], slogan=slogan,
                descricao=descricao, logo=None, capa=None, telefone=telefone, email_contato=email, site='',
                chave_pix=pix, familias_por_mes=familias, aceita_itens='itens' in aceita,
                aceita_dinheiro='dinheiro' in aceita, aceita_voluntariado='voluntariado' in aceita,
-               situacao='ativa', ods=lista(*[_ODS[n] for n in ods]), necessidades=lista(*necessidades))
+               situacao=situacao, criada_em=criada_em, aprovada_em=aprovada_em,
+               motivo_reprovacao=motivo_reprovacao, ods=lista(*[_ODS[n] for n in ods]),
+               necessidades=lista(*necessidades))
 
 
 ONGS = lista(
@@ -78,7 +82,17 @@ ONGS = lista(
          'Oficinas de currículo, entrevistas simuladas e mentoria para jovens de 16 a 24 anos.',
          [_necessidade(61, 'Mentores de primeiro emprego', 'voluntariado', 'voluntários', 10, 4)]),
 )
+ONG_PENDENTE = _ong(
+    7, 'Horta Comunitária Vila Planalto', 'Horta Vila Planalto', 'Planaltina', '', [2], 'itens voluntariado',
+    40, '(61) 3301-2200', 'contato@exemplo.org', '', '', [],
+    situacao='pendente', criada_em=datetime(2026, 10, 16), aprovada_em=None)
 
+ONG_REPROVADA = _ong(
+    8, 'Instituto Raízes do Planalto', 'Raízes do Planalto', 'Planaltina', '', [2], 'itens voluntariado',
+    40, '(61) 3301-2200', 'contato@exemplo.org', '', '', [],
+    situacao='reprovada', criada_em=datetime(2026, 10, 16), aprovada_em=None,
+    motivo_reprovacao='O CNPJ informado pertence a uma empresa com fins lucrativos, '
+                      'não a uma organização da sociedade civil.')
 
 def ong_por_pk(pk):
     return next((o for o in ONGS if o.pk == pk), None)
