@@ -9,7 +9,7 @@ from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 
-from colheita.choices import Destino, Unidade
+from colheita.choices import Destino, SituacaoReserva, Unidade
 
 RAIO_DA_TERRA_KM = 6371.0
 
@@ -103,3 +103,25 @@ def confirmar_recebimento(reserva, quantidade_recebida):
 def cancelar_reserva(reserva, cancelada_por):
     """RF-24 (BL-47, camada 3). Só reserva ativa; situacao = cancelada; a quantidade volta ao saldo."""
     raise NotImplementedError('BL-47')
+
+
+def resumo_recebido(oferta):
+    """RF-25, RN-08, RN-09 (BL-36 parte 1, Pedro). O que já foi entregue de uma oferta, para a Minhas ofertas
+    (protótipo, Tela 13): "260 un recebidas por 2 ONGs · Renda gerada R$ 208,00".
+
+    Lê oferta.reservas.all(), então funciona igual com o mock de hoje e com o model Reserva da camada 1
+    (related_name='reservas'). Na parte 2 da BL-36, a view só troca o mock pela consulta ao banco
+    (com prefetch_related('reservas__ong')) e ganha a proteção de perfil (RNF-05).
+
+    Só contam as reservas recebidas. Devolve um dict com:
+    - quantidade_recebida: soma de quantidade_recebida (Decimal);
+    - ongs: quantas ONGs diferentes receberam;
+    - renda: preco_unitario × quantidade_recebida, só em oferta de venda (None em doação).
+    Testes: colheita/tests/test_resumo_recebido.py
+    """
+    recebidas = [r for r in oferta.reservas.all() if r.situacao == SituacaoReserva.RECEBIDA]
+    quantidade = sum((r.quantidade_recebida for r in recebidas), Decimal('0'))
+    renda = None
+    if oferta.destino == Destino.VENDER:
+        renda = (quantidade * oferta.preco_unitario).quantize(Decimal('0.01'))
+    return {'quantidade_recebida': quantidade, 'ongs': len({r.ong.pk for r in recebidas}), 'renda': renda}
