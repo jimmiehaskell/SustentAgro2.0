@@ -8,8 +8,11 @@ from datetime import date
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
+from django.db.models import Sum
 
-from colheita.choices import Destino, Unidade
+from colheita.choices import Destino, SituacaoReserva, Unidade
+
+RAIO_DA_TERRA_KM = 6371.0
 
 RAIO_DA_TERRA_KM = 6371.0
 
@@ -29,22 +32,33 @@ def distancia_km(origem, destino):
 def saldo(oferta):
     """RN-03 (BL-26). Quantidade publicada menos a soma das reservas ativas e recebidas.
     Reservas canceladas e não recebidas não contam. Nunca negativo.
+    A recebida conta pela quantidade reservada: a diferença para o recebido não volta ao saldo.
+    Testes: colheita/tests/test_models.py
     """
-    raise NotImplementedError('BL-26')
+    if oferta.pk is None:
+        return oferta.quantidade
+    reservado = oferta.reservas.filter(
+        situacao__in=[SituacaoReserva.ATIVA, SituacaoReserva.RECEBIDA],
+    ).aggregate(total=Sum('quantidade'))['total'] or Decimal('0')
+    return max(oferta.quantidade - reservado, Decimal('0'))
 
 
-def validar_oferta(oferta):
+def validar_oferta(oferta, checar_data=True):
     """RN-13, RN-16, UC-08 (BL-32, Gabriel). Levanta ValidationError se:
     - destino = vender sem preço, ou destino = doar com preço;
     - unidade = un com quantidade fracionada;
     - colher_ate no passado.
     Também recusa quantidade ou preço menores ou iguais a zero. Os erros saem por campo, para o
     formulário mostrar cada mensagem ao lado do campo certo.
+    checar_data=False pula a data, para editar uma oferta antiga (Oferta.clean, BL-26). Campos vazios
+    são ignorados aqui: o próprio campo do model já avisa que é obrigatório.
     Testes: colheita/tests/test_oferta.py
     """
     erros = {}
 
-    if oferta.quantidade <= 0:
+    if oferta.quantidade is None:
+        pass
+    elif oferta.quantidade <= 0:
         erros['quantidade'] = 'Informe uma quantidade maior que zero.'
     else:
         erro_fracao = erro_de_fracao(oferta.quantidade, oferta.unidade)
@@ -60,7 +74,7 @@ def validar_oferta(oferta):
         erros['preco_unitario'] = 'Oferta de doação não tem preço.'
 
     # Mesma referência de "hoje" dos testes (date.today(), relógio do sistema)
-    if oferta.colher_ate < date.today():
+    if checar_data and oferta.colher_ate is not None and oferta.colher_ate < date.today():
         erros['colher_ate'] = 'A data "colher até" não pode estar no passado.'
 
     if erros:
@@ -76,6 +90,32 @@ def erro_de_fracao(quantidade, unidade):
     if unidade == Unidade.KG and quantidade != quantidade.quantize(Decimal('0.1')):
         return 'Em kg, informe no máximo uma casa decimal.'
     return None
+
+
+def validar_quantidade_da_reserva(reserva):
+    """RN-16, E-01, E-02 (BL-26). Reservada maior que zero e, se informada, recebida de 0 até a reservada,
+    nas casas decimais da unidade da oferta. Não confere o saldo: isso é do reservar_oferta (BL-34),
+    que trava a oferta antes de somar as reservas.
+    """
+    if reserva.oferta_id is None or reserva.quantidade is None:
+        return  # o próprio campo do model já avisa que é obrigatório
+    unidade = reserva.oferta.unidade
+    erros = {}
+
+    if reserva.quantidade <= 0:
+        erros['quantidade'] = 'Informe uma quantidade maior que zero.'
+    elif erro_de_fracao(reserva.quantidade, unidade):
+        erros['quantidade'] = erro_de_fracao(reserva.quantidade, unidade)
+
+    recebida = reserva.quantidade_recebida
+    if recebida is not None:
+        if recebida < 0 or recebida > reserva.quantidade:
+            erros['quantidade_recebida'] = 'A quantidade recebida vai de 0 até a reservada.'
+        elif erro_de_fracao(recebida, unidade):
+            erros['quantidade_recebida'] = erro_de_fracao(recebida, unidade)
+
+    if erros:
+        raise ValidationError(erros)
 
 
 def reservar_oferta(oferta, ong, quantidade):
