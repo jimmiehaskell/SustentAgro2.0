@@ -226,8 +226,45 @@ def confirmar_recebimento(reserva, quantidade_recebida):
 
 
 def cancelar_reserva(reserva, cancelada_por):
-    """RF-24 (BL-47, camada 3). Só reserva ativa; situacao = cancelada; a quantidade volta ao saldo."""
-    raise NotImplementedError('BL-47')
+    """RF-24, RN-03, RN-18, UC-09, UC-11 (BL-47, Gabriel).
+
+    Dentro de transaction.atomic(), trava a reserva com select_for_update() e devolve a reserva atualizada.
+    Levanta ValidationError se a reserva não está ativa (recebida, não recebida ou já cancelada).
+    Grava situacao = cancelada e cancelada_por (CanceladaPor: ong, agricultor ou sistema); a quantidade
+    volta ao saldo (saldo ignora a cancelada). Quem pode cancelar (a ONG dona da reserva ou o agricultor
+    dono da oferta) é conferido pela view. Em oferta vencida a reserva também cancela (RN-18).
+    Testes: colheita/tests/test_cancelamentos.py
+    """
+    from colheita.models import Reserva
+    with transaction.atomic():
+        reserva = Reserva.objects.select_for_update().select_related('oferta').get(pk=reserva.pk)
+        if reserva.situacao != SituacaoReserva.ATIVA:
+            raise ValidationError('Só uma reserva ativa pode ser cancelada.')
+        reserva.situacao = SituacaoReserva.CANCELADA
+        reserva.cancelada_por = cancelada_por
+        reserva.save(update_fields=['situacao', 'cancelada_por'])
+    return reserva
+
+
+def cancelar_oferta(oferta):
+    """RF-24, RN-03, UC-11 (BL-47, Gabriel).
+
+    Dentro de transaction.atomic(), trava a oferta com select_for_update() e devolve a oferta atualizada.
+    Levanta ValidationError se a oferta já está cancelada ou se ainda tem reserva ativa (o agricultor
+    cancela a reserva antes). Grava situacao = cancelada: a oferta sai da lista das ONGs. As reservas
+    recebidas continuam contando no painel. Quem pode cancelar (o agricultor dono) é conferido pela view.
+    Testes: colheita/tests/test_cancelamentos.py
+    """
+    from colheita.models import Oferta
+    with transaction.atomic():
+        oferta = Oferta.objects.select_for_update().get(pk=oferta.pk)
+        if oferta.situacao == SituacaoOferta.CANCELADA:
+            raise ValidationError('Esta oferta já foi cancelada.')
+        if oferta.reservas.filter(situacao=SituacaoReserva.ATIVA).exists():
+            raise ValidationError('Só é possível cancelar ofertas sem reservas ativas. Cancele as reservas primeiro.')
+        oferta.situacao = SituacaoOferta.CANCELADA
+        oferta.save(update_fields=['situacao'])
+    return oferta
 
 
 def resumo_recebido(oferta):
