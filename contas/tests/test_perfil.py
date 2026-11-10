@@ -1,5 +1,4 @@
-"""BL-24 (Vinicius): RN-12. Remova o @skip quando os models PerfilPessoa e Localidade existirem."""
-from unittest import skip
+"""BL-24 (Vinicius): RN-12 e precedência do perfil agricultor."""
 
 from django.test import TestCase
 
@@ -13,7 +12,6 @@ class _Requisicao:
         self.session = {}
 
 
-@skip('Remova ao implementar o BL-24')
 class PerfilPessoaTest(TestCase):
     def test_agricultor_tem_precedencia_quando_tem_os_dois_perfis(self):
         perfil = criar_agricultor(eh_doador=True)  # RN-12, RN-25
