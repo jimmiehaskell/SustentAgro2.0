@@ -8,9 +8,11 @@ from datetime import date
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Q, Sum
 
 from colheita.choices import Destino, SituacaoOferta, SituacaoReserva, Unidade
+from ongs.choices import SituacaoOng
 
 RAIO_DA_TERRA_KM = 6371.0
 
@@ -142,14 +144,45 @@ def validar_quantidade_da_reserva(reserva):
 
 
 def reservar_oferta(oferta, ong, quantidade):
-    """RF-20, RN-01, RN-03, RN-16, UC-09 (BL-34, Gabriel em dupla com Jimmie).
+    """RF-20, RF-27, RN-01, RN-03, RN-16, E-01, E-04, UC-09 (BL-34, Gabriel em dupla com Jimmie).
 
     Dentro de transaction.atomic(), trava a oferta com select_for_update(), recalcula o saldo e cria a
-    Reserva. Levanta ValidationError se a ONG não está ativa, se a quantidade é <= 0, se passa do saldo
-    ("Só restam X kg desta oferta.") ou se é fracionada numa oferta em unidades. Devolve a Reserva.
+    Reserva. Levanta ValidationError se a ONG não está ativa, se a oferta foi cancelada ou venceu
+    (as reservas já feitas continuam valendo, RN-18), se a quantidade é <= 0, se passa do saldo
+    ("Só restam X kg desta oferta.") ou se tem mais casas decimais do que a unidade aceita. Devolve a
+    Reserva; o contato do agricultor e o da ONG passam a aparecer por causa dela (RF-27).
     Testes: colheita/tests/test_reserva.py
     """
-    raise NotImplementedError('BL-34')
+    from colheita.models import Oferta, Reserva
+    if ong.situacao != SituacaoOng.ATIVA:
+        raise ValidationError('Só uma ONG ativa pode reservar ofertas.')
+    with transaction.atomic():
+        oferta = Oferta.objects.select_for_update().get(pk=oferta.pk)
+        if oferta.situacao != SituacaoOferta.ABERTA or oferta.vencida:
+            raise ValidationError('Esta oferta não está mais disponível para reserva.')
+        if quantidade <= 0:
+            raise ValidationError('Informe uma quantidade maior que zero.')
+        disponivel = saldo(oferta)
+        if quantidade > disponivel:
+            raise ValidationError(f"Só restam {format(disponivel.normalize(), 'f')} {oferta.unidade} desta oferta.")
+        erro_fracao = erro_de_fracao(quantidade, oferta.unidade)
+        if erro_fracao:
+            raise ValidationError(erro_fracao)
+        return Reserva.objects.create(oferta=oferta, ong=ong, quantidade=quantidade)
+
+
+def reservas_da_ong(ong):
+    """RF-27 (BL-34). Reservas da ONG para a Tela 11, das mais novas para as mais antigas, com o
+    distancia_km da ONG até a oferta em cada oferta. O contato do agricultor vem junto: a ONG só chega
+    aqui porque reservou.
+    Testes: colheita/tests/test_tela_reservar.py
+    """
+    from colheita.models import Reserva
+    reservas = list(Reserva.objects.filter(ong=ong).select_related(
+        'oferta__localidade', 'oferta__agricultor__usuario'))
+    for reserva in reservas:
+        reserva.oferta.distancia_km = distancia_km(ong.localidade, reserva.oferta.localidade)
+    return reservas
 
 
 def confirmar_recebimento(reserva, quantidade_recebida):

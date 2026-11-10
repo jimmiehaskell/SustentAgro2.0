@@ -1,8 +1,5 @@
-"""BL-34 (Gabriel, em dupla com Jimmie): RF-20, RN-01, RN-03, RN-16, UC-09.
-Remova o @skip ao implementar colheita.services.reservar_oferta e saldo (depende de BL-24 a BL-26).
-"""
+"""BL-34 (Gabriel, em dupla com Jimmie): RF-20, RN-01, RN-03, RN-16, UC-09."""
 from decimal import Decimal
-from unittest import skip
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -10,7 +7,6 @@ from django.test import TestCase
 from core.tests.fabricas import criar_oferta, criar_ong
 
 
-@skip('Remova ao implementar o BL-34 (depois do BL-26)')
 class ReservarOfertaTest(TestCase):
     def setUp(self):
         from colheita.services import reservar_oferta, saldo

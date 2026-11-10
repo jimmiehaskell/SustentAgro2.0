@@ -23,14 +23,14 @@
       <div class="tabular">{% if versao_ong %}Saldo{% else %}Disponível{% endif %} <strong class="text-numero">{{ oferta.saldo|floatformat:"-1" }} {{ oferta.unidade }}</strong>{% if versao_ong %} de {{ oferta.quantidade|floatformat:"-1" }} {{ oferta.unidade }}{% endif %}</div>
     </div>
     {% if versao_ong %}
-      {# MOCK: na camada 1 (BL-34) este formulário faz POST e chama colheita.services.reservar_oferta #}
-      {# RF-20: reserva parcial, de 1 até o saldo #}
-      <form class="d-grid gap-2 align-self-center" style="min-width: 10rem">
+      {# RF-20: reserva parcial, de 1 até o saldo; o POST chama colheita.services.reservar_oferta #}
+      <form class="d-grid gap-2 align-self-center" style="min-width: 10rem" method="post" action="{% url 'colheita:reservar' oferta.pk %}">
+        {% csrf_token %}
         <label class="small text-body-secondary" for="qtd-{{ oferta.pk }}">Quantidade ({{ oferta.unidade }})</label>
         <input class="form-control text-end" id="qtd-{{ oferta.pk }}" name="quantidade" type="number"
                min="{% if oferta.unidade == 'kg' %}0.1{% else %}1{% endif %}" max="{{ oferta.saldo|unlocalize }}"
-               step="{% if oferta.unidade == 'kg' %}0.1{% else %}1{% endif %}" placeholder="até {{ oferta.saldo|floatformat:'-1' }}">
-        <button type="button" class="btn btn-primary">Reservar</button>
+               step="{% if oferta.unidade == 'kg' %}0.1{% else %}1{% endif %}" placeholder="até {{ oferta.saldo|floatformat:'-1' }}" required>
+        <button type="submit" class="btn btn-primary">Reservar</button>
       </form>
     {% endif %}
   </div>

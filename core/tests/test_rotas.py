@@ -16,7 +16,6 @@ TELAS = [
     ('painel:painel', {}),
     ('ongs:minha_ong', {}),
     ('ongs:necessidades', {}),
-    ('colheita:minhas_reservas', {}),
     ('doacoes:a_confirmar', {}),
     ('colheita:minhas_ofertas', {}),
     ('contas:contribuicoes', {}),
