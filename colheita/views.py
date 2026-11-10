@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http import Http404
 from django.shortcuts import redirect
+from django.utils.formats import number_format
 from django.views import View
 from django.views.generic import TemplateView
 
@@ -57,7 +58,7 @@ class ReservarOfertaView(OngAtivaRequeridaMixin, View):
         except ValidationError as erro:
             messages.error(request, ' '.join(erro.messages))
         else:
-            messages.success(request, f'Reserva feita: {reserva.quantidade.normalize():f} {oferta.unidade} de {oferta.produto}. '
+            messages.success(request, f'Reserva feita: {number_format(reserva.quantidade.normalize())} {oferta.unidade} de {oferta.produto}. '
                                       'O contato do agricultor está em Minhas reservas.')
         return redirect('colheita:ofertas')
 
