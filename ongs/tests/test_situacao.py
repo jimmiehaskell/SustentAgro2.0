@@ -1,12 +1,9 @@
-"""BL-29 (Júlia): RN-14, RN-19, RN-20, E-05. Remova o @skip ao implementar (depende de BL-25 e BL-26)."""
-from unittest import skip
-
+"""BL-29 (Júlia): RN-14, RN-19, RN-20, E-05."""
 from django.test import TestCase
 
 from core.tests.fabricas import criar_oferta, criar_ong
 
 
-@skip('Remova ao implementar o BL-29 (depois do BL-25 e do BL-26)')
 class SituacaoOngTest(TestCase):
     def test_aprovar_deixa_a_ong_ativa_e_registra_a_data(self):
         from ongs.services import aprovar_ong

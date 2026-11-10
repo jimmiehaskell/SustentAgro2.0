@@ -1,12 +1,20 @@
 """Regras de negócio do app ongs (ADR-001). Views e ações do admin só chamam estas funções."""
+import re
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.utils import timezone
 
-from ongs.choices import SituacaoNecessidade
+from colheita.choices import CanceladaPor, SituacaoReserva
+from ongs.choices import SituacaoNecessidade, SituacaoOng
 
 # RNF-06: limite de tamanho das imagens (o mesmo do Nginx do servidor)
 TAMANHO_MAXIMO_DA_IMAGEM = 10 * 1024 * 1024
+
+# RF-10: pesos do cálculo dos dois dígitos verificadores do CNPJ
+_PESOS_DO_1O_DIGITO = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+_PESOS_DO_2O_DIGITO = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 
 
 def validar_tamanho_da_imagem(arquivo):
@@ -40,6 +48,11 @@ def percentual_da_necessidade(necessidade):
     return min(100, int(confirmado_da_necessidade(necessidade) / necessidade.meta * 100))
 
 
+def _digito_verificador(numeros, pesos):
+    resto = sum(int(numero) * peso for numero, peso in zip(numeros, pesos)) % 11
+    return '0' if resto < 2 else str(11 - resto)
+
+
 def validar_cnpj(cnpj):
     """RF-10 (BL-29, Vinicius). Devolve True se o CNPJ tem 14 dígitos e dígitos verificadores válidos.
 
@@ -48,20 +61,48 @@ def validar_cnpj(cnpj):
     A unicidade é garantida pelo unique=True do campo Ong.cnpj.
     Testes: ongs/tests/test_cnpj.py
     """
-    raise NotImplementedError('BL-29')
+    digitos = re.sub(r'[.\-/\s]', '', cnpj or '')
+    if len(digitos) != 14 or not digitos.isdigit() or len(set(digitos)) == 1:
+        return False
+    primeiro = _digito_verificador(digitos[:12], _PESOS_DO_1O_DIGITO)
+    segundo = _digito_verificador(digitos[:12] + primeiro, _PESOS_DO_2O_DIGITO)
+    return digitos[12:] == primeiro + segundo
 
 
 def aprovar_ong(ong):
-    """RN-14, RF-11 (BL-29, Júlia): situacao = ativa e aprovada_em = agora."""
-    raise NotImplementedError('BL-29')
+    """RN-14, RF-11 (BL-29, Júlia): situacao = ativa e aprovada_em = agora.
+    Apaga o motivo de uma reprovação anterior. Testes: ongs/tests/test_situacao.py
+    """
+    ong.situacao = SituacaoOng.ATIVA
+    ong.aprovada_em = timezone.now()
+    ong.motivo_reprovacao = ''
+    ong.save(update_fields=['situacao', 'aprovada_em', 'motivo_reprovacao'])
 
 
 def reprovar_ong(ong, motivo):
-    """RN-14, RN-20 (BL-29, Júlia): situacao = reprovada e grava o motivo, que a ONG vê ao entrar."""
-    raise NotImplementedError('BL-29')
+    """RN-14, RN-20 (BL-29, Júlia): situacao = reprovada e grava o motivo, que a ONG vê ao entrar.
+    Sem motivo, levanta ValidationError. Testes: ongs/tests/test_situacao.py
+    """
+    motivo = (motivo or '').strip()
+    if not motivo:
+        raise ValidationError({'motivo_reprovacao': 'Informe o motivo da reprovação.'})
+    ong.situacao = SituacaoOng.REPROVADA
+    ong.motivo_reprovacao = motivo
+    ong.save(update_fields=['situacao', 'motivo_reprovacao'])
 
 
 def desativar_ong(ong):
     """RN-14, RN-19, E-05 (BL-29, Júlia): situacao = desativada e cancela as reservas ativas da ONG
-    (cancelada_por = sistema), devolvendo as quantidades ao saldo das ofertas."""
-    raise NotImplementedError('BL-29')
+    (cancelada_por = sistema), devolvendo as quantidades ao saldo das ofertas.
+
+    O saldo é calculado (colheita.services.saldo), então basta cancelar as reservas. Devolve quantas
+    reservas foram canceladas, para o admin avisar. Testes: ongs/tests/test_situacao.py
+    """
+    from colheita.models import Reserva  # dentro da função: ongs.models importa este módulo
+
+    with transaction.atomic():
+        canceladas = Reserva.objects.filter(ong=ong, situacao=SituacaoReserva.ATIVA).update(
+            situacao=SituacaoReserva.CANCELADA, cancelada_por=CanceladaPor.SISTEMA)
+        ong.situacao = SituacaoOng.DESATIVADA
+        ong.save(update_fields=['situacao'])
+    return canceladas

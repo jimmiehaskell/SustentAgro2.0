@@ -21,6 +21,12 @@
       <strong>ONG ativa</strong><br>
       Aprovada em {{ ong.aprovada_em|date:"d/m/Y" }}. Sua página está pública e vocês já podem reservar ofertas.
     </div>
+  {% elif ong.situacao == 'desativada' %}
+    {# RN-19 (BL-29): a ONG desativada sai do site e perde as reservas ativas #}
+    <div class="alert alert-secondary" role="alert">
+      <strong>ONG desativada</strong><br>
+      A página da ONG saiu do site e as reservas ativas foram canceladas. Para voltar, fale com a equipe do SustentAgro.
+    </div>
   {% endif %}
   <form class="card card-body" id="form-perfil-ong" method="post" enctype="multipart/form-data" novalidate aria-label="Perfil público da ONG">
     {% csrf_token %}
