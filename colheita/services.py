@@ -10,6 +10,7 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q, Sum
+from django.utils import timezone
 from django.utils.formats import number_format
 
 from colheita.choices import Destino, SituacaoOferta, SituacaoReserva, Unidade
@@ -33,14 +34,16 @@ def distancia_km(origem, destino):
 def ofertas_da_lista(ong=None, limite_km=None):
     """RF-19, RF-28, RN-04, RN-05, RN-15, RN-18, RN-22, P-03 (BL-33, Gabriel). Ofertas da Tela 7.
     Só entram ofertas abertas, não vencidas e com saldo: a vencida sai da lista, mas as reservas dela
-    continuam valendo (RN-18). Oferta sem ONG de destino aparece para todos; a direcionada, só para a ONG
-    de destino (a abertura a todas depois de 48 h é do BL-46).
-    Com ong (ativa): põe distancia_km em cada oferta, aplica limite_km (None = todas) e ordena do mais
-    perto para o mais longe. Sem ong (visitante e doador): sem distância e sem filtro de km.
+    continuam valendo (RN-18). Aparece para todos a oferta já aberta a todas (aberta_a_todas_em <= agora:
+    sem ONG de destino, desde a publicação, RN-05; direcionada, 48 h depois, RN-04); antes disso, só para a
+    ONG de destino.
+    Com ong (ativa): põe distancia_km em cada oferta, aplica limite_km (None = todas) e ordena (RF-22):
+    as exclusivas da ONG primeiro, depois as urgentes (RN-06), depois do mais perto para o mais longe.
+    Sem ong (visitante e doador): sem distância, sem filtro de km e sem selo ou ordem de urgência (P-05).
     Testes: colheita/tests/test_lista_ofertas.py
     """
     from colheita.models import Oferta
-    visiveis = Q(ong_destino__isnull=True)
+    visiveis = Q(aberta_a_todas_em__lte=timezone.now())
     if ong is not None:
         visiveis |= Q(ong_destino=ong)
     ofertas = Oferta.objects.filter(
@@ -52,7 +55,7 @@ def ofertas_da_lista(ong=None, limite_km=None):
     for oferta in ofertas:
         oferta.distancia_km = distancia_km(ong.localidade, oferta.localidade)
     ofertas = [o for o in ofertas if limite_km is None or o.distancia_km <= limite_km]
-    return sorted(ofertas, key=lambda oferta: oferta.distancia_km)
+    return sorted(ofertas, key=lambda o: (not o.so_da_ong_destino, not o.urgente, o.distancia_km))
 
 
 def saldo(oferta):
@@ -161,6 +164,8 @@ def reservar_oferta(oferta, ong, quantidade):
         oferta = Oferta.objects.select_for_update().get(pk=oferta.pk)
         if oferta.situacao != SituacaoOferta.ABERTA or oferta.vencida:
             raise ValidationError('Esta oferta não está mais disponível para reserva.')
+        if oferta.so_da_ong_destino and oferta.ong_destino_id != ong.pk:
+            raise ValidationError('Esta oferta está reservada à ONG de destino nas primeiras 48 h.')
         if quantidade <= 0:
             raise ValidationError('Informe uma quantidade maior que zero.')
         disponivel = saldo(oferta)
