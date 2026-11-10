@@ -10,6 +10,7 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q, Sum
+from django.utils import timezone
 from django.utils.formats import number_format
 
 from colheita.choices import Destino, SituacaoOferta, SituacaoReserva, Unidade
@@ -187,14 +188,37 @@ def reservas_da_ong(ong):
 
 
 def confirmar_recebimento(reserva, quantidade_recebida):
-    """RF-23, RN-17, RN-18, E-02, E-03 (BL-35, Gabriel em dupla com Jimmie).
+    """RF-23, RN-16, RN-17, RN-18, E-02, E-03 (BL-35, Gabriel em dupla com Jimmie).
 
-    Aceita de 0 até reserva.quantidade. Acima disso: ValidationError.
-    Maior que 0: situacao = recebida, grava quantidade_recebida e recebida_em (agora).
-    Igual a 0: situacao = nao_recebida; a quantidade volta ao saldo (só se a oferta não venceu).
+    Dentro de transaction.atomic(), trava a reserva com select_for_update() e devolve a reserva atualizada.
+    Levanta ValidationError se a reserva não está ativa, se a quantidade passa da reservada (ou é negativa)
+    ou se tem mais casas decimais do que a unidade aceita.
+    Maior que 0: situacao = recebida, grava quantidade_recebida e recebida_em (agora); passa a contar no
+    painel e a diferença para o reservado não volta ao saldo (ver saldo).
+    Igual a 0: situacao = nao_recebida, quantidade_recebida = 0, sem recebida_em; não conta no painel e a
+    quantidade volta ao saldo (saldo ignora a não recebida). Em oferta vencida o saldo não importa: ela já
+    saiu da lista e a confirmação continua valendo (RN-18).
     Testes: colheita/tests/test_recebimento.py
     """
-    raise NotImplementedError('BL-35')
+    from colheita.models import Reserva
+    with transaction.atomic():
+        reserva = Reserva.objects.select_for_update().select_related('oferta').get(pk=reserva.pk)
+        if reserva.situacao != SituacaoReserva.ATIVA:
+            raise ValidationError('Esta reserva já foi encerrada.')
+        if quantidade_recebida < 0 or quantidade_recebida > reserva.quantidade:
+            raise ValidationError(
+                f"A quantidade recebida vai de 0 até {format(reserva.quantidade.normalize(), 'f')} {reserva.oferta.unidade}.")
+        erro_fracao = erro_de_fracao(quantidade_recebida, reserva.oferta.unidade)
+        if erro_fracao:
+            raise ValidationError(erro_fracao)
+        reserva.quantidade_recebida = quantidade_recebida
+        if quantidade_recebida > 0:
+            reserva.situacao = SituacaoReserva.RECEBIDA
+            reserva.recebida_em = timezone.now()
+        else:
+            reserva.situacao = SituacaoReserva.NAO_RECEBIDA
+        reserva.save(update_fields=['situacao', 'quantidade_recebida', 'recebida_em'])
+    return reserva
 
 
 def cancelar_reserva(reserva, cancelada_por):
