@@ -199,3 +199,10 @@ class ContatoAposReservaTest(TestCase):
         self.assertRedirects(self.client.get(url), f"{reverse('contas:entrar')}?next={url}")
         self.client.force_login(fabricas.criar_ong(situacao='pendente').usuario)
         self.assertEqual(self.client.get(url).status_code, 403)
+
+    def test_mensagem_de_sucesso_usa_virgula(self):  # pt-BR
+        resposta = self.reservar('12,5')
+        self.assertEqual(self.textos(resposta), [
+            'Reserva feita: 12,5 kg de Alface crespa. '
+            'O contato do agricultor está em Minhas reservas.'
+        ])
