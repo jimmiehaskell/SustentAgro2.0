@@ -72,7 +72,7 @@ def criar_ong(situacao='ativa', localidade='Ceilândia', familias_por_mes=100, o
 
 
 def criar_oferta(agricultor=None, quantidade='100', unidade='kg', destino='doar', preco_unitario=None,
-                 localidade='Brazlândia', colher_ate=None, ong_destino=None, **campos):
+                 localidade='Brazlândia', colher_ate=None, ong_destino=None, aberta_a_todas_em=None, **campos):
     from colheita.models import Oferta
     agora = timezone.now()
     return Oferta.objects.create(
@@ -82,4 +82,4 @@ def criar_oferta(agricultor=None, quantidade='100', unidade='kg', destino='doar'
         estado=campos.pop('estado', 'excedente'), destino=destino,
         preco_unitario=Decimal(preco_unitario) if preco_unitario else None,
         local_retirada='Chácara 12, Núcleo Rural Alexandre Gusmão', transporte='ong_busca',
-        ong_destino=ong_destino, aberta_a_todas_em=agora + timedelta(hours=48) if ong_destino else agora, **campos)
+        ong_destino=ong_destino, aberta_a_todas_em=aberta_a_todas_em or (agora + timedelta(hours=48) if ong_destino else agora), **campos)
