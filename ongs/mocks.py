@@ -82,6 +82,8 @@ ONGS = lista(
          'Oficinas de currículo, entrevistas simuladas e mentoria para jovens de 16 a 24 anos.',
          [_necessidade(61, 'Mentores de primeiro emprego', 'voluntariado', 'voluntários', 10, 4)]),
 )
+
+
 ONG_PENDENTE = _ong(
     7, 'Horta Comunitária Vila Planalto', 'Horta Vila Planalto', 'Planaltina', '', [2], 'itens voluntariado',
     40, '(61) 3301-2200', 'contato@exemplo.org', '', '', [],
@@ -91,8 +93,9 @@ ONG_REPROVADA = _ong(
     8, 'Instituto Raízes do Planalto', 'Raízes do Planalto', 'Planaltina', '', [2], 'itens voluntariado',
     40, '(61) 3301-2200', 'contato@exemplo.org', '', '', [],
     situacao='reprovada', criada_em=datetime(2026, 10, 16), aprovada_em=None,
-    motivo_reprovacao='O CNPJ informado pertence a uma empresa com fins lucrativos, '
+    motivo_reprovacao='o CNPJ informado pertence a uma empresa com fins lucrativos, '
                       'não a uma organização da sociedade civil.')
+
 
 def ong_por_pk(pk):
     return next((o for o in ONGS if o.pk == pk), None)

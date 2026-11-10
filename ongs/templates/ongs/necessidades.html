@@ -5,7 +5,8 @@
   <h1 class="h3 mb-0">Minha conta</h1>
   <p class="text-body-secondary">{{ ong.nome }}</p>
   {% include 'componentes/abas_ong.html' with aba=aba %}
-    {# RF-13: lista de necessidades. MOCK: Editar e Encerrar ligam na camada 2 (BL-41); o JavaScript no fim da página impede o envio do formulário #}
+  {# RF-13: lista de necessidades. MOCK: Editar e Encerrar ligam na camada 2 (BL-41); o JavaScript no fim da página impede o envio do formulário #}
+  <div class="d-grid gap-3 mb-4">
     {% for n in ong.necessidades.all %}
       <article class="card">
         <div class="card-body d-grid gap-2">
@@ -43,7 +44,7 @@
       <p class="text-body-secondary mb-0">Sua ONG ainda não tem necessidades. Publique a primeira abaixo.</p>
     {% endfor %}
   </div>
- <form class="card card-body" id="form-necessidade" method="post" novalidate aria-label="Nova necessidade">
+  <form class="card card-body" id="form-necessidade" method="post" novalidate aria-label="Nova necessidade">
     {% csrf_token %}
     <h2 class="h5 mb-3">Nova necessidade</h2>
     <div class="row g-3">
@@ -73,8 +74,6 @@
     </div>
     <div class="mt-4"><button class="btn btn-primary" type="submit">Publicar necessidade</button></div>
   </form>
-</div>
- </form>
 </div>
 <div class="alert alert-info shadow position-fixed bottom-0 start-50 translate-middle-x mb-3"
      style="z-index: 1080; width: min(32rem, calc(100% - 2rem))"

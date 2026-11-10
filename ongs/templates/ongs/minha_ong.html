@@ -22,7 +22,7 @@
       Aprovada em {{ ong.aprovada_em|date:"d/m/Y" }}. Sua página está pública e vocês já podem reservar ofertas.
     </div>
   {% endif %}
-<form class="card card-body" id="form-perfil-ong" method="post" enctype="multipart/form-data" novalidate aria-label="Perfil público da ONG">
+  <form class="card card-body" id="form-perfil-ong" method="post" enctype="multipart/form-data" novalidate aria-label="Perfil público da ONG">
     {% csrf_token %}
     <h2 class="h5 mb-3">Perfil público</h2>
     <div class="row g-3">
