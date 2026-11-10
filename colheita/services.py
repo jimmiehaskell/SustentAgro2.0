@@ -10,6 +10,7 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q, Sum
+from django.utils.formats import number_format
 
 from colheita.choices import Destino, SituacaoOferta, SituacaoReserva, Unidade
 from ongs.choices import SituacaoOng
@@ -164,7 +165,7 @@ def reservar_oferta(oferta, ong, quantidade):
             raise ValidationError('Informe uma quantidade maior que zero.')
         disponivel = saldo(oferta)
         if quantidade > disponivel:
-            raise ValidationError(f"Só restam {format(disponivel.normalize(), 'f')} {oferta.unidade} desta oferta.")
+            raise ValidationError(f'Só restam {number_format(disponivel.normalize())} {oferta.unidade} desta oferta.')
         erro_fracao = erro_de_fracao(quantidade, oferta.unidade)
         if erro_fracao:
             raise ValidationError(erro_fracao)
