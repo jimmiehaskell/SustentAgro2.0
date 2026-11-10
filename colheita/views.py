@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 
-from colheita import mocks
+from colheita import mocks, services
 from colheita.choices import Categoria, Estado, Transporte
 from core.perfis import perfil_da_requisicao
 from ongs import mocks as ongs_mocks
@@ -58,7 +58,8 @@ class MinhasOfertasView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['agricultor'] = mocks.AGRICULTOR
-        context['ofertas'] = mocks.OFERTAS_DO_AGRICULTOR
+        # Cada oferta vai com o resumo do que já foi recebido (protótipo: oferta vencida)
+        context['ofertas'] = [(oferta, services.resumo_recebido(oferta)) for oferta in mocks.OFERTAS_DO_AGRICULTOR]
         return context
 
 
