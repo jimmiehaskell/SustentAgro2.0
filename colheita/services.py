@@ -8,9 +8,9 @@ from datetime import date
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
-from django.db.models import Sum
+from django.db.models import Q, Sum
 
-from colheita.choices import Destino, SituacaoReserva, Unidade
+from colheita.choices import Destino, SituacaoOferta, SituacaoReserva, Unidade
 
 RAIO_DA_TERRA_KM = 6371.0
 
@@ -25,6 +25,31 @@ def distancia_km(origem, destino):
     a = (math.sin((lat2 - lat1) / 2) ** 2
          + math.cos(lat1) * math.cos(lat2) * math.sin((lon2 - lon1) / 2) ** 2)
     return round(2 * RAIO_DA_TERRA_KM * math.asin(math.sqrt(a)), 1)
+
+
+def ofertas_da_lista(ong=None, limite_km=None):
+    """RF-19, RF-28, RN-04, RN-05, RN-15, RN-18, RN-22, P-03 (BL-33, Gabriel). Ofertas da Tela 7.
+    Só entram ofertas abertas, não vencidas e com saldo: a vencida sai da lista, mas as reservas dela
+    continuam valendo (RN-18). Oferta sem ONG de destino aparece para todos; a direcionada, só para a ONG
+    de destino (a abertura a todas depois de 48 h é do BL-46).
+    Com ong (ativa): põe distancia_km em cada oferta, aplica limite_km (None = todas) e ordena do mais
+    perto para o mais longe. Sem ong (visitante e doador): sem distância e sem filtro de km.
+    Testes: colheita/tests/test_lista_ofertas.py
+    """
+    from colheita.models import Oferta
+    visiveis = Q(ong_destino__isnull=True)
+    if ong is not None:
+        visiveis |= Q(ong_destino=ong)
+    ofertas = Oferta.objects.filter(
+        visiveis, situacao=SituacaoOferta.ABERTA, colher_ate__gte=date.today(),
+    ).select_related('localidade')
+    ofertas = [oferta for oferta in ofertas if oferta.saldo > 0]
+    if ong is None:
+        return ofertas
+    for oferta in ofertas:
+        oferta.distancia_km = distancia_km(ong.localidade, oferta.localidade)
+    ofertas = [o for o in ofertas if limite_km is None or o.distancia_km <= limite_km]
+    return sorted(ofertas, key=lambda oferta: oferta.distancia_km)
 
 
 def saldo(oferta):

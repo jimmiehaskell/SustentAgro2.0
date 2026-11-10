@@ -9,9 +9,9 @@ LIMITES_KM = {'30': 30, '60': 60, 'todas': None}
 
 
 class OfertasView(TemplateView):
-    """Tela 7 · Ofertas da Colheita (BL-18, Gabriel). RF-19 a RF-22, RF-27, RF-28.
+    """Tela 7 · Ofertas da Colheita (BL-18, BL-33, Gabriel). RF-19 a RF-22, RF-27, RF-28.
     Versão ONG ativa: distância, filtros de km e reserva. Versão visitante/doador: só consulta (D-26).
-    MOCK: trocar na camada 1 (BL-33, BL-34).
+    MOCK: o formulário de reserva troca na camada 1 (BL-34).
     """
     template_name = 'colheita/ofertas.html'
 
@@ -21,17 +21,10 @@ class OfertasView(TemplateView):
         dist = self.request.GET.get('dist', 'todas')
         if dist not in LIMITES_KM:
             dist = 'todas'
-        ofertas = [o for o in mocks.OFERTAS if o.saldo > 0]
-        if perfil == 'ong':
-            limite = LIMITES_KM[dist]
-            if limite is not None:
-                ofertas = [o for o in ofertas if o.distancia_km <= limite]
-            # RF-22: direcionadas à ONG primeiro, depois urgentes, depois as mais perto
-            ofertas.sort(key=lambda o: (o.ong_destino is None, not o.urgente, o.distancia_km))
-        else:
-            # Visitante e doador não veem ofertas direcionadas (RN-04)
-            ofertas = [o for o in ofertas if o.ong_destino is None]
-        context.update(ofertas=ofertas, dist=dist, versao_ong=perfil == 'ong', localidade_da_ong='Ceilândia')
+        ong = getattr(self.request.user, 'ong', None) if perfil == 'ong' else None
+        ofertas = services.ofertas_da_lista(ong=ong, limite_km=LIMITES_KM[dist])
+        context.update(ofertas=ofertas, dist=dist, versao_ong=ong is not None,
+                       localidade_da_ong=ong.localidade.nome if ong else '')
         return context
 
 

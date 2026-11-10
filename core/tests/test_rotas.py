@@ -2,6 +2,8 @@
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from core.tests import fabricas
+
 TELAS = [
     ('core:inicio', {}),
     ('ongs:lista', {}),
@@ -54,9 +56,9 @@ class PerfilMockTest(TestCase):
         self.assertEqual(resposta.context['perfil'], 'agricultor')
         self.assertEqual(resposta.context['url_colheita'], 'colheita:publicar')  # D-26, RN-25
 
-    @override_settings(DEBUG=True)
-    def test_ong_simulada_ve_a_versao_com_reserva(self):
-        self.client.get(reverse('core:perfil_mock', kwargs={'perfil': 'ong'}))
+    def test_ong_ativa_ve_a_versao_com_reserva(self):
+        fabricas.criar_oferta()
+        self.client.force_login(fabricas.criar_ong().usuario)
         resposta = self.client.get(reverse('colheita:ofertas'))
         self.assertTrue(resposta.context['versao_ong'])
         self.assertContains(resposta, 'Reservar')
