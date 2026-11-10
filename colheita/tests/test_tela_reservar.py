@@ -33,7 +33,7 @@ class RegrasDaReservaTest(TestCase):
 
     def test_mensagem_de_saldo_traz_o_que_resta(self):  # RN-03
         reservar_oferta(self.oferta, self.ong, Decimal('80.5'))
-        with self.assertRaisesMessage(ValidationError, 'Só restam 19.5 kg desta oferta.'):
+        with self.assertRaisesMessage(ValidationError, 'Só restam 19,5 kg desta oferta.'):
             reservar_oferta(self.oferta, fabricas.criar_ong(), Decimal('30'))
 
     def test_reserva_de_todo_o_saldo_zera_a_oferta(self):  # RF-20
