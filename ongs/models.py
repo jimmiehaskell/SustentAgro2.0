@@ -76,10 +76,16 @@ class Ong(models.Model):
     def clean(self):
         """Valida a ONG em full_clean() e nos formulários do Django Admin."""
         super().clean()
+        erros = {}
         # O formulário pode ainda não ter um usuário válido selecionado.
         usuario = getattr(self, 'usuario', None)
         if usuario is not None and usuario.tipo_conta != TipoConta.ONG:
-            raise ValidationError({'usuario': 'Só uma conta do tipo ONG pode ter o perfil de ONG.'})
+            erros['usuario'] = 'Só uma conta do tipo ONG pode ter o perfil de ONG.'
+        # RF-10: dígitos verificadores (a unicidade vem do unique=True do campo)
+        if self.cnpj and not services.validar_cnpj(self.cnpj):
+            erros['cnpj'] = 'CNPJ inválido. Confira os 14 dígitos.'
+        if erros:
+            raise ValidationError(erros)
 
 
 class Necessidade(models.Model):

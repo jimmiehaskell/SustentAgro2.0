@@ -1,12 +1,9 @@
-"""BL-29 (Vinicius): RF-10. Remova o @skip ao implementar ongs.services.validar_cnpj."""
-from unittest import skip
-
+"""BL-29 (Vinicius): RF-10."""
 from django.test import SimpleTestCase
 
 from ongs.services import validar_cnpj
 
 
-@skip('Remova ao implementar o BL-29')
 class ValidarCnpjTest(SimpleTestCase):
     def test_cnpj_valido_com_e_sem_pontuacao(self):
         self.assertTrue(validar_cnpj('11.222.333/0001-81'))

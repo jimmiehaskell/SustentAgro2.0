@@ -9,6 +9,8 @@ from decimal import Decimal
 
 from django.utils import timezone
 
+from core.demo.cnpj import gerar_cnpj  # CNPJ com dígitos verificadores válidos (RF-10, RN-24)
+
 COORDENADAS = {
     'Ceilândia': ('-15.819700', '-48.108300'),
     'Brazlândia': ('-15.675800', '-48.200300'),
@@ -63,7 +65,7 @@ def criar_ong(situacao='ativa', localidade='Ceilândia', familias_por_mes=100, o
     n = _proximo()
     ong = Ong.objects.create(
         usuario=criar_usuario('ong'), nome=f'ONG de teste {n}', nome_curto=f'Teste {n}',
-        cnpj=campos.pop('cnpj', f'{n:014d}'), telefone='(61) 3333-0000', email_contato=f'ong{n}@exemplo.org',
+        cnpj=campos.pop('cnpj', gerar_cnpj(n)), telefone='(61) 3333-0000', email_contato=f'ong{n}@exemplo.org',
         familias_por_mes=familias_por_mes, situacao=situacao, localidade=criar_localidade(localidade), **campos)
     ong.ods.set([criar_ods(numero) for numero in ods])
     return ong

@@ -21,7 +21,8 @@ def perfil_da_requisicao(request):
         return 'visitante'
 
     if usuario.tipo_conta == 'ong':
-        # Conta de ONG ainda sem o perfil Ong (cadastro incompleto) conta como pendente (RN-20)
+        # Conta de ONG ainda sem o perfil Ong (cadastro incompleto) conta como pendente (RN-20).
+        # A desativada também: só entra na "Minha conta", que mostra a situação pelo ong.situacao (RN-19).
         ong = getattr(usuario, 'ong', None)
         situacao = getattr(ong, 'situacao', 'pendente')
         return {'ativa': 'ong', 'reprovada': 'ong-reprovada'}.get(situacao, 'ong-pendente')
