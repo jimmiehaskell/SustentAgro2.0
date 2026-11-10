@@ -1,6 +1,4 @@
-"""BL-29 (Júlia): RN-14, RN-19, RN-20, E-05. Remova o @skip ao implementar (depende de BL-25 e BL-26)."""
-from unittest import skip
-
+"""BL-29 (Júlia): RN-14, RN-19, RN-20, E-05."""
 from django.test import TestCase
 
 from core.tests.fabricas import criar_oferta, criar_ong
