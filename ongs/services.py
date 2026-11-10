@@ -1,6 +1,45 @@
 """Regras de negócio do app ongs (ADR-001). Views e ações do admin só chamam estas funções."""
+from decimal import Decimal
+
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
+
+from ongs.choices import SituacaoNecessidade
+
+# RNF-06: limite de tamanho das imagens (o mesmo do Nginx do servidor)
+TAMANHO_MAXIMO_DA_IMAGEM = 10 * 1024 * 1024
+
+
+def validar_tamanho_da_imagem(arquivo):
+    """RNF-06 (BL-25). Recusa imagem com mais de 10 MB. Usado como validador do logo e da capa da ONG.
+    Testes: ongs/tests/test_models_ongs.py
+    """
+    if arquivo.size > TAMANHO_MAXIMO_DA_IMAGEM:
+        raise ValidationError('A imagem deve ter no máximo 10 MB.')
+
+
+def confirmado_da_necessidade(necessidade):
+    """RN-02 (BL-25). Quantidade ou valor já confirmado pela ONG; promessas e inscrições pendentes não contam.
+
+    As contribuições só existem na camada 2 (doacoes.Contribuicao, BL-42 a BL-45). Até lá, nada é
+    confirmado e as barras começam em zero.
+    Testes: ongs/tests/test_models_ongs.py
+    """
+    return Decimal('0')
+
+
+def percentual_da_necessidade(necessidade):
+    """RN-21 (BL-25). Percentual da meta já confirmado, de 0 a 100, como nos mocks.
+
+    Necessidade atendida fica com a barra em 100%, mesmo antes de existirem contribuições confirmadas.
+    Testes: ongs/tests/test_models_ongs.py
+    """
+    if necessidade.situacao == SituacaoNecessidade.ATENDIDA:
+        return 100
+    if not necessidade.meta:
+        return 0
+    return min(100, int(confirmado_da_necessidade(necessidade) / necessidade.meta * 100))
 
 
 def validar_cnpj(cnpj):
@@ -22,7 +61,6 @@ def aprovar_ong(ong):
     ong.save(update_fields=['situacao', 'aprovada_em', 'motivo_reprovacao'])
 
 
-
 def reprovar_ong(ong, motivo):
     """RN-14, RN-20 (BL-29, Júlia): situacao = reprovada e grava o motivo, que a ONG vê ao entrar."""
     if not motivo or not motivo.strip():
@@ -30,7 +68,6 @@ def reprovar_ong(ong, motivo):
     ong.situacao = 'reprovada'
     ong.motivo_reprovacao = motivo
     ong.save(update_fields=['situacao', 'motivo_reprovacao'])
-
 
 
 def desativar_ong(ong):
