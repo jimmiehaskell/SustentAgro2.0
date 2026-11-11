@@ -1,11 +1,11 @@
 {# Cartão de oferta (RF-19, RF-22, RF-28). Uso: {% include 'componentes/cartao_oferta.html' with oferta=oferta versao_ong=True %} #}
 {% load l10n %}
-<article class="card{% if oferta.ong_destino and versao_ong %} oferta-direcionada{% endif %}">
+<article class="card{% if oferta.so_da_ong_destino and versao_ong %} oferta-direcionada{% endif %}">
   <div class="card-body d-flex flex-wrap gap-3 justify-content-between">
     <div class="d-grid gap-1">
       <div class="d-flex flex-wrap gap-2 align-items-center">
         <h3 class="h6 mb-0">{{ oferta.produto }}</h3>
-        {% if versao_ong and oferta.ong_destino %}<span class="selo selo-limao">Para a sua ONG · abre a todas em {{ oferta.aberta_a_todas_em|timeuntil }}</span>{% endif %}
+        {% if versao_ong and oferta.so_da_ong_destino %}<span class="selo selo-limao">Para a sua ONG · abre a todas em {{ oferta.aberta_a_todas_em|timeuntil }}</span>{% endif %}
         {% if versao_ong and oferta.urgente %}<span class="selo selo-limao">Urgente</span>{% endif %}
         <span class="selo selo-apoio">{% if oferta.destino == 'vender' %}Venda · R$ {{ oferta.preco_unitario|floatformat:2 }}/{{ oferta.unidade }}{% else %}Doação{% endif %}</span>
       </div>

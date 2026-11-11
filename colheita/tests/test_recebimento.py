@@ -1,9 +1,6 @@
-"""BL-35 (Gabriel, em dupla com Jimmie): RF-23, RN-17, RN-18, E-02, E-03.
-Remova o @skip ao implementar colheita.services.confirmar_recebimento (depende de BL-34).
-"""
+"""BL-35 (Gabriel, em dupla com Jimmie): RF-23, RN-17, RN-18, E-02, E-03."""
 from datetime import date, timedelta
 from decimal import Decimal
-from unittest import skip
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -11,7 +8,6 @@ from django.test import TestCase
 from core.tests.fabricas import criar_oferta, criar_ong
 
 
-@skip('Remova ao implementar o BL-35 (depois do BL-34)')
 class ConfirmarRecebimentoTest(TestCase):
     def setUp(self):
         from colheita.services import confirmar_recebimento, reservar_oferta, saldo

@@ -10,12 +10,15 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q, Sum
+from django.utils import timezone
 from django.utils.formats import number_format
 
 from colheita.choices import Destino, SituacaoOferta, SituacaoReserva, Unidade
 from ongs.choices import SituacaoOng
 
 RAIO_DA_TERRA_KM = 6371.0
+# RN-03: reservas que tiram quantidade do saldo (cancelada e não recebida devolvem)
+SITUACOES_QUE_OCUPAM_O_SALDO = [SituacaoReserva.ATIVA, SituacaoReserva.RECEBIDA]
 
 
 def distancia_km(origem, destino):
@@ -33,39 +36,48 @@ def distancia_km(origem, destino):
 def ofertas_da_lista(ong=None, limite_km=None):
     """RF-19, RF-28, RN-04, RN-05, RN-15, RN-18, RN-22, P-03 (BL-33, Gabriel). Ofertas da Tela 7.
     Só entram ofertas abertas, não vencidas e com saldo: a vencida sai da lista, mas as reservas dela
-    continuam valendo (RN-18). Oferta sem ONG de destino aparece para todos; a direcionada, só para a ONG
-    de destino (a abertura a todas depois de 48 h é do BL-46).
-    Com ong (ativa): põe distancia_km em cada oferta, aplica limite_km (None = todas) e ordena do mais
-    perto para o mais longe. Sem ong (visitante e doador): sem distância e sem filtro de km.
+    continuam valendo (RN-18). Aparece para todos a oferta já aberta a todas (aberta_a_todas_em <= agora:
+    sem ONG de destino, desde a publicação, RN-05; direcionada, 48 h depois, RN-04); antes disso, só para a
+    ONG de destino.
+    Com ong (ativa): põe distancia_km em cada oferta, aplica limite_km (None = todas) e ordena (RF-22):
+    as exclusivas da ONG primeiro, depois as urgentes (RN-06), depois do mais perto para o mais longe.
+    Sem ong (visitante e doador): sem distância, sem filtro de km e sem selo ou ordem de urgência (P-05).
+    O total reservado vem na mesma consulta (reservado_na_consulta), e o saldo usa esse valor em vez de
+    fazer uma consulta por oferta.
     Testes: colheita/tests/test_lista_ofertas.py
     """
     from colheita.models import Oferta
-    visiveis = Q(ong_destino__isnull=True)
+    visiveis = Q(aberta_a_todas_em__lte=timezone.now())
     if ong is not None:
         visiveis |= Q(ong_destino=ong)
     ofertas = Oferta.objects.filter(
         visiveis, situacao=SituacaoOferta.ABERTA, colher_ate__gte=date.today(),
-    ).select_related('localidade')
+    ).select_related('localidade').annotate(reservado_na_consulta=Sum(
+        'reservas__quantidade', filter=Q(reservas__situacao__in=SITUACOES_QUE_OCUPAM_O_SALDO)))
     ofertas = [oferta for oferta in ofertas if oferta.saldo > 0]
     if ong is None:
         return ofertas
     for oferta in ofertas:
         oferta.distancia_km = distancia_km(ong.localidade, oferta.localidade)
     ofertas = [o for o in ofertas if limite_km is None or o.distancia_km <= limite_km]
-    return sorted(ofertas, key=lambda oferta: oferta.distancia_km)
+    return sorted(ofertas, key=lambda o: (not o.so_da_ong_destino, not o.urgente, o.distancia_km))
 
 
 def saldo(oferta):
     """RN-03 (BL-26). Quantidade publicada menos a soma das reservas ativas e recebidas.
     Reservas canceladas e não recebidas não contam. Nunca negativo.
     A recebida conta pela quantidade reservada: a diferença para o recebido não volta ao saldo.
+    Se a oferta veio de ofertas_da_lista, usa o total reservado já somado na consulta.
     Testes: colheita/tests/test_models.py
     """
     if oferta.pk is None:
         return oferta.quantidade
-    reservado = oferta.reservas.filter(
-        situacao__in=[SituacaoReserva.ATIVA, SituacaoReserva.RECEBIDA],
-    ).aggregate(total=Sum('quantidade'))['total'] or Decimal('0')
+    if hasattr(oferta, 'reservado_na_consulta'):
+        reservado = oferta.reservado_na_consulta or Decimal('0')
+    else:
+        reservado = oferta.reservas.filter(
+            situacao__in=SITUACOES_QUE_OCUPAM_O_SALDO,
+        ).aggregate(total=Sum('quantidade'))['total'] or Decimal('0')
     return max(oferta.quantidade - reservado, Decimal('0'))
 
 
@@ -161,6 +173,8 @@ def reservar_oferta(oferta, ong, quantidade):
         oferta = Oferta.objects.select_for_update().get(pk=oferta.pk)
         if oferta.situacao != SituacaoOferta.ABERTA or oferta.vencida:
             raise ValidationError('Esta oferta não está mais disponível para reserva.')
+        if oferta.so_da_ong_destino and oferta.ong_destino_id != ong.pk:
+            raise ValidationError('Esta oferta está reservada à ONG de destino nas primeiras 48 h.')
         if quantidade <= 0:
             raise ValidationError('Informe uma quantidade maior que zero.')
         disponivel = saldo(oferta)
@@ -187,19 +201,79 @@ def reservas_da_ong(ong):
 
 
 def confirmar_recebimento(reserva, quantidade_recebida):
-    """RF-23, RN-17, RN-18, E-02, E-03 (BL-35, Gabriel em dupla com Jimmie).
+    """RF-23, RN-16, RN-17, RN-18, E-02, E-03 (BL-35, Gabriel em dupla com Jimmie).
 
-    Aceita de 0 até reserva.quantidade. Acima disso: ValidationError.
-    Maior que 0: situacao = recebida, grava quantidade_recebida e recebida_em (agora).
-    Igual a 0: situacao = nao_recebida; a quantidade volta ao saldo (só se a oferta não venceu).
+    Dentro de transaction.atomic(), trava a reserva com select_for_update() e devolve a reserva atualizada.
+    Levanta ValidationError se a reserva não está ativa, se a quantidade passa da reservada (ou é negativa)
+    ou se tem mais casas decimais do que a unidade aceita.
+    Maior que 0: situacao = recebida, grava quantidade_recebida e recebida_em (agora); passa a contar no
+    painel e a diferença para o reservado não volta ao saldo (ver saldo).
+    Igual a 0: situacao = nao_recebida, quantidade_recebida = 0, sem recebida_em; não conta no painel e a
+    quantidade volta ao saldo (saldo ignora a não recebida). Em oferta vencida o saldo não importa: ela já
+    saiu da lista e a confirmação continua valendo (RN-18).
     Testes: colheita/tests/test_recebimento.py
     """
-    raise NotImplementedError('BL-35')
+    from colheita.models import Reserva
+    with transaction.atomic():
+        reserva = Reserva.objects.select_for_update().select_related('oferta').get(pk=reserva.pk)
+        if reserva.situacao != SituacaoReserva.ATIVA:
+            raise ValidationError('Esta reserva já foi encerrada.')
+        if quantidade_recebida < 0 or quantidade_recebida > reserva.quantidade:
+            raise ValidationError(
+                f"A quantidade recebida vai de 0 até {number_format(reserva.quantidade.normalize())} {reserva.oferta.unidade}.")
+        erro_fracao = erro_de_fracao(quantidade_recebida, reserva.oferta.unidade)
+        if erro_fracao:
+            raise ValidationError(erro_fracao)
+        reserva.quantidade_recebida = quantidade_recebida
+        if quantidade_recebida > 0:
+            reserva.situacao = SituacaoReserva.RECEBIDA
+            reserva.recebida_em = timezone.now()
+        else:
+            reserva.situacao = SituacaoReserva.NAO_RECEBIDA
+        reserva.save(update_fields=['situacao', 'quantidade_recebida', 'recebida_em'])
+    return reserva
 
 
 def cancelar_reserva(reserva, cancelada_por):
-    """RF-24 (BL-47, camada 3). Só reserva ativa; situacao = cancelada; a quantidade volta ao saldo."""
-    raise NotImplementedError('BL-47')
+    """RF-24, RN-03, RN-18, UC-09, UC-11 (BL-47, Gabriel).
+
+    Dentro de transaction.atomic(), trava a reserva com select_for_update() e devolve a reserva atualizada.
+    Levanta ValidationError se a reserva não está ativa (recebida, não recebida ou já cancelada).
+    Grava situacao = cancelada e cancelada_por (CanceladaPor: ong, agricultor ou sistema); a quantidade
+    volta ao saldo (saldo ignora a cancelada). Quem pode cancelar (a ONG dona da reserva ou o agricultor
+    dono da oferta) é conferido pela view. Em oferta vencida a reserva também cancela (RN-18).
+    Testes: colheita/tests/test_cancelamentos.py
+    """
+    from colheita.models import Reserva
+    with transaction.atomic():
+        reserva = Reserva.objects.select_for_update().select_related('oferta').get(pk=reserva.pk)
+        if reserva.situacao != SituacaoReserva.ATIVA:
+            raise ValidationError('Só uma reserva ativa pode ser cancelada.')
+        reserva.situacao = SituacaoReserva.CANCELADA
+        reserva.cancelada_por = cancelada_por
+        reserva.save(update_fields=['situacao', 'cancelada_por'])
+    return reserva
+
+
+def cancelar_oferta(oferta):
+    """RF-24, RN-03, UC-11 (BL-47, Gabriel).
+
+    Dentro de transaction.atomic(), trava a oferta com select_for_update() e devolve a oferta atualizada.
+    Levanta ValidationError se a oferta já está cancelada ou se ainda tem reserva ativa (o agricultor
+    cancela a reserva antes). Grava situacao = cancelada: a oferta sai da lista das ONGs. As reservas
+    recebidas continuam contando no painel. Quem pode cancelar (o agricultor dono) é conferido pela view.
+    Testes: colheita/tests/test_cancelamentos.py
+    """
+    from colheita.models import Oferta
+    with transaction.atomic():
+        oferta = Oferta.objects.select_for_update().get(pk=oferta.pk)
+        if oferta.situacao == SituacaoOferta.CANCELADA:
+            raise ValidationError('Esta oferta já foi cancelada.')
+        if oferta.reservas.filter(situacao=SituacaoReserva.ATIVA).exists():
+            raise ValidationError('Só é possível cancelar ofertas sem reservas ativas. Cancele as reservas primeiro.')
+        oferta.situacao = SituacaoOferta.CANCELADA
+        oferta.save(update_fields=['situacao'])
+    return oferta
 
 
 def resumo_recebido(oferta):
