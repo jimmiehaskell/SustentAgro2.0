@@ -17,6 +17,8 @@ from colheita.choices import Destino, SituacaoOferta, SituacaoReserva, Unidade
 from ongs.choices import SituacaoOng
 
 RAIO_DA_TERRA_KM = 6371.0
+# RN-03: reservas que tiram quantidade do saldo (cancelada e não recebida devolvem)
+SITUACOES_QUE_OCUPAM_O_SALDO = [SituacaoReserva.ATIVA, SituacaoReserva.RECEBIDA]
 
 
 def distancia_km(origem, destino):
@@ -40,6 +42,8 @@ def ofertas_da_lista(ong=None, limite_km=None):
     Com ong (ativa): põe distancia_km em cada oferta, aplica limite_km (None = todas) e ordena (RF-22):
     as exclusivas da ONG primeiro, depois as urgentes (RN-06), depois do mais perto para o mais longe.
     Sem ong (visitante e doador): sem distância, sem filtro de km e sem selo ou ordem de urgência (P-05).
+    O total reservado vem na mesma consulta (reservado_na_consulta), e o saldo usa esse valor em vez de
+    fazer uma consulta por oferta.
     Testes: colheita/tests/test_lista_ofertas.py
     """
     from colheita.models import Oferta
@@ -48,7 +52,8 @@ def ofertas_da_lista(ong=None, limite_km=None):
         visiveis |= Q(ong_destino=ong)
     ofertas = Oferta.objects.filter(
         visiveis, situacao=SituacaoOferta.ABERTA, colher_ate__gte=date.today(),
-    ).select_related('localidade')
+    ).select_related('localidade').annotate(reservado_na_consulta=Sum(
+        'reservas__quantidade', filter=Q(reservas__situacao__in=SITUACOES_QUE_OCUPAM_O_SALDO)))
     ofertas = [oferta for oferta in ofertas if oferta.saldo > 0]
     if ong is None:
         return ofertas
@@ -62,13 +67,17 @@ def saldo(oferta):
     """RN-03 (BL-26). Quantidade publicada menos a soma das reservas ativas e recebidas.
     Reservas canceladas e não recebidas não contam. Nunca negativo.
     A recebida conta pela quantidade reservada: a diferença para o recebido não volta ao saldo.
+    Se a oferta veio de ofertas_da_lista, usa o total reservado já somado na consulta.
     Testes: colheita/tests/test_models.py
     """
     if oferta.pk is None:
         return oferta.quantidade
-    reservado = oferta.reservas.filter(
-        situacao__in=[SituacaoReserva.ATIVA, SituacaoReserva.RECEBIDA],
-    ).aggregate(total=Sum('quantidade'))['total'] or Decimal('0')
+    if hasattr(oferta, 'reservado_na_consulta'):
+        reservado = oferta.reservado_na_consulta or Decimal('0')
+    else:
+        reservado = oferta.reservas.filter(
+            situacao__in=SITUACOES_QUE_OCUPAM_O_SALDO,
+        ).aggregate(total=Sum('quantidade'))['total'] or Decimal('0')
     return max(oferta.quantidade - reservado, Decimal('0'))
 
 

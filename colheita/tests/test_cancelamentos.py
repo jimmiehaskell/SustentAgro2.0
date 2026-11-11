@@ -165,6 +165,10 @@ class CancelarReservaDaOngNaTelaTest(TestCase):
         resposta = self.client.get(reverse('colheita:minhas_reservas'))
         self.assertContains(resposta, f'formaction="{self.url}"')
 
+    def test_botao_pede_confirmacao_antes_de_cancelar(self):
+        resposta = self.client.get(reverse('colheita:minhas_reservas'))
+        self.assertContains(resposta, "return confirm('Cancelar a reserva de")
+
 
 class CancelarComoAgricultorNaTelaTest(TestCase):
     def setUp(self):
