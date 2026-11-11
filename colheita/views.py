@@ -128,7 +128,7 @@ class ConfirmarRecebimentoView(OngAtivaRequeridaMixin, View):
         else:
             produto, unidade = reserva.oferta.produto, reserva.oferta.unidade
             if reserva.situacao == SituacaoReserva.RECEBIDA:
-                messages.success(request, f'Recebimento confirmado: {reserva.quantidade_recebida.normalize():f} {unidade} '
+                messages.success(request, f'Recebimento confirmado: {number_format(reserva.quantidade_recebida.normalize())} {unidade} '
                                           f'de {produto}. A quantidade já conta no painel de impacto.')
             elif reserva.oferta.vencida:
                 messages.success(request, f'Reserva de {produto} encerrada como não recebida.')

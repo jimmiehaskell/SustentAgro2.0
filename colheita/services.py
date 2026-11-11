@@ -207,7 +207,7 @@ def confirmar_recebimento(reserva, quantidade_recebida):
             raise ValidationError('Esta reserva já foi encerrada.')
         if quantidade_recebida < 0 or quantidade_recebida > reserva.quantidade:
             raise ValidationError(
-                f"A quantidade recebida vai de 0 até {format(reserva.quantidade.normalize(), 'f')} {reserva.oferta.unidade}.")
+                f"A quantidade recebida vai de 0 até {number_format(reserva.quantidade.normalize())} {reserva.oferta.unidade}.")
         erro_fracao = erro_de_fracao(quantidade_recebida, reserva.oferta.unidade)
         if erro_fracao:
             raise ValidationError(erro_fracao)

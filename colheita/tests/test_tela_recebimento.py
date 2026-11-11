@@ -29,6 +29,11 @@ class RegrasDoRecebimentoTest(TestCase):
         with self.assertRaisesMessage(ValidationError, 'A quantidade recebida vai de 0 até 50 kg.'):
             confirmar_recebimento(self.reserva, Decimal('50.1'))
 
+    def test_mensagem_de_excesso_usa_virgula(self):  # pt-BR
+        reserva = reservar_oferta(self.oferta, fabricas.criar_ong(), Decimal('12.5'))
+        with self.assertRaisesMessage(ValidationError, 'A quantidade recebida vai de 0 até 12,5 kg.'):
+            confirmar_recebimento(reserva, Decimal('13'))
+
     def test_recusado_nao_muda_a_reserva(self):  # E-02
         with self.assertRaises(ValidationError):
             confirmar_recebimento(self.reserva, Decimal('60'))
@@ -92,6 +97,10 @@ class ConfirmarNaTelaTest(TestCase):
         self.confirmar('12,5')
         self.reserva.refresh_from_db()
         self.assertEqual(self.reserva.quantidade_recebida, Decimal('12.5'))
+
+    def test_mensagem_de_sucesso_usa_virgula(self):  # pt-BR
+        self.assertEqual(self.textos(self.confirmar('12,5')), ['Recebimento confirmado: 12,5 kg de Alface crespa. '
+                                                               'A quantidade já conta no painel de impacto.'])
 
     def test_zero_encerra_e_a_quantidade_volta_para_a_lista(self):  # RN-17, E-03
         self.assertContains(self.client.get(reverse('colheita:ofertas')), 'Saldo <strong class="text-numero">50 kg</strong>')
