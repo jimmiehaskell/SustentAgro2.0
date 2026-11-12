@@ -37,11 +37,15 @@ class PerfilPessoa(models.Model):
         Usuario, on_delete=models.CASCADE, related_name='perfil_pessoa')
     nome_completo = models.CharField(max_length=150)
     telefone = models.CharField(max_length=20, blank=True)
-    eh_doador = models.BooleanField(default=False)
-    eh_agricultor = models.BooleanField(default=False)
+    eh_doador = models.BooleanField('doador(a) ou voluntário(a)', default=False)
+    eh_agricultor = models.BooleanField('agricultor(a)', default=False)
     localidade = models.ForeignKey(
         Localidade, null=True, blank=True, on_delete=models.PROTECT,
         related_name='perfis')
+
+    class Meta:
+        verbose_name = 'perfil de pessoa'
+        verbose_name_plural = 'perfis de pessoa'
 
     def __str__(self):
         return self.nome_completo
