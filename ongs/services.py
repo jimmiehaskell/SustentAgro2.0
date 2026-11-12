@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Sum
 from django.utils import timezone
 
 from colheita.choices import CanceladaPor, SituacaoReserva
@@ -26,13 +27,11 @@ def validar_tamanho_da_imagem(arquivo):
 
 
 def confirmado_da_necessidade(necessidade):
-    """RN-02 (BL-25). Quantidade ou valor já confirmado pela ONG; promessas e inscrições pendentes não contam.
-
-    As contribuições só existem na camada 2 (doacoes.Contribuicao, BL-42 a BL-45). Até lá, nada é
-    confirmado e as barras começam em zero.
-    Testes: ongs/tests/test_models_ongs.py
-    """
-    return Decimal('0')
+    """RN-02: soma somente o que a ONG confirmou; pendências não contam."""
+    if necessidade.pk is None:
+        return Decimal('0')
+    return necessidade.contribuicoes.filter(situacao='confirmada').aggregate(
+        total=Sum('quantidade_confirmada'))['total'] or Decimal('0')
 
 
 def percentual_da_necessidade(necessidade):
