@@ -5,9 +5,10 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
+from django.db.models import Count, Q
 
 from colheita.choices import CanceladaPor, SituacaoReserva
-from ongs.choices import SituacaoNecessidade, SituacaoOng
+from ongs.choices import SituacaoNecessidade, SituacaoOng, TipoNecessidade
 
 # RNF-06: limite de tamanho das imagens (o mesmo do Nginx do servidor)
 TAMANHO_MAXIMO_DA_IMAGEM = 10 * 1024 * 1024
@@ -106,3 +107,42 @@ def desativar_ong(ong):
         ong.situacao = SituacaoOng.DESATIVADA
         ong.save(update_fields=['situacao'])
     return canceladas
+
+def ongs_ativas():
+    """RN-01 (BL-30): só ONG ativa aparece nas telas públicas. Testes: ongs/tests/"""
+    from ongs.models import Ong  # dentro da função: ongs.models importa este módulo
+
+    return Ong.objects.filter(situacao=SituacaoOng.ATIVA)
+
+
+def filtrar_ongs(q='', ods='', tipo='', cidade=''):
+    """RF-01, RF-04 (BL-30): busca por texto e filtros de ODS, tipo de ajuda e cidade, combinados por E lógico.
+
+    A busca olha o nome da ONG, o nome curto, o nome de um ODS e a cidade.
+    """
+    ongs = ongs_ativas()
+    q = (q or '').strip()
+    if q:
+        ongs = ongs.filter(
+            Q(nome__icontains=q) | Q(nome_curto__icontains=q)
+            | Q(ods__nome__icontains=q) | Q(localidade__nome__icontains=q))
+    if str(ods).isdigit():
+        ongs = ongs.filter(ods__numero=int(ods))
+    if tipo in TipoNecessidade.values:
+        ongs = ongs.filter(**{f'aceita_{tipo}': True})
+    if cidade:
+        ongs = ongs.filter(localidade__nome=cidade)
+    return ongs.select_related('localidade').prefetch_related('ods').distinct().order_by('nome')
+
+
+def ods_com_contagem():
+    """RF-02 (BL-30): todos os ODS, cada um com `total_ongs` = quantidade de ONGs ativas."""
+    from ongs.models import Ods
+
+    return Ods.objects.annotate(
+        total_ongs=Count('ongs', filter=Q(ongs__situacao=SituacaoOng.ATIVA), distinct=True))
+
+
+def precisa_agora(ong):
+    """RF-05 (BL-30): a necessidade aberta mais recente da ONG, ou None."""
+    return ong.necessidades.filter(situacao=SituacaoNecessidade.ABERTA).order_by('-criada_em', '-pk').first()
