@@ -25,10 +25,7 @@ TELAS = [
 
 class TelasAbremTest(TestCase):
     def test_todas_as_telas_abrem(self):
-        ong = fabricas.criar_ong()  # BL-30: a página da ONG lê do banco (RN-01), então precisa existir uma ativa
         for nome, kwargs in TELAS:
-            if nome == 'ongs:detalhe':
-                kwargs = {'pk': ong.pk}
             with self.subTest(tela=nome):
                 resposta = self.client.get(reverse(nome, kwargs=kwargs))
                 self.assertEqual(resposta.status_code, 200)
