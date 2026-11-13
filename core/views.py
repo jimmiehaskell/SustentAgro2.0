@@ -6,7 +6,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import TemplateView
 
 from core.perfis import CHAVE_SESSAO_MOCK, PERFIS
-from ongs import services
+from ongs import mocks as ongs_mocks
 
 EQUIPE = [
     'Brayan Aragão Pletsch', 'Caio Vinício Nunes Vilarouca', 'Gabriel Ribeiro de Carvalho',
@@ -22,11 +22,17 @@ class InicioView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-               # RN-01: só ONGs ativas; RF-02: contagem real por ODS
-        ongs = services.ongs_ativas().select_related('localidade').prefetch_related('ods').order_by('nome')
-        context['ods_com_contagem'] = [(ods, ods.total_ongs) for ods in services.ods_com_contagem()]
+        # MOCK: trocar na camada 1 (BL-30) por Ods com a contagem de ONGs ativas e Ong.objects ativas
+        ongs = [ong for ong in ongs_mocks.ONGS if ong.situacao == 'ativa']
+        context['ods_com_contagem'] = [
+            (ods, sum(1 for ong in ongs if ods in ong.ods)) 
+            for ods in ongs_mocks.ODS
+        ]
         context['ongs'] = ongs
-        context['ongs_com_necessidade'] = [(ong, services.precisa_agora(ong)) for ong in ongs]
+        context['ongs_com_necessidade'] = [
+            (ong, ongs_mocks.precisa_agora(ong))
+            for ong in ongs
+        ]
         context['equipe'] = EQUIPE
         return context
 
