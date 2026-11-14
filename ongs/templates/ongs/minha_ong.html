@@ -4,6 +4,7 @@
 <div class="container py-4">
   <h1 class="h3 mb-0">Minha conta</h1>
   <p class="text-body-secondary">{{ ong.nome }}</p>
+  {% for m in messages %}<div class="alert alert-success" role="status">{{ m }}</div>{% endfor %}
   {% include 'componentes/abas_ong.html' with aba=aba %}
   {# RN-20: perfil = ong | ong-pendente | ong-reprovada; mostrar a situação e o motivo, se reprovada #}
   {% if ong.situacao == 'pendente' %}
@@ -30,15 +31,24 @@
   {% endif %}
   <form class="card card-body" id="form-perfil-ong" method="post" enctype="multipart/form-data" novalidate aria-label="Perfil público da ONG">
     {% csrf_token %}
+    {% if form.errors %}
+      <div class="alert alert-danger" role="alert">
+        <strong>Corrija os campos abaixo:</strong>
+        <ul class="mb-0">
+          {% for erro in form.non_field_errors %}<li>{{ erro }}</li>{% endfor %}
+          {% for campo in form %}{% for erro in campo.errors %}<li>{{ campo.label }}: {{ erro }}</li>{% endfor %}{% endfor %}
+        </ul>
+      </div>
+    {% endif %}
     <h2 class="h5 mb-3">Perfil público</h2>
     <div class="row g-3">
       <div class="col-12 col-md-6">
         <label class="form-label" for="po-nome">Nome</label>
-        <input class="form-control" id="po-nome" name="nome" value="{{ ong.nome }}">
+        <input class="form-control" id="po-nome" name="nome" value="{{ ong.nome }}" readonly>
       </div>
       <div class="col-12 col-md-6">
         <label class="form-label" for="po-curto">Nome curto</label>
-        <input class="form-control" id="po-curto" name="nome_curto" value="{{ ong.nome_curto }}">
+        <input class="form-control" id="po-curto" name="nome_curto" value="{{ ong.nome_curto }}" readonly>
       </div>
       <div class="col-12">
         <label class="form-label" for="po-slogan">Frase de apresentação</label>
@@ -62,14 +72,14 @@
       <fieldset class="col-12">
         <legend class="form-label fs-6">Causas (ODS)</legend>
         <div class="row g-2">
-          {% for o in ods %}
-            <div class="col-12 col-md-6">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="po-ods-{{ o.numero }}" name="ods" value="{{ o.numero }}" {% if o in ong.ods.all %}checked{% endif %}>
-                <label class="form-check-label" for="po-ods-{{ o.numero }}">{{ o.numero }} · {{ o.nome }}</label>
-              </div>
+         {% for checkbox in form.ods %}
+          <div class="col-12 col-md-6">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="{{ checkbox.id_for_label }}" name="{{ checkbox.data.name }}" value="{{ checkbox.data.value }}" {% if checkbox.data.selected %}checked{% endif %}>
+              <label class="form-check-label" for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
             </div>
-          {% endfor %}
+          </div>
+        {% endfor %}
         </div>
       </fieldset>
 
@@ -85,7 +95,9 @@
       <div class="col-12 col-md-6">
         <label class="form-label" for="po-local">Localidade</label>
         <select class="form-select" id="po-local" name="localidade">
-          {% for l in localidades %}<option value="{{ l.nome }}" {% if l.nome == ong.localidade.nome %}selected{% endif %}>{{ l.nome }}</option>{% endfor %}
+          {% for l in form.localidade.field.queryset %}
+            <option value="{{ l.pk }}" {% if l.pk|stringformat:"s" == form.localidade.value|stringformat:"s" %}selected{% endif %}>{{ l.nome }}</option>
+          {% endfor %}
         </select>
       </div>
       <div class="col-12 col-md-6">
@@ -114,24 +126,5 @@
     <div class="mt-4"><button class="btn btn-primary" type="submit">Salvar perfil</button></div>
   </form>
 </div>
-<div class="alert alert-info shadow position-fixed bottom-0 start-50 translate-middle-x mb-3"
-     style="z-index: 1080; width: min(32rem, calc(100% - 2rem))"
-     id="aviso-minha-ong" role="status" aria-live="polite" hidden></div>
 {% endblock %}
-{% block scripts %}
-<script>
-  // MOCK: trocar no BL-31 pelo envio real do formulário (apague este bloco)
-  (function () {
-    const form = document.getElementById('form-perfil-ong');
-    const aviso = document.getElementById('aviso-minha-ong');
-    let avisoTimer;
-    form.addEventListener('submit', function (evento) {
-      evento.preventDefault();
-      aviso.textContent = 'Perfil salvo. Simulação: nenhum dado foi alterado.';
-      aviso.hidden = false;
-      clearTimeout(avisoTimer);
-      avisoTimer = setTimeout(function () { aviso.hidden = true; }, 3200);
-    });
-  })();
-</script>
-{% endblock %}
+

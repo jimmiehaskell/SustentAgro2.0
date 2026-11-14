@@ -14,7 +14,6 @@ TELAS = [
     ('colheita:publicar', {}),
     ('colheita:ofertas', {}),
     ('painel:painel', {}),
-    ('ongs:minha_ong', {}),
     ('ongs:necessidades', {}),
     ('doacoes:a_confirmar', {}),
     ('colheita:minhas_ofertas', {}),
@@ -29,6 +28,18 @@ class TelasAbremTest(TestCase):
             with self.subTest(tela=nome):
                 resposta = self.client.get(reverse(nome, kwargs=kwargs))
                 self.assertEqual(resposta.status_code, 200)
+
+    def test_minha_ong_abre_para_a_ong_logada(self):  # RN-20: qualquer situação abre
+        for situacao in ('ativa', 'pendente', 'reprovada'):
+            with self.subTest(situacao=situacao):
+                ong = fabricas.criar_ong(situacao=situacao)
+                self.client.force_login(ong.usuario)
+                resposta = self.client.get(reverse('ongs:minha_ong'))
+                self.assertEqual(resposta.status_code, 200)
+
+    def test_minha_ong_de_visitante_leva_ao_login(self):  # RNF-05
+        resposta = self.client.get(reverse('ongs:minha_ong'))
+        self.assertEqual(resposta.status_code, 302)
 
     def test_saude_responde_ok(self):
         resposta = self.client.get(reverse('core:saude'))
