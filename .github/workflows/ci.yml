@@ -72,8 +72,16 @@ jobs:
           docker compose ps
           test "$(curl -s http://127.0.0.1:8000/saude/)" = "ok"
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/)" = "200"
-          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/ongs/1/)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/ongs/)" = "200"
           test -f staticfiles/css/sustentagro.css
+          # Com o banco lendo de verdade (BL-30), a página da ONG precisa de dados: a carga de demonstração
+          # (BL-27) cria as ONGs e também é conferida contra o PostgreSQL
+          docker compose exec -T app python manage.py carregar_demo --noinput --senha senha-da-demo-ci
+          ONG=$(docker compose exec -T app python manage.py shell -c \
+            "from ongs.models import Ong; print(Ong.objects.filter(situacao='ativa').order_by('pk').first().pk)")
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/ongs/$ONG/)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/colheita/)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/impacto/)" = "200"
           docker compose exec -T -e DJANGO_SUPERUSER_USERNAME=admin -e DJANGO_SUPERUSER_EMAIL=admin@example.com \
             -e DJANGO_SUPERUSER_PASSWORD=senha-do-admin-ci app python manage.py createsuperuser --noinput
       - name: Logs em caso de falha
