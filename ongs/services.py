@@ -4,10 +4,12 @@ from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Count, Q
 from django.utils import timezone
 
+
 from colheita.choices import CanceladaPor, SituacaoReserva
-from ongs.choices import SituacaoNecessidade, SituacaoOng
+from ongs.choices import SituacaoNecessidade, SituacaoOng, TipoNecessidade
 
 # RNF-06: limite de tamanho das imagens (o mesmo do Nginx do servidor)
 TAMANHO_MAXIMO_DA_IMAGEM = 10 * 1024 * 1024
@@ -106,3 +108,43 @@ def desativar_ong(ong):
         ong.situacao = SituacaoOng.DESATIVADA
         ong.save(update_fields=['situacao'])
     return canceladas
+
+
+def ongs_ativas():
+    """RN-01 (BL-30). Só ONG ativa (aprovada e não desativada) aparece em telas públicas."""
+    from ongs.models import Ong  # dentro da função: ongs.models importa este módulo
+
+    return Ong.objects.filter(situacao=SituacaoOng.ATIVA)
+
+
+def buscar_ongs(texto='', ods='', tipo='', cidade=''):
+    """RF-01, RF-04 (BL-30). ONGs ativas filtradas por texto, ODS, tipo de ajuda e cidade (E lógico).
+
+    O texto procura no nome, no nome curto, no slogan, na descrição, na cidade e no nome dos ODS.
+    """
+    ongs = ongs_ativas()
+    texto = (texto or '').strip()
+    if texto:
+        ongs = ongs.filter(
+            Q(nome__icontains=texto) | Q(nome_curto__icontains=texto) | Q(slogan__icontains=texto)
+            | Q(descricao__icontains=texto) | Q(localidade__nome__icontains=texto)
+            | Q(ods__nome__icontains=texto))
+    if str(ods).isdigit():
+        ongs = ongs.filter(ods__numero=int(ods))
+    if tipo in TipoNecessidade.values:
+        ongs = ongs.filter(**{f'aceita_{tipo}': True})
+    if cidade:
+        ongs = ongs.filter(localidade__nome=cidade)
+    return ongs.select_related('localidade').prefetch_related('ods', 'necessidades').distinct().order_by('nome')
+
+
+def precisa_agora(ong):
+    """RF-05 (BL-30). Necessidade aberta mais recente da ONG (Necessidade já vem ordenada por -criada_em)."""
+    return next((n for n in ong.necessidades.all() if n.situacao == SituacaoNecessidade.ABERTA), None)
+
+
+def ods_com_contagem():
+    """RF-02 (BL-30). Os ODS com `total` = quantidade de ONGs ativas de cada um."""
+    from ongs.models import Ods  # dentro da função: ongs.models importa este módulo
+
+    return Ods.objects.annotate(total=Count('ongs', filter=Q(ongs__situacao=SituacaoOng.ATIVA)))
