@@ -2,12 +2,15 @@
 from datetime import timedelta
 from decimal import Decimal
 from types import SimpleNamespace
+import io
+import tempfile
+from PIL import Image
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
 from django.db.models.deletion import ProtectedError
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -16,6 +19,7 @@ from core.perfis import perfil_da_requisicao
 from core.tests.fabricas import criar_localidade, criar_ods, criar_ong, criar_usuario
 from ongs.models import Necessidade, Ods, Ong
 from ongs.services import TAMANHO_MAXIMO_DA_IMAGEM, validar_tamanho_da_imagem
+from ongs.choices import SituacaoOng
 
 
 def _necessidade(ong, titulo='Cestas básicas', meta='60', **campos):
@@ -161,7 +165,7 @@ class AdminOngsTest(TestCase):
         _necessidade(cls.ong)
 
     def setUp(self):
-        self.client.force_login(self.administrador)
+      self.client.force_login(self.administrador)
 
     def test_listas_do_admin_abrem(self):
         for nome in ('ongs_ods_changelist', 'ongs_ong_changelist', 'ongs_necessidade_changelist'):
@@ -171,3 +175,62 @@ class AdminOngsTest(TestCase):
     def test_ong_abre_com_as_necessidades(self):
         resposta = self.client.get(reverse('admin:ongs_ong_change', args=[self.ong.pk]))
         self.assertContains(resposta, 'Cestas básicas')
+
+
+def _imagem(nome='logo.png', formato='PNG'):
+    buf = io.BytesIO()
+    Image.new('RGB', (4, 4)).save(buf, formato)
+    return SimpleUploadedFile(nome, buf.getvalue())
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class PerfilOngTests(TestCase): 
+    def setUp(self):
+        # ong_a pendente: prova que ONG pendente edita o perfil (RN-20)
+        self.ong_a = criar_ong(situacao=SituacaoOng.PENDENTE, ods=(1,))
+        self.ong_b = criar_ong(ods=(1,))
+        self.client.force_login(self.ong_a.usuario)
+        self.url = reverse('ongs:minha_ong')
+
+    def _post(self, **extra):
+        dados = {
+            'descricao': 'Nova descrição',
+            'telefone': '61999999999',
+            'email_contato': 'contato@exemplo.org',
+            'localidade': self.ong_a.localidade_id,
+            'ods': [self.ong_a.ods.first().pk],
+            'familias_por_mes': 10,
+            **extra,
+        }
+        return self.client.post(self.url, dados)
+
+    def test_edita_o_proprio_perfil(self):
+        self._post(descricao='Texto novo', chave_pix='ong@pix.com')
+        self.ong_a.refresh_from_db()
+        self.assertEqual(self.ong_a.descricao, 'Texto novo')
+        self.assertEqual(self.ong_a.chave_pix, 'ong@pix.com')
+
+    def test_nao_altera_outra_ong(self):
+        antes = self.ong_b.descricao
+        self._post(descricao='Invasão', id=self.ong_b.pk)
+        self.ong_b.refresh_from_db()
+        self.assertEqual(self.ong_b.descricao, antes)
+
+    def test_nao_permite_trocar_situacao_nem_cnpj(self):
+        cnpj, situacao = self.ong_a.cnpj, self.ong_a.situacao
+        self._post(situacao=SituacaoOng.ATIVA, cnpj='00000000000000')
+        self.ong_a.refresh_from_db()
+        self.assertEqual(self.ong_a.cnpj, cnpj)
+        self.assertEqual(self.ong_a.situacao, situacao)
+
+    def test_exige_ao_menos_um_ods(self):
+        r = self._post(ods=[])
+        self.assertIn('ods', r.context['form'].errors)
+
+    def test_aceita_png_no_logo(self):
+        r = self._post(logo=_imagem())
+        self.assertEqual(r.status_code, 302)
+
+    def test_rejeita_extensao_invalida(self):
+        r = self._post(logo=_imagem('logo.gif', 'GIF'))
+        self.assertIn('logo', r.context['form'].errors)
