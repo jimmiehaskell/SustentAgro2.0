@@ -3,10 +3,17 @@ from collections import Counter
 from datetime import date
 from decimal import Decimal
 
+from django.db.models import DecimalField, F, Sum
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.formats import date_format
 
-from colheita.choices import SituacaoReserva, Unidade
+from colheita.choices import Destino, SituacaoReserva, Unidade
+from colheita.models import Reserva
+from ongs.choices import SituacaoOng
+from ongs.models import Ong
+
+ZERO = Decimal('0')
 
 
 def indicadores():
@@ -17,25 +24,45 @@ def indicadores():
     - ongs_ativas: quantidade de ONGs com situacao = ativa (RN-11).
     Testes: painel/tests/test_indicadores.py
     """
-    raise NotImplementedError('BL-37')
+    recebidas = Reserva.objects.filter(situacao=SituacaoReserva.RECEBIDA)
+    ongs_ativas = Ong.objects.filter(situacao=SituacaoOng.ATIVA)
+
+    kg_salvos = recebidas.filter(oferta__unidade=Unidade.KG).aggregate(
+        total=Coalesce(Sum('quantidade_recebida'), ZERO))['total']
+    renda_gerada = recebidas.filter(oferta__destino=Destino.VENDER).aggregate(
+        total=Coalesce(Sum(F('quantidade_recebida') * F('oferta__preco_unitario'),
+                           output_field=DecimalField(max_digits=14, decimal_places=2)), ZERO))['total']
+    familias = ongs_ativas.aggregate(total=Coalesce(Sum('familias_por_mes'), 0))['total']
+
+    return {
+        'kg_salvos': kg_salvos,
+        'familias_atendidas': familias,
+        'renda_gerada': renda_gerada.quantize(Decimal('0.01')),
+        'ongs_ativas': ongs_ativas.count(),
+    }
 
 
 def kg_por_mes():
-    """RF-30, RN-23, E-09. Lista de (mês, kg) agrupada pela data de recebida_em, no fuso de Brasília."""
-    raise NotImplementedError('BL-37')
+    """RF-30, RN-23, E-09. Lista de (mês, kg) agrupada pela data de recebida_em, no fuso de Brasília.
+    Busca no banco só as reservas recebidas em kg e deixa a conta para agrupar_kg_por_mes (parte 1)."""
+    reservas = (Reserva.objects.filter(situacao=SituacaoReserva.RECEBIDA, oferta__unidade=Unidade.KG)
+                .select_related('oferta'))
+    return agrupar_kg_por_mes(reservas)
 
 
 def fatia_por_ods():
     """RF-31, RN-07, E-10. Lista de (ods, percentual). Cada ação confirmada conta uma vez para cada ODS da
     ONG que a recebeu; o percentual de um ODS é a contagem dele dividida pela soma das contagens.
-    Com só a camada 1 pronta, as ações são as reservas recebidas."""
-    raise NotImplementedError('BL-37')
+    Com só a camada 1 pronta, as ações são as reservas recebidas.
+    Busca no banco as reservas recebidas com os ODS da ONG e deixa a conta para calcular_fatia_por_ods (parte 1)."""
+    reservas = (Reserva.objects.filter(situacao=SituacaoReserva.RECEBIDA)
+                .select_related('ong').prefetch_related('ong__ods'))
+    return calcular_fatia_por_ods(reservas)
 
 
 # ---------------------------------------------------------------------------------------------
-# BL-37 parte 1: as contas do painel, sem banco. Recebem uma lista de reservas (do mock ou do model
-# Reserva, com os mesmos nomes de campo). Na parte 2, kg_por_mes() e fatia_por_ods() só buscam as
-# reservas no banco e chamam estas funções.
+# As contas do painel (BL-37 parte 1). Recebem uma lista de reservas com os nomes de campo do model
+# Reserva; kg_por_mes() e fatia_por_ods(), acima, buscam as reservas no banco e chamam estas funções.
 # ---------------------------------------------------------------------------------------------
 
 def agrupar_kg_por_mes(reservas):
