@@ -28,6 +28,7 @@ python -m venv .venv && source .venv/Scripts/activate   # no Mac/Linux: source .
 pip install -r requirements.txt
 cp .env.example .env
 python manage.py migrate
+python manage.py carregar_demo   # dados de exemplo; apaga e recria (pede confirmação)
 python manage.py runserver
 ```
 
