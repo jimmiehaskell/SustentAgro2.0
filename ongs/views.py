@@ -1,4 +1,3 @@
-from django import forms
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
@@ -6,9 +5,9 @@ from django.views.generic import TemplateView, UpdateView
 
 from contas.models import Localidade
 from core.mixins import OngRequeridaMixin
-from core.perfis import perfil_da_requisicao
 from ongs import mocks, services
 from ongs.choices import TipoNecessidade
+from ongs.forms import PerfilOngForm
 from ongs.models import Ods, Ong
 
 
@@ -43,21 +42,9 @@ class DetalheOngView(TemplateView):
         return context
 
 
-class PerfilOngForm(forms.ModelForm):
-    class Meta:
-        model = Ong
-        fields = [
-            'slogan', 'descricao', 'logo', 'capa', 'ods',
-            'aceita_itens', 'aceita_dinheiro', 'aceita_voluntariado',
-            'localidade', 'telefone', 'email_contato', 'site',
-            'chave_pix', 'familias_por_mes',
-        ]
-        widgets = {'ods': forms.CheckboxSelectMultiple}
-
-
 class MinhaOngView(OngRequeridaMixin, UpdateView):
-    """Tela 9 · Minha conta da ONG: situação e perfil (BL-16, Júlia). RF-11, RF-12, RN-20.
-    MOCK: trocar na camada 1 (BL-31). Proteger com OngRequeridaMixin (aceita pendente e reprovada).
+    """Tela 9 · Minha conta da ONG: situação e perfil (BL-16, BL-31, Júlia). RF-11, RF-12, RN-20, RNF-05.
+    A ONG edita o próprio perfil; pendente e reprovada também editam (OngRequeridaMixin).
     """
     template_name = 'ongs/minha_ong.html'
     form_class = PerfilOngForm

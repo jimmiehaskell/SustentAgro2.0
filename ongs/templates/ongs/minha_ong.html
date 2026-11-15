@@ -4,7 +4,6 @@
 <div class="container py-4">
   <h1 class="h3 mb-0">Minha conta</h1>
   <p class="text-body-secondary">{{ ong.nome }}</p>
-  {% for m in messages %}<div class="alert alert-success" role="status">{{ m }}</div>{% endfor %}
   {% include 'componentes/abas_ong.html' with aba=aba %}
   {# RN-20: perfil = ong | ong-pendente | ong-reprovada; mostrar a situação e o motivo, se reprovada #}
   {% if ong.situacao == 'pendente' %}
