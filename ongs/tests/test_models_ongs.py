@@ -2,6 +2,7 @@
 from datetime import timedelta
 from decimal import Decimal
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -135,6 +136,49 @@ class NecessidadeTest(TestCase):
         with self.assertRaises(ValidationError) as erro:
             necessidade.full_clean()
         self.assertIn('tipo', erro.exception.message_dict)
+
+
+class GestaoDeNecessidadeTest(TestCase):  # RF-13, RN-21, E-07, UC-04
+    def _confirmado(self, valor):
+        return patch('ongs.services.confirmado_da_necessidade', return_value=Decimal(valor))
+
+    def test_meta_menor_que_o_confirmado_e_recusada(self):
+        necessidade = _necessidade(criar_ong(), meta='60')
+        necessidade.meta = Decimal('20')
+        with self._confirmado('30'), self.assertRaises(ValidationError) as erro:
+            necessidade.full_clean()
+        self.assertIn('meta', erro.exception.message_dict)
+
+    def test_meta_igual_ao_confirmado_e_aceita(self):
+        necessidade = _necessidade(criar_ong(), meta='60')
+        necessidade.meta = Decimal('30')
+        with self._confirmado('30'):
+            necessidade.full_clean()
+
+    def test_bater_a_meta_deixa_atendida(self):
+        necessidade = _necessidade(criar_ong(), meta='60')
+        with self._confirmado('60'):
+            necessidade.save()
+        necessidade.refresh_from_db()
+        self.assertEqual(necessidade.situacao, 'atendida')
+        self.assertFalse(necessidade.aceita_contribuicoes)
+
+    def test_aumentar_a_meta_reabre(self):
+        necessidade = _necessidade(criar_ong(), meta='60', situacao='atendida')
+        necessidade.meta = Decimal('100')
+        with self._confirmado('60'):
+            necessidade.save()
+        necessidade.refresh_from_db()
+        self.assertEqual(necessidade.situacao, 'aberta')
+        self.assertTrue(necessidade.aceita_contribuicoes)
+
+    def test_encerrada_continua_encerrada(self):
+        necessidade = _necessidade(criar_ong(), meta='60', situacao='encerrada')
+        with self._confirmado('60'):
+            necessidade.save()
+        necessidade.refresh_from_db()
+        self.assertEqual(necessidade.situacao, 'encerrada')
+        self.assertFalse(necessidade.aceita_contribuicoes)
 
 
 class PerfilDaContaDeOngTest(TestCase):  # RN-20: o perfil vem da situação da Ong

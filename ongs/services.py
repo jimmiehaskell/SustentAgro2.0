@@ -48,6 +48,18 @@ def percentual_da_necessidade(necessidade):
     return min(100, int(confirmado_da_necessidade(necessidade) / necessidade.meta * 100))
 
 
+def situacao_da_necessidade(necessidade):
+    """RN-21, E-07 (BL-41, Júlia). Situação que a necessidade deve ter: bater a meta deixa "atendida" e
+    aumentar a meta a reabre. Necessidade encerrada pela ONG continua encerrada.
+    Testes: ongs/tests/test_models_ongs.py
+    """
+    if necessidade.situacao == SituacaoNecessidade.ENCERRADA:
+        return SituacaoNecessidade.ENCERRADA
+    if confirmado_da_necessidade(necessidade) >= necessidade.meta:
+        return SituacaoNecessidade.ATENDIDA
+    return SituacaoNecessidade.ABERTA
+
+
 def _digito_verificador(numeros, pesos):
     resto = sum(int(numero) * peso for numero, peso in zip(numeros, pesos)) % 11
     return '0' if resto < 2 else str(11 - resto)
