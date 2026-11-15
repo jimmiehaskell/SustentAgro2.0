@@ -14,6 +14,7 @@ from django.utils import timezone
 from colheita.models import Oferta, Reserva
 from contas.models import Localidade, PerfilPessoa, Usuario
 from core.demo import dados
+from doacoes.models import Contribuicao
 from ongs.models import Necessidade, Ods, Ong
 
 HORARIO_DO_RECEBIMENTO = 10  # 10h da manhã, no horário de Brasília
@@ -38,7 +39,9 @@ def carregar(senha):
 
 
 def _apagar():
-    # Na ordem certa: primeiro quem aponta para os outros (reservas → ofertas → ONGs e pessoas)
+    # Na ordem certa: primeiro quem aponta para os outros (contribuições e reservas → ofertas →
+    # necessidades, ONGs e pessoas). Contribuicao protege (PROTECT) pessoa, ONG e necessidade (BL-42).
+    Contribuicao.objects.all().delete()
     Reserva.objects.all().delete()
     Oferta.objects.all().delete()
     Necessidade.objects.all().delete()

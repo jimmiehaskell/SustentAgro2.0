@@ -10,6 +10,7 @@ from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
 from colheita.choices import CanceladaPor, SituacaoReserva
+from doacoes.choices import SituacaoContribuicao
 from ongs.choices import SituacaoNecessidade, SituacaoOng, TipoNecessidade
 
 # RNF-06: limite de tamanho das imagens (o mesmo do Nginx do servidor)
@@ -32,7 +33,7 @@ def confirmado_da_necessidade(necessidade):
     """RN-02: soma somente o que a ONG confirmou; pendências não contam."""
     if necessidade.pk is None:
         return Decimal('0')
-    return necessidade.contribuicoes.filter(situacao='confirmada').aggregate(
+    return necessidade.contribuicoes.filter(situacao=SituacaoContribuicao.CONFIRMADA).aggregate(
         total=Sum('quantidade_confirmada'))['total'] or Decimal('0')
 
 
