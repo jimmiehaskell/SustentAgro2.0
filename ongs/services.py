@@ -7,7 +7,6 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 
-
 from colheita.choices import CanceladaPor, SituacaoReserva
 from ongs.choices import SituacaoNecessidade, SituacaoOng, TipoNecessidade
 
