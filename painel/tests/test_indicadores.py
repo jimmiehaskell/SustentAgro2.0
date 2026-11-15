@@ -1,7 +1,6 @@
 """BL-37 (Pedro): RF-29, RN-08 a RN-11, P-01. Remova o @skip ao implementar painel.services.indicadores
 (depende de BL-24 a BL-26)."""
 from decimal import Decimal
-from unittest import skip
 
 from django.test import TestCase
 
@@ -12,7 +11,6 @@ def _valor(indicadores, nome):
     return indicadores[nome] if isinstance(indicadores, dict) else getattr(indicadores, nome)
 
 
-@skip('Remova ao implementar o BL-37')
 class IndicadoresTest(TestCase):
     def setUp(self):
         from colheita.models import Reserva
