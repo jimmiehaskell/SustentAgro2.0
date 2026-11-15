@@ -1,9 +1,11 @@
-from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 
+from contas.models import Localidade
 from core.perfis import perfil_da_requisicao
-from ongs import mocks
+from ongs import mocks, services
 from ongs.choices import TipoNecessidade
+from ongs.models import Ods
 
 
 class ListaOngsView(TemplateView):
@@ -17,23 +19,10 @@ class ListaOngsView(TemplateView):
         q = self.request.GET
         filtros = {'q': q.get('q', ''), 'ods': q.get('ods', ''), 'tipo': q.get('tipo', ''),
                    'cidade': q.get('cidade', '')}
-        ongs = [ong for ong in mocks.ONGS if ong.situacao == 'ativa']
-        # MOCK: filtros em memória, combinados por E lógico (RF-04); no BL-30 viram filtros da consulta
-        if filtros['q']:
-            termo = filtros['q'].casefold()
-            ongs = [o for o in ongs
-                    if any(
-                        termo in campo.casefold()
-                          for campo in (o.nome, o.nome_curto, o.slogan, o.descricao, o.localidade.nome,*(ods.nome for ods in o.ods))
-                          )]
-        if filtros['ods'].isdigit():
-            ongs = [o for o in ongs if any(ods.numero == int(filtros['ods']) for ods in o.ods)]
-        if filtros['tipo'] in TipoNecessidade.values:
-            ongs = [o for o in ongs if getattr(o, f"aceita_{filtros['tipo']}")]
-        if filtros['cidade']:
-            ongs = [o for o in ongs if o.localidade.nome == filtros['cidade']]
-        context.update(filtros=filtros, ongs=[(o, mocks.precisa_agora(o)) for o in ongs],
-                       ods=mocks.ODS, tipos=TipoNecessidade.choices, localidades=mocks.LOCALIDADES)
+        ongs = services.buscar_ongs(filtros['q'], filtros['ods'], filtros['tipo'], filtros['cidade'])
+        context.update(filtros=filtros, ongs=[(o, services.precisa_agora(o)) for o in ongs],
+                       ods=Ods.objects.all(), tipos=TipoNecessidade.choices,
+                       localidades=Localidade.objects.order_by('nome'))
         return context
 
 
@@ -45,11 +34,9 @@ class DetalheOngView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        ong = mocks.ong_por_pk(kwargs['pk'])
-        if ong is None:
-            raise Http404('ONG não encontrada.')
+        ong = get_object_or_404(services.ongs_ativas(), pk=kwargs['pk'])  # RN-01: pendente/desativada = 404
         context['ong'] = ong
-        context['necessidades'] = [n for n in ong.necessidades.all() if n.situacao != 'encerrada']
+        context['necessidades'] = ong.necessidades.exclude(situacao='encerrada')
         return context
 
 
