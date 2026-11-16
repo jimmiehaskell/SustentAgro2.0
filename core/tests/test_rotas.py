@@ -15,7 +15,6 @@ TELAS = [
     ('colheita:ofertas', {}),
     ('painel:painel', {}),
     ('ongs:minha_ong', {}),
-    ('ongs:necessidades', {}),
     ('doacoes:a_confirmar', {}),
     ('colheita:minhas_ofertas', {}),
     ('contas:contribuicoes', {}),
@@ -46,6 +45,13 @@ class TelasAbremTest(TestCase):
         resposta = self.client.get(reverse('contas:minha_conta'))
         self.assertRedirects(resposta, reverse('contas:entrar'))
 
+    def test_necessidades_da_ong_exige_ong_ativa(self):  # RF-13, RNF-05
+        url = reverse('ongs:necessidades')
+        resposta = self.client.get(url)  # visitante
+        self.assertEqual(resposta.status_code, 302)
+        self.assertIn(reverse('contas:entrar'), resposta.url)
+        self.client.force_login(fabricas.criar_ong().usuario)
+        self.assertEqual(self.client.get(url).status_code, 200)
 
 class PerfilMockTest(TestCase):
     @override_settings(DEBUG=True)

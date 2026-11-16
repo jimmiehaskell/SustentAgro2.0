@@ -111,14 +111,8 @@ class Necessidade(models.Model):
     def clean(self):
         """UC-04: meta menor que o já confirmado é recusada."""
         super().clean()
-        if self.pk and self.meta is not None and self.meta < self.confirmado:
+        if self.pk and isinstance(self.meta, Decimal) and self.meta < self.confirmado:
             raise ValidationError({'meta': f'A meta não pode ser menor que o já confirmado ({self.confirmado}).'})
-
-    def save(self, *args, **kwargs):
-        # RN-21: só em necessidade já existente, para a carga de demonstração poder criar "atendida" direto (A-01)
-        if self.pk:
-            self.situacao = services.situacao_da_necessidade(self)
-        super().save(*args, **kwargs)
 
     @property
     def aceita_contribuicoes(self):
