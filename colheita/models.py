@@ -65,6 +65,11 @@ class Oferta(models.Model):
         return self.colher_ate < date.today()
 
     @property
+    def so_da_ong_destino(self):
+        """RN-04: tem ONG de destino e ainda não abriu a todas."""
+        return self.ong_destino_id is not None and self.aberta_a_todas_em > timezone.now()
+
+    @property
     def urgente(self):
         """RF-22: aberta, com saldo e aberta a todas há mais de 48 h."""
         return (self.situacao == SituacaoOferta.ABERTA and not self.vencida
