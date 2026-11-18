@@ -57,6 +57,22 @@ class VencimentoESaldoTest(TestCase):
         reserva.refresh_from_db()
         self.assertEqual(reserva.situacao, SituacaoReserva.ATIVA)
 
+    def test_saldo_da_lista_desconta_so_ativas_e_recebidas(self):  # RN-03
+        oferta = fabricas.criar_oferta(quantidade='100')
+        for situacao, quantidade in [(SituacaoReserva.ATIVA, '10'), (SituacaoReserva.RECEBIDA, '20'),
+                                     (SituacaoReserva.CANCELADA, '30'), (SituacaoReserva.NAO_RECEBIDA, '5')]:
+            Reserva.objects.create(oferta=oferta, ong=self.ong, quantidade=Decimal(quantidade), situacao=situacao)
+        self.assertEqual(ofertas_da_lista(ong=self.ong)[0].saldo, Decimal('70'))
+
+    def test_saldo_e_urgente_nao_consultam_o_banco_por_oferta(self):
+        for produto in ['Alface', 'Couve', 'Tomate']:
+            oferta = fabricas.criar_oferta(produto=produto)
+            Reserva.objects.create(oferta=oferta, ong=self.ong, quantidade=Decimal('10'))
+        self.ong.localidade  # já carregada, para contar só as consultas da lista
+        with self.assertNumQueries(1):
+            ofertas = ofertas_da_lista(ong=self.ong)
+            [(oferta.saldo, oferta.urgente) for oferta in ofertas]
+
     def test_oferta_sem_saldo_sai_da_lista(self):
         oferta = fabricas.criar_oferta(produto='Esgotada', quantidade='100')
         fabricas.criar_oferta(produto='Com saldo', quantidade='100')

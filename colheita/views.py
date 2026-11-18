@@ -9,9 +9,9 @@ from django.views import View
 from django.views.generic import TemplateView
 
 from colheita import mocks, services
-from colheita.choices import Categoria, Estado, SituacaoReserva, Transporte
-from colheita.models import Reserva
-from core.mixins import OngAtivaRequeridaMixin
+from colheita.choices import CanceladaPor, Categoria, Estado, SituacaoReserva, Transporte
+from colheita.models import Oferta, Reserva
+from core.mixins import AgricultorRequeridoMixin, OngAtivaRequeridaMixin
 from core.perfis import perfil_da_requisicao
 from ongs import mocks as ongs_mocks
 
@@ -80,7 +80,8 @@ class PublicarOfertaView(TemplateView):
 
 class MinhasOfertasView(TemplateView):
     """Tela 13 · Minhas ofertas do agricultor (BL-21, Pedro). RF-25, RF-27.
-    MOCK: trocar na camada 1 (BL-36). Proteger com AgricultorRequeridoMixin.
+    MOCK: trocar na camada 1 (BL-36). Proteger com AgricultorRequeridoMixin. Os botões de cancelar entram
+    nessa troca: CancelarReservaDoAgricultorView e CancelarOfertaView (BL-47) já estão prontas.
     """
     template_name = 'colheita/minhas_ofertas.html'
 
@@ -95,7 +96,7 @@ class MinhasOfertasView(TemplateView):
 class MinhasReservasView(OngAtivaRequeridaMixin, TemplateView):
     """Tela 11 · Minhas reservas da ONG (BL-19, BL-34, Gabriel). RF-23, RF-24, RF-27, RN-17.
     Reservas reais, com o contato do agricultor (BL-34) e o formulário de recebimento (BL-35, em
-    ConfirmarRecebimentoView). MOCK: cancelar troca na camada 3 (BL-47).
+    ConfirmarRecebimentoView) e o cancelamento (BL-47, em CancelarReservaView).
     """
     template_name = 'colheita/minhas_reservas.html'
 
@@ -136,3 +137,62 @@ class ConfirmarRecebimentoView(OngAtivaRequeridaMixin, View):
                 messages.success(request, f'Reserva de {produto} encerrada como não recebida. '
                                           'A quantidade voltou ao saldo da oferta.')
         return redirect('colheita:minhas_reservas')
+
+
+class CancelarReservaView(OngAtivaRequeridaMixin, View):
+    """Cancelar reserva, botão da Tela 11 (BL-47, Gabriel). RF-24, UC-09.
+    Só ONG ativa e só a dona da reserva; reserva de outra ONG (ou inexistente) dá 404.
+    """
+    http_method_names = ['post']
+
+    def post(self, request, pk):
+        reserva = get_object_or_404(Reserva.objects.select_related('oferta'), pk=pk, ong=request.user.ong)
+        try:
+            reserva = services.cancelar_reserva(reserva, CanceladaPor.ONG)
+        except ValidationError as erro:
+            messages.error(request, ' '.join(erro.messages))
+        else:
+            messages.success(request, _mensagem_reserva_cancelada(reserva))
+        return redirect('colheita:minhas_reservas')
+
+
+class CancelarReservaDoAgricultorView(AgricultorRequeridoMixin, View):
+    """Cancelar reserva de uma oferta do agricultor, Tela 13 (BL-47, Gabriel). RF-24, UC-11, RNF-05.
+    Só o agricultor dono da oferta; reserva de oferta de outro (ou inexistente) dá 404.
+    """
+    http_method_names = ['post']
+
+    def post(self, request, pk):
+        reserva = get_object_or_404(Reserva.objects.select_related('oferta'), pk=pk,
+                                    oferta__agricultor=request.user.perfil_pessoa)
+        try:
+            reserva = services.cancelar_reserva(reserva, CanceladaPor.AGRICULTOR)
+        except ValidationError as erro:
+            messages.error(request, ' '.join(erro.messages))
+        else:
+            messages.success(request, _mensagem_reserva_cancelada(reserva))
+        return redirect('colheita:minhas_ofertas')
+
+
+class CancelarOfertaView(AgricultorRequeridoMixin, View):
+    """Cancelar oferta, Tela 13 (BL-47, Gabriel). RF-24, UC-11, RNF-05.
+    Só o agricultor dono; oferta de outro (ou inexistente) dá 404.
+    """
+    http_method_names = ['post']
+
+    def post(self, request, pk):
+        oferta = get_object_or_404(Oferta, pk=pk, agricultor=request.user.perfil_pessoa)
+        try:
+            oferta = services.cancelar_oferta(oferta)
+        except ValidationError as erro:
+            messages.error(request, ' '.join(erro.messages))
+        else:
+            messages.success(request, f'Oferta de {oferta.produto} cancelada. Ela saiu da lista das ONGs.')
+        return redirect('colheita:minhas_ofertas')
+
+
+def _mensagem_reserva_cancelada(reserva):
+    produto = reserva.oferta.produto
+    if reserva.oferta.vencida:
+        return f'Reserva de {produto} cancelada.'
+    return f'Reserva de {produto} cancelada. A quantidade voltou ao saldo da oferta.'
