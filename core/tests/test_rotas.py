@@ -67,6 +67,7 @@ class TelasAbremTest(TestCase):
         self.client.force_login(fabricas.criar_ong().usuario)
         self.assertEqual(self.client.get(url).status_code, 200)
 
+
 class PerfilMockTest(TestCase):
     @override_settings(DEBUG=True)
     def test_perfil_simulado_muda_o_menu_da_colheita(self):

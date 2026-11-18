@@ -51,9 +51,9 @@ def percentual_da_necessidade(necessidade):
 
 
 def situacao_da_necessidade(necessidade):
-    """RN-21, E-07 (BL-41, Júlia). Situação que a necessidade deve ter: bater a meta deixa "atendida" e
+    """RN-21 (BL-41, Júlia). Situação que a necessidade deve ter: bater a meta deixa "atendida" e
     aumentar a meta a reabre. Necessidade encerrada pela ONG continua encerrada.
-    Testes: ongs/tests/test_models_ongs.py
+    Testes: ongs/tests/test_necessidades.py
     """
     if necessidade.situacao == SituacaoNecessidade.ENCERRADA:
         return SituacaoNecessidade.ENCERRADA
@@ -68,7 +68,7 @@ CAMPOS_DA_NECESSIDADE = ('titulo', 'descricao', 'tipo', 'unidade', 'meta')
 
 def criar_necessidade(ong, dados):
     """RF-13, UC-04 (BL-41, Júlia). Cria uma necessidade aberta para a ONG.
-    Dado inválido levanta ValidationError. Testes: ongs/tests/test_models_ongs.py
+    Dado inválido levanta ValidationError. Testes: ongs/tests/test_necessidades.py
     """
     from ongs.models import Necessidade  # dentro da função: ongs.models importa este módulo
 
@@ -81,7 +81,7 @@ def criar_necessidade(ong, dados):
 def editar_necessidade(necessidade, dados):
     """RF-13, UC-04, RN-21 (BL-41, Júlia). Aplica os campos, valida (meta menor que o confirmado é recusada
     pelo clean() do model) e recalcula a situação: bater a meta deixa "atendida", aumentar a meta reabre.
-    Testes: ongs/tests/test_models_ongs.py
+    Testes: ongs/tests/test_necessidades.py
     """
     for campo in CAMPOS_DA_NECESSIDADE:
         if campo in dados:
@@ -94,7 +94,7 @@ def editar_necessidade(necessidade, dados):
 
 def encerrar_necessidade(necessidade):
     """RF-13, UC-04 (BL-41, Júlia). Encerra a necessidade; ela deixa de aceitar contribuições.
-    Testes: ongs/tests/test_models_ongs.py
+    Testes: ongs/tests/test_necessidades.py
     """
     necessidade.situacao = SituacaoNecessidade.ENCERRADA
     necessidade.save(update_fields=['situacao'])

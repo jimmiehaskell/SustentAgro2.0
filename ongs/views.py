@@ -13,6 +13,7 @@ from ongs.forms import PerfilOngForm
 from ongs.models import Ods, Ong
 from ongs.services import CAMPOS_DA_NECESSIDADE, criar_necessidade, editar_necessidade, encerrar_necessidade
 
+
 class ListaOngsView(TemplateView):
     """Tela 2 · Lista de ONGs (BL-15, Júlia). RF-04, RF-05, UC-01.
     MOCK: trocar na camada 1 (BL-30) por Ong.objects ativas com os filtros da querystring."""
