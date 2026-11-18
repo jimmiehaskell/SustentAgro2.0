@@ -2,19 +2,16 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import TemplateView
-from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, UpdateView
 
 from contas.models import Localidade
-from core.mixins import OngRequeridaMixin
-from ongs import mocks, services
+from core.mixins import OngAtivaRequeridaMixin, OngRequeridaMixin
+from ongs import services
 from ongs.choices import TipoNecessidade
 from ongs.forms import PerfilOngForm
 from ongs.models import Ods, Ong
 from ongs.services import CAMPOS_DA_NECESSIDADE, criar_necessidade, editar_necessidade, encerrar_necessidade
-
 
 class ListaOngsView(TemplateView):
     """Tela 2 · Lista de ONGs (BL-15, Júlia). RF-04, RF-05, UC-01.
