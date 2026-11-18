@@ -84,6 +84,13 @@ class ValidacaoPerfilPessoaTest(TestCase):
         self.assertFalse(PerfilPessoa.objects.filter(pk=perfil.pk).exists())
         self.assertTrue(Localidade.objects.filter(pk=perfil.localidade_id).exists())
 
+    def test_rotulos_em_portugues_no_admin(self):
+        self.assertEqual(str(PerfilPessoa._meta.verbose_name), 'perfil de pessoa')
+        self.assertEqual(str(PerfilPessoa._meta.verbose_name_plural), 'perfis de pessoa')
+        self.assertEqual(str(PerfilPessoa._meta.get_field('eh_doador').verbose_name),
+                         'doador(a) ou voluntário(a)')
+        self.assertEqual(str(PerfilPessoa._meta.get_field('eh_agricultor').verbose_name), 'agricultor(a)')
+
 
 class AdminContasTest(TestCase):
     @classmethod

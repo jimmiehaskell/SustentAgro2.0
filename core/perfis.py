@@ -11,7 +11,7 @@ CHAVE_SESSAO_MOCK = 'perfil_mock'
 
 
 def perfil_da_requisicao(request):
-    if settings.DEBUG:
+    if settings.DEBUG and not request.user.is_authenticated:
         simulado = request.session.get(CHAVE_SESSAO_MOCK)
         if simulado in PERFIS:
             return simulado

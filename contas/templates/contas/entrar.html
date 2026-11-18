@@ -7,6 +7,7 @@
     <p class="text-body-secondary">Use o nome de usuário e a senha do seu cadastro.</p>
     <form class="card card-body d-grid gap-3" method="post">
       {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
       {{ form.non_field_errors }}
       <div><label class="form-label" for="id_username">Nome de usuário</label><input class="form-control" id="id_username" name="username" autocomplete="username" value="{{ form.username.value|default_if_none:'' }}">{{ form.username.errors }}</div>
       <div><label class="form-label" for="id_password">Senha</label><input class="form-control" id="id_password" name="password" type="password" autocomplete="current-password">{{ form.password.errors }}</div>
