@@ -16,10 +16,11 @@
     {% if ong.aceita_dinheiro %}<li class="nav-item"><a class="nav-link {% if tipo == 'dinheiro' %}active{% endif %}" href="{% url 'doacoes:contribuir' ong.pk 'dinheiro' %}">Doar dinheiro</a></li>{% endif %}
   </ul>
 
-  {# MOCK: na camada 2 (BL-42, BL-43) o formulário faz POST e grava a Contribuicao pendente #}
+  {% if erros %}<div class="alert alert-danger" role="alert">{{ erros }}</div>{% endif %}
   {% if tipo == 'itens' %}
     {% if necessidades %}
-      <form class="card card-body d-grid gap-3">
+      <form class="card card-body d-grid gap-3" method="post">
+        {% csrf_token %}
         <div>
           <label class="form-label" for="necessidade">Necessidade</label>
           <select class="form-select" id="necessidade" name="necessidade">
@@ -28,10 +29,10 @@
         </div>
         <div>
           <label class="form-label" for="quantidade">Quantidade que você vai entregar</label>
-          <input class="form-control" style="max-width: 10rem" id="quantidade" name="quantidade" type="number" min="1" step="1" value="5">
+          <input class="form-control" style="max-width: 10rem" id="quantidade" name="quantidade" type="number" min="0.01" step="0.01" required>
           <div class="form-text">A barra só avança quando a ONG confirmar que recebeu.</div>
         </div>
-        <div><button class="btn btn-primary" type="button">Registrar promessa de doação</button></div>
+        <div><button class="btn btn-primary" type="submit">Registrar promessa de doação</button></div>
       </form>
     {% else %}
       <div class="card card-body text-center text-body-secondary">Esta ONG não tem necessidade de itens aberta agora.</div>
@@ -39,7 +40,8 @@
 
   {% elif tipo == 'voluntariado' %}
     {% if necessidades %}
-      <form class="card card-body d-grid gap-3">
+      <form class="card card-body d-grid gap-3" method="post">
+        {% csrf_token %}
         <div>
           <label class="form-label" for="necessidade">Vaga de voluntariado</label>
           <select class="form-select" id="necessidade" name="necessidade">
@@ -47,7 +49,7 @@
           </select>
         </div>
         <p class="small text-body-secondary mb-0">A ONG vê seu nome e telefone e entra em contato para combinar. Sua inscrição fica pendente até ela confirmar.</p>
-        <div><button class="btn btn-primary" type="button">Quero me inscrever</button></div>
+        <div><button class="btn btn-primary" type="submit">Quero me inscrever</button></div>
       </form>
     {% else %}
       <div class="card card-body text-center text-body-secondary">Esta ONG não tem vaga de voluntariado aberta agora.</div>

@@ -2,19 +2,32 @@
 from django.test import TestCase
 from django.urls import reverse
 
+from core.tests.fabricas import criar_doador, criar_ong
+from ongs.models import Necessidade
+
 
 class TelaContribuirTest(TestCase):
     def _abrir(self, tipo, ong_pk=1):
         return self.client.get(reverse('doacoes:contribuir', args=[ong_pk, tipo]))
 
     def test_doar_itens(self):  # RF-14
-        resposta = self._abrir('itens')
+        ong = criar_ong()
+        ong.aceita_itens = True
+        ong.save(update_fields=['aceita_itens'])
+        Necessidade.objects.create(ong=ong, titulo='Cestas básicas', tipo='itens', unidade='cestas', meta=18)
+        self.client.force_login(criar_doador().usuario)
+        resposta = self._abrir('itens', ong.pk)
         self.assertContains(resposta, 'Registrar promessa de doação')
-        self.assertContains(resposta, 'Cestas básicas · faltam 18 cestas')   # protótipo: quanto falta
+        self.assertContains(resposta, 'Cestas básicas · faltam 18 cestas')
         self.assertNotContains(resposta, 'Tela em construção')
 
     def test_ser_voluntario(self):  # RF-15
-        resposta = self._abrir('voluntariado')
+        ong = criar_ong()
+        ong.aceita_voluntariado = True
+        ong.save(update_fields=['aceita_voluntariado'])
+        Necessidade.objects.create(ong=ong, titulo='Voluntários', tipo='voluntariado', unidade='pessoas', meta=3)
+        self.client.force_login(criar_doador().usuario)
+        resposta = self._abrir('voluntariado', ong.pk)
         self.assertContains(resposta, 'Quero me inscrever')
 
     def test_doar_dinheiro_mostra_a_chave_pix(self):  # RF-17

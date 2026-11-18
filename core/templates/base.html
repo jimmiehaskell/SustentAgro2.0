@@ -24,7 +24,7 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-{% if modo_debug %}
+{% if modo_debug and not request.user.is_authenticated %}
   {# Barra de perfil simulado: só em DEBUG, para navegar pelas telas mock (camada 0) #}
   <div class="barra-mock py-1">
     <div class="container d-flex flex-wrap gap-3 align-items-center">
@@ -56,7 +56,7 @@
       {% endwith %}
       <div class="d-flex flex-wrap align-items-center gap-3">
         <button type="button" class="btn btn-sm btn-outline-secondary" id="botao-tema" aria-label="Alternar tema claro e escuro">Tema</button>
-        {% if perfil != 'visitante' %}
+        {% if request.user.is_authenticated %}
           <span class="small text-body-secondary">{{ perfil_nome }}</span>
           <a class="nav-link" href="{% url url_minha_conta %}">Minha conta</a>
           <form method="post" action="{% url 'contas:sair' %}" class="m-0">

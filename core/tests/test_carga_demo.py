@@ -11,6 +11,8 @@ from colheita.models import Oferta, Reserva
 from contas.models import Localidade, PerfilPessoa, Usuario
 from core.demo import dados
 from core.demo.carga import carregar, data_do_recebimento
+from doacoes.models import Contribuicao
+from doacoes.services import registrar_contribuicao
 from ongs.models import Necessidade, Ods, Ong
 from ongs.services import validar_cnpj
 from painel.services import agrupar_kg_por_mes, calcular_fatia_por_ods
@@ -64,6 +66,23 @@ class CargaDemoTest(TestCase):
 
     def test_nenhum_recebimento_no_futuro(self):
         self.assertFalse(Reserva.objects.filter(recebida_em__gt=timezone.now()).exists())
+
+    def test_recarga_apaga_contribuicoes_sem_protected_error(self):  # BL-42: Contribuicao usa PROTECT
+        pessoa = PerfilPessoa.objects.filter(eh_doador=True, usuario__tipo_conta='pessoa').first()
+        necessidade = Necessidade.objects.filter(
+            tipo='itens', situacao='aberta', ong__situacao='ativa', ong__aceita_itens=True).first()
+        self.assertIsNotNone(pessoa)
+        self.assertIsNotNone(necessidade)
+        contribuicao = registrar_contribuicao(pessoa, necessidade.ong, 'itens', '5', necessidade=necessidade)
+        self.assertTrue(Contribuicao.objects.filter(pk=contribuicao.pk).exists())
+
+        resumo = carregar(SENHA)  # não pode levantar ProtectedError
+
+        self.assertFalse(Contribuicao.objects.exists())
+        self.assertEqual(resumo, self.resumo)
+        self.assertEqual(Ong.objects.count(), len(dados.ONGS))
+        self.assertEqual(Necessidade.objects.count(), 10)
+        self.assertEqual(PerfilPessoa.objects.count(), len(dados.AGRICULTORES) + len(dados.DOADORES))
 
 
 class DataDoRecebimentoTest(TestCase):
