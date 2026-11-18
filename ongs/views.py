@@ -1,17 +1,19 @@
+from django.contrib import messages
 from django.shortcuts import get_object_or_404
-from django.views.generic import TemplateView
+from django.urls import reverse_lazy
+from django.views.generic import TemplateView, UpdateView
 
 from contas.models import Localidade
-from core.perfis import perfil_da_requisicao
+from core.mixins import OngRequeridaMixin
 from ongs import mocks, services
 from ongs.choices import TipoNecessidade
-from ongs.models import Ods
+from ongs.forms import PerfilOngForm
+from ongs.models import Ods, Ong
 
 
 class ListaOngsView(TemplateView):
     """Tela 2 · Lista de ONGs (BL-15, Júlia). RF-04, RF-05, UC-01.
-    MOCK: trocar na camada 1 (BL-30) por Ong.objects ativas com os filtros da querystring.
-    """
+    MOCK: trocar na camada 1 (BL-30) por Ong.objects ativas com os filtros da querystring."""
     template_name = 'ongs/lista.html'
 
     def get_context_data(self, **kwargs):
@@ -40,19 +42,26 @@ class DetalheOngView(TemplateView):
         return context
 
 
-class MinhaOngView(TemplateView):
-    """Tela 9 · Minha conta da ONG: situação e perfil (BL-16, Júlia). RF-11, RF-12, RN-20.
-    MOCK: trocar na camada 1 (BL-31). Proteger com OngRequeridaMixin (aceita pendente e reprovada).
+class MinhaOngView(OngRequeridaMixin, UpdateView):
+    """Tela 9 · Minha conta da ONG: situação e perfil (BL-16, BL-31, Júlia). RF-11, RF-12, RN-20, RNF-05.
+    A ONG edita o próprio perfil; pendente e reprovada também editam (OngRequeridaMixin).
     """
     template_name = 'ongs/minha_ong.html'
+    form_class = PerfilOngForm
+    success_url = reverse_lazy('ongs:minha_ong')
+
+    def get_object(self, queryset=None):
+        # RNF-05: a ONG vem sempre do usuário logado, nunca de id na URL ou no POST
+        return get_object_or_404(Ong, usuario=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # MOCK: a ONG vem do perfil simulado; no BL-31 vira a ONG do usuário logado
-        ong = {'ong-pendente': mocks.ONG_PENDENTE, 'ong-reprovada': mocks.ONG_REPROVADA}.get(
-            perfil_da_requisicao(self.request), mocks.ONGS[0])
-        context.update(ong=ong, ods=mocks.ODS, localidades=mocks.LOCALIDADES, aba='perfil')
+        context['aba'] = 'perfil'
         return context
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Perfil atualizado.')
+        return super().form_valid(form)
 
 
 class NecessidadesView(TemplateView):
