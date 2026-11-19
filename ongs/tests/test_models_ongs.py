@@ -2,7 +2,6 @@
 from datetime import timedelta
 from decimal import Decimal
 from types import SimpleNamespace
-from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -16,7 +15,8 @@ from contas.models import Usuario
 from core.perfis import perfil_da_requisicao
 from core.tests.fabricas import criar_localidade, criar_ods, criar_ong, criar_usuario
 from ongs.models import Necessidade, Ods, Ong
-from ongs.services import (TAMANHO_MAXIMO_DA_IMAGEM, criar_necessidade, editar_necessidade, encerrar_necessidade, validar_tamanho_da_imagem)
+from ongs.services import TAMANHO_MAXIMO_DA_IMAGEM, validar_tamanho_da_imagem
+
 
 def _necessidade(ong, titulo='Cestas básicas', meta='60', **campos):
     return Necessidade.objects.create(ong=ong, titulo=titulo, tipo=campos.pop('tipo', 'itens'),
