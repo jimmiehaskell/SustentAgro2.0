@@ -108,6 +108,17 @@ class Necessidade(models.Model):
     def __str__(self):
         return f'{self.titulo} ({self.ong.nome_curto})'
 
+    def clean(self):
+        """UC-04: meta menor que o já confirmado é recusada."""
+        super().clean()
+        if self.pk and isinstance(self.meta, Decimal) and self.meta < self.confirmado:
+            raise ValidationError({'meta': f'A meta não pode ser menor que o já confirmado ({self.confirmado}).'})
+
+    @property
+    def aceita_contribuicoes(self):
+        """RN-21: só necessidade aberta aceita novas promessas e inscrições."""
+        return self.situacao == SituacaoNecessidade.ABERTA
+
     # Propriedades com os mesmos nomes dos mocks (ADR-004); a regra fica em ongs.services
     @property
     def confirmado(self):

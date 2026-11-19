@@ -50,6 +50,57 @@ def percentual_da_necessidade(necessidade):
     return min(100, int(confirmado_da_necessidade(necessidade) / necessidade.meta * 100))
 
 
+def situacao_da_necessidade(necessidade):
+    """RN-21 (BL-41, Júlia). Situação que a necessidade deve ter: bater a meta deixa "atendida" e
+    aumentar a meta a reabre. Necessidade encerrada pela ONG continua encerrada.
+    Testes: ongs/tests/test_necessidades.py
+    """
+    if necessidade.situacao == SituacaoNecessidade.ENCERRADA:
+        return SituacaoNecessidade.ENCERRADA
+    if confirmado_da_necessidade(necessidade) >= necessidade.meta:
+        return SituacaoNecessidade.ATENDIDA
+    return SituacaoNecessidade.ABERTA
+
+
+# RF-13: campos que a ONG pode informar ao criar ou editar uma necessidade
+CAMPOS_DA_NECESSIDADE = ('titulo', 'descricao', 'tipo', 'unidade', 'meta')
+
+
+def criar_necessidade(ong, dados):
+    """RF-13, UC-04 (BL-41, Júlia). Cria uma necessidade aberta para a ONG.
+    Dado inválido levanta ValidationError. Testes: ongs/tests/test_necessidades.py
+    """
+    from ongs.models import Necessidade  # dentro da função: ongs.models importa este módulo
+
+    necessidade = Necessidade(ong=ong, **{c: dados[c] for c in CAMPOS_DA_NECESSIDADE if c in dados})
+    necessidade.full_clean()
+    necessidade.save()
+    return necessidade
+
+
+def editar_necessidade(necessidade, dados):
+    """RF-13, UC-04, RN-21 (BL-41, Júlia). Aplica os campos, valida (meta menor que o confirmado é recusada
+    pelo clean() do model) e recalcula a situação: bater a meta deixa "atendida", aumentar a meta reabre.
+    Testes: ongs/tests/test_necessidades.py
+    """
+    for campo in CAMPOS_DA_NECESSIDADE:
+        if campo in dados:
+            setattr(necessidade, campo, dados[campo])
+    necessidade.full_clean()
+    necessidade.situacao = situacao_da_necessidade(necessidade)
+    necessidade.save()
+    return necessidade
+
+
+def encerrar_necessidade(necessidade):
+    """RF-13, UC-04 (BL-41, Júlia). Encerra a necessidade; ela deixa de aceitar contribuições.
+    Testes: ongs/tests/test_necessidades.py
+    """
+    necessidade.situacao = SituacaoNecessidade.ENCERRADA
+    necessidade.save(update_fields=['situacao'])
+    return necessidade
+
+
 def _digito_verificador(numeros, pesos):
     resto = sum(int(numero) * peso for numero, peso in zip(numeros, pesos)) % 11
     return '0' if resto < 2 else str(11 - resto)
