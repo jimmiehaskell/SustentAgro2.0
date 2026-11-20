@@ -2,6 +2,8 @@
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from core.tests import fabricas
+
 TELAS = [
     ('core:inicio', {}),
     ('ongs:lista', {}),
@@ -12,9 +14,6 @@ TELAS = [
     ('colheita:publicar', {}),
     ('colheita:ofertas', {}),
     ('painel:painel', {}),
-    ('ongs:minha_ong', {}),
-    ('ongs:necessidades', {}),
-    ('colheita:minhas_reservas', {}),
     ('doacoes:a_confirmar', {}),
     ('colheita:minhas_ofertas', {}),
     ('contas:contribuicoes', {}),
@@ -24,10 +23,25 @@ TELAS = [
 
 class TelasAbremTest(TestCase):
     def test_todas_as_telas_abrem(self):
+        ong = fabricas.criar_ong()  # RN-01: a página pública só abre para ONG ativa (BL-30)
         for nome, kwargs in TELAS:
+            if nome == 'ongs:detalhe':
+                kwargs = {'pk': ong.pk}
             with self.subTest(tela=nome):
                 resposta = self.client.get(reverse(nome, kwargs=kwargs))
                 self.assertEqual(resposta.status_code, 200)
+
+    def test_minha_ong_abre_para_a_ong_logada(self):  # RN-20: qualquer situação abre
+        for situacao in ('ativa', 'pendente', 'reprovada'):
+            with self.subTest(situacao=situacao):
+                ong = fabricas.criar_ong(situacao=situacao)
+                self.client.force_login(ong.usuario)
+                resposta = self.client.get(reverse('ongs:minha_ong'))
+                self.assertEqual(resposta.status_code, 200)
+
+    def test_minha_ong_de_visitante_leva_ao_login(self):  # RNF-05
+        resposta = self.client.get(reverse('ongs:minha_ong'))
+        self.assertEqual(resposta.status_code, 302)
 
     def test_saude_responde_ok(self):
         resposta = self.client.get(reverse('core:saude'))
@@ -45,6 +59,14 @@ class TelasAbremTest(TestCase):
         resposta = self.client.get(reverse('contas:minha_conta'))
         self.assertRedirects(resposta, reverse('contas:entrar'))
 
+    def test_necessidades_da_ong_exige_ong_ativa(self):  # RF-13, RNF-05
+        url = reverse('ongs:necessidades')
+        resposta = self.client.get(url)  # visitante
+        self.assertEqual(resposta.status_code, 302)
+        self.assertIn(reverse('contas:entrar'), resposta.url)
+        self.client.force_login(fabricas.criar_ong().usuario)
+        self.assertEqual(self.client.get(url).status_code, 200)
+
 
 class PerfilMockTest(TestCase):
     @override_settings(DEBUG=True)
@@ -54,9 +76,9 @@ class PerfilMockTest(TestCase):
         self.assertEqual(resposta.context['perfil'], 'agricultor')
         self.assertEqual(resposta.context['url_colheita'], 'colheita:publicar')  # D-26, RN-25
 
-    @override_settings(DEBUG=True)
-    def test_ong_simulada_ve_a_versao_com_reserva(self):
-        self.client.get(reverse('core:perfil_mock', kwargs={'perfil': 'ong'}))
+    def test_ong_ativa_ve_a_versao_com_reserva(self):
+        fabricas.criar_oferta()
+        self.client.force_login(fabricas.criar_ong().usuario)
         resposta = self.client.get(reverse('colheita:ofertas'))
         self.assertTrue(resposta.context['versao_ong'])
         self.assertContains(resposta, 'Reservar')

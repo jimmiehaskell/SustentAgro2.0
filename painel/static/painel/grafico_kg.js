@@ -7,7 +7,8 @@
 
   var linhas = JSON.parse(dados.textContent);
   var meses = linhas.map(function (linha) { return linha[0]; });
-  var quilos = linhas.map(function (linha) { return linha[1]; });
+  // Os kg vêm do banco como Decimal, que o json_script escreve como texto ("4380.0"): Number() converte
+  var quilos = linhas.map(function (linha) { return Number(linha[1]); });
   var formatar = new Intl.NumberFormat('pt-BR');
 
   function cor(nome) {

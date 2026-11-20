@@ -1,0 +1,19 @@
+{% if tipo == 'pessoa' %}
+  <h2 class="h4 mb-0">Doador(a) ou voluntário(a)</h2>
+{% elif tipo == 'agricultor' %}
+  <h2 class="h4 mb-0">Agricultor(a) familiar</h2>
+{% else %}
+  <h2 class="h4 mb-0">ONG ou cozinha comunitária</h2>
+  <div class="alert alert-success mb-0"><strong>Seu cadastro passa por análise</strong><br>A equipe do SustentAgro confere o CNPJ antes de publicar a ONG. Enquanto isso, você acessa só a sua conta.</div>
+{% endif %}
+
+{% for erro in form_perfil.non_field_errors %}<div class="alert alert-danger" role="alert">{{ erro }}</div>{% endfor %}
+{% for erro in form_conta.non_field_errors %}<div class="alert alert-danger" role="alert">{{ erro }}</div>{% endfor %}
+<div class="row g-3">
+  {% for campo in form_perfil %}
+    {% include 'contas/componentes/campo_cadastro.html' %}
+  {% endfor %}
+  {% for campo in form_conta %}
+    {% include 'contas/componentes/campo_cadastro.html' %}
+  {% endfor %}
+</div>

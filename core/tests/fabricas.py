@@ -9,6 +9,8 @@ from decimal import Decimal
 
 from django.utils import timezone
 
+from core.demo.cnpj import gerar_cnpj  # CNPJ com dígitos verificadores válidos (RF-10, RN-24)
+
 COORDENADAS = {
     'Ceilândia': ('-15.819700', '-48.108300'),
     'Brazlândia': ('-15.675800', '-48.200300'),
@@ -63,14 +65,14 @@ def criar_ong(situacao='ativa', localidade='Ceilândia', familias_por_mes=100, o
     n = _proximo()
     ong = Ong.objects.create(
         usuario=criar_usuario('ong'), nome=f'ONG de teste {n}', nome_curto=f'Teste {n}',
-        cnpj=campos.pop('cnpj', f'{n:014d}'), telefone='(61) 3333-0000', email_contato=f'ong{n}@exemplo.org',
+        cnpj=campos.pop('cnpj', gerar_cnpj(n)), telefone='(61) 3333-0000', email_contato=f'ong{n}@exemplo.org',
         familias_por_mes=familias_por_mes, situacao=situacao, localidade=criar_localidade(localidade), **campos)
     ong.ods.set([criar_ods(numero) for numero in ods])
     return ong
 
 
 def criar_oferta(agricultor=None, quantidade='100', unidade='kg', destino='doar', preco_unitario=None,
-                 localidade='Brazlândia', colher_ate=None, ong_destino=None, **campos):
+                 localidade='Brazlândia', colher_ate=None, ong_destino=None, aberta_a_todas_em=None, **campos):
     from colheita.models import Oferta
     agora = timezone.now()
     return Oferta.objects.create(
@@ -80,4 +82,4 @@ def criar_oferta(agricultor=None, quantidade='100', unidade='kg', destino='doar'
         estado=campos.pop('estado', 'excedente'), destino=destino,
         preco_unitario=Decimal(preco_unitario) if preco_unitario else None,
         local_retirada='Chácara 12, Núcleo Rural Alexandre Gusmão', transporte='ong_busca',
-        ong_destino=ong_destino, aberta_a_todas_em=agora + timedelta(hours=48) if ong_destino else agora, **campos)
+        ong_destino=ong_destino, aberta_a_todas_em=aberta_a_todas_em or (agora + timedelta(hours=48) if ong_destino else agora), **campos)

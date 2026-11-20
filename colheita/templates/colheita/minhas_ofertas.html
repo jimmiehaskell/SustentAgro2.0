@@ -12,7 +12,7 @@
 
   {# RF-25: ofertas com saldo, reservas, situação e contato da ONG #}
   <div class="d-grid gap-3">
-    {% for oferta in ofertas %}
+    {% for oferta, resumo in ofertas %}
       <article class="card card-body d-grid gap-2">
         <div class="d-flex flex-wrap gap-2 align-items-center">
           <h2 class="h6 mb-0">{{ oferta.produto }}</h2>
@@ -28,24 +28,34 @@
           {% endif %}
         </div>
 
-        <div class="small text-body-secondary d-flex flex-wrap gap-3">
-          <span class="tabular">Saldo <strong class="text-numero">{{ oferta.saldo|floatformat:"-1" }} {{ oferta.unidade }}</strong> de {{ oferta.quantidade|floatformat:"-1" }} {{ oferta.unidade }}</span>
-          <span>Colher até {{ oferta.colher_ate|date:"d/m" }}</span>
-          <span>{% if oferta.destino == 'vender' %}Venda · R$ {{ oferta.preco_unitario|floatformat:2 }}/{{ oferta.unidade }}{% else %}Doação{% endif %}</span>
-        </div>
-
-        {# RF-27: o contato da ONG só aparece depois da reserva #}
-        {% for reserva in oferta.reservas.all %}
-          <div class="contato-reserva">
-            <strong>
-              {% if reserva.situacao == 'recebida' %}Recebida · {{ reserva.quantidade_recebida|floatformat:"-1" }} {{ oferta.unidade }} em {{ reserva.recebida_em|date:"d/m" }}
-              {% else %}Reserva ativa · {{ reserva.quantidade|floatformat:"-1" }} {{ oferta.unidade }}{% endif %}
-            </strong>
-            <span>{{ reserva.ong.nome }} · <a class="text-nowrap" href="tel:{{ reserva.ong.telefone }}">{{ reserva.ong.telefone }}</a> · <a class="text-break" href="mailto:{{ reserva.ong.email_contato }}">{{ reserva.ong.email_contato }}</a></span>
+        {% if oferta.vencida %}
+          {# Oferta vencida: resumo do que foi entregue, como no protótipo (services.resumo_recebido) #}
+          <div class="small text-body-secondary d-flex flex-wrap gap-3">
+            <span class="tabular">{{ oferta.quantidade|floatformat:"-1" }} {{ oferta.unidade }} publicadas ·
+              {% if resumo.quantidade_recebida %}{{ resumo.quantidade_recebida|floatformat:"-1" }} {{ oferta.unidade }} recebidas por {{ resumo.ongs }} ONG{{ resumo.ongs|pluralize }}{% else %}nada recebido{% endif %}</span>
+            <span>{% if oferta.destino == 'vender' %}Venda · R$ {{ oferta.preco_unitario|floatformat:2 }}/{{ oferta.unidade }}{% else %}Doação{% endif %}</span>
+            {% if resumo.renda %}<span class="tabular">Renda gerada <strong class="text-numero">R$ {{ resumo.renda|floatformat:"2g" }}</strong></span>{% endif %}
           </div>
-        {% empty %}
-          <p class="small text-body-secondary mb-0">Nenhuma reserva ainda.</p>
-        {% endfor %}
+        {% else %}
+          <div class="small text-body-secondary d-flex flex-wrap gap-3">
+            <span class="tabular">Saldo <strong class="text-numero">{{ oferta.saldo|floatformat:"-1" }} {{ oferta.unidade }}</strong> de {{ oferta.quantidade|floatformat:"-1" }} {{ oferta.unidade }}</span>
+            <span>Colher até {{ oferta.colher_ate|date:"d/m" }}</span>
+            <span>{% if oferta.destino == 'vender' %}Venda · R$ {{ oferta.preco_unitario|floatformat:2 }}/{{ oferta.unidade }}{% else %}Doação{% endif %}</span>
+          </div>
+
+          {# RF-27: o contato da ONG só aparece depois da reserva #}
+          {% for reserva in oferta.reservas.all %}
+            <div class="contato-reserva">
+              <strong>
+                {% if reserva.situacao == 'recebida' %}Recebida · {{ reserva.quantidade_recebida|floatformat:"-1" }} {{ oferta.unidade }} em {{ reserva.recebida_em|date:"d/m" }}
+                {% else %}Reserva ativa · {{ reserva.quantidade|floatformat:"-1" }} {{ oferta.unidade }}{% endif %}
+              </strong>
+              <span>{{ reserva.ong.nome }} · <a class="text-nowrap" href="tel:{{ reserva.ong.telefone }}">{{ reserva.ong.telefone }}</a> · <a class="text-break" href="mailto:{{ reserva.ong.email_contato }}">{{ reserva.ong.email_contato }}</a></span>
+            </div>
+          {% empty %}
+            <p class="small text-body-secondary mb-0">Nenhuma reserva ainda.</p>
+          {% endfor %}
+        {% endif %}
       </article>
     {% empty %}
       <div class="card card-body text-center">

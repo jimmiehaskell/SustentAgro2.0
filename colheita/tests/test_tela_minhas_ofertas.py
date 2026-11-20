@@ -12,6 +12,10 @@ class TelaMinhasOfertasTest(TestCase):
         self.assertContains(self.resposta, 'Aberta · urgente')
         self.assertContains(self.resposta, 'Só para Sol Nascente')
         self.assertContains(self.resposta, 'Vencida em 10/10')
+
+    def test_oferta_vencida_mostra_o_resumo_do_recebido(self):  # protótipo, Tela 13
+        self.assertContains(self.resposta, '260 un recebidas por 2 ONGs')
+        self.assertContains(self.resposta, 'R$ 208,00')
         self.assertNotContains(self.resposta, 'Tela em construção')
 
     def test_reserva_mostra_o_contato_da_ong(self):  # RF-27

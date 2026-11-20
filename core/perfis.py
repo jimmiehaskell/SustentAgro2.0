@@ -11,7 +11,7 @@ CHAVE_SESSAO_MOCK = 'perfil_mock'
 
 
 def perfil_da_requisicao(request):
-    if settings.DEBUG:
+    if settings.DEBUG and not request.user.is_authenticated:
         simulado = request.session.get(CHAVE_SESSAO_MOCK)
         if simulado in PERFIS:
             return simulado
@@ -21,7 +21,8 @@ def perfil_da_requisicao(request):
         return 'visitante'
 
     if usuario.tipo_conta == 'ong':
-        # A ONG só existe depois do BL-25; até lá, toda conta de ONG conta como pendente
+        # Conta de ONG ainda sem o perfil Ong (cadastro incompleto) conta como pendente (RN-20).
+        # A desativada também: só entra na "Minha conta", que mostra a situação pelo ong.situacao (RN-19).
         ong = getattr(usuario, 'ong', None)
         situacao = getattr(ong, 'situacao', 'pendente')
         return {'ativa': 'ong', 'reprovada': 'ong-reprovada'}.get(situacao, 'ong-pendente')

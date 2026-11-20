@@ -14,7 +14,8 @@
 </section>
 
 <div class="container">
-  {% include 'componentes/aviso_construcao.html' with item='BL-14' responsavel='Júlia' tela='1' %}
+  
+
 
   <section class="py-4">
     <h2 class="h4">Encontre por causa</h2>
@@ -33,18 +34,72 @@
     </div>
   </section>
 
-  <section class="py-4">
-    <h2 class="h4">ONGs da rede</h2>
-    {# RF-03 (desejável): carrossel com setas; no protótipo, botões de anterior e próximo #}
-    <div class="row g-3">
-      {% for ong in ongs %}<div class="col-12 col-md-6 col-lg-4">{% include 'componentes/cartao_ong.html' with ong=ong %}</div>{% endfor %}
+ <section class="py-4">
+  <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+    <div>
+      <h2 class="h4 mb-1">ONGs da rede</h2>
+      <p class="small text-body-secondary mb-0">
+        {{ ongs|length }} ONG{{ ongs|length|pluralize:"s" }} ativas.
+        Use as setas ou arraste para o lado.
+      </p>
     </div>
-  </section>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary btn-sm" type="button"
+              data-carrossel="-1" aria-label="ONGs anteriores"
+              aria-controls="carrossel-ongs">‹</button>
+      <button class="btn btn-outline-secondary btn-sm" type="button"
+              data-carrossel="1" aria-label="Próximas ONGs"
+              aria-controls="carrossel-ongs">›</button>
+    </div>
+  </div>
+
+  <div class="carrossel-ongs" id="carrossel-ongs" tabindex="0"
+       aria-label="Carrossel de ONGs ativas">
+    {% for ong, precisa in ongs_com_necessidade %}
+      <div class="item-carrossel-ong">
+        {% include 'componentes/cartao_ong.html' with ong=ong precisa=precisa %}
+      </div>
+    {% empty %}
+      <p class="text-body-secondary">Nenhuma ONG ativa para mostrar.</p>
+    {% endfor %}
+  </div>
+</section>
 
   <section class="py-4" id="sobre">
     <h2 class="h4">Sobre o SustentAgro</h2>
-    {# RF-34 (desejável): texto do projeto e a equipe (P-09) #}
-    <ul class="small">{% for nome in equipe %}<li>{{ nome }}</li>{% endfor %}</ul>
+    {# RF-34, P-09: texto do projeto e os 11 nomes da lista oficial da equipe #}
+    <div class="row g-4">
+      <div class="col-12 col-lg-7">
+        <p class="text-body-secondary">Alimento bom para consumo se perde no campo por ser excedente ou por estar fora do padrão estético, enquanto ONGs e cozinhas comunitárias têm demanda que não conseguem atender. O SustentAgro liga agricultores familiares, ONGs e quem quer ajudar, e mostra o impacto dessa rede em números públicos.</p>
+        <p class="text-body-secondary">Projeto do Itinerário 5, Trilha Cultura e Desenvolvimento Social, com foco nos ODS 2, 8 e 10.</p>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="card card-body">
+          <h3 class="h6">Equipe do projeto</h3>
+          <ul class="small mb-0">{% for nome in equipe %}<li>{{ nome }}</li>{% endfor %}</ul>
+        </div>
+      </div>
+    </div>
   </section>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const carrossel = document.getElementById('carrossel-ongs');
+
+  document.querySelectorAll('[data-carrossel]').forEach((botao) => {
+    botao.addEventListener('click', () => {
+      const item = carrossel?.querySelector('.item-carrossel-ong');
+
+      if (item) {
+        const distancia = item.getBoundingClientRect().width + 12;
+        carrossel.scrollBy({
+          left: distancia * Number(botao.dataset.carrossel),
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+</script>
 {% endblock %}
